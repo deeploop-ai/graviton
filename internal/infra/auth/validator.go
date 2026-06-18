@@ -109,9 +109,14 @@ func (v *Validator) principalFromJWT(ctx context.Context, claims *jwtparser.Clai
 			IsPlatformAdmin: admin.Role == "owner" || admin.Role == "admin",
 			UserID:          admin.ID,
 			Email:           admin.Email,
-			Roles:           []string{"admin", admin.Role},
+			Roles:           []string{admin.Role},
 		}, nil
 	default:
+		if claims.SessionID != "" && claims.ProjectID != "" {
+			if err := v.validateEndUserSession(ctx, claims.ProjectID, claims.SessionID); err != nil {
+				return nil, err
+			}
+		}
 		return &shared.Principal{
 			ActorID:        idgen.ID(claims.UserID),
 			ActorKind:      shared.ActorKindEndUser,
@@ -126,7 +131,7 @@ func (v *Validator) principalFromJWT(ctx context.Context, claims *jwtparser.Clai
 }
 
 func (v *Validator) principalFromSession(ctx context.Context, projectID, sessionID string) (*shared.Principal, error) {
-	sessionDoc, err := v.docDB.GetDocument(ctx, projectID, "default", "sessions", sessionID)
+	sessionDoc, err := v.docDB.GetDocument(ctx, projectID, "default", "sessions", sessionID, databases.SystemRoles)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "session lookup failed")
 	}
@@ -153,6 +158,23 @@ func (v *Validator) principalFromSession(ctx context.Context, projectID, session
 		SessionID:      sessionID,
 		Roles:          []string{"users", fmt.Sprintf("user:%s", userID)},
 	}, nil
+}
+
+func (v *Validator) validateEndUserSession(ctx context.Context, projectID, sessionID string) error {
+	sessionDoc, err := v.docDB.GetDocument(ctx, projectID, "default", "sessions", sessionID, databases.SystemRoles)
+	if err != nil {
+		return status.Error(codes.Unauthenticated, "session lookup failed")
+	}
+	if sessionDoc == nil {
+		return status.Error(codes.Unauthenticated, "session not found or revoked")
+	}
+	if expireAtRaw, ok := sessionDoc.Data["expire_at"]; ok {
+		expireAt, err := parseTime(expireAtRaw)
+		if err == nil && expireAt.Before(time.Now()) {
+			return status.Error(codes.Unauthenticated, "session expired")
+		}
+	}
+	return nil
 }
 
 func parseTime(v any) (time.Time, error) {

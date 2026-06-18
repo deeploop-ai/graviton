@@ -76,7 +76,11 @@ func (s *APIKeysService) ListAPIKeys(ctx context.Context, _ *sharedv1.ListReques
 }
 
 func (s *APIKeysService) GetAPIKey(ctx context.Context, req *serverv1.GetAPIKeyRequest) (*serverv1.APIKey, error) {
-	key, err := s.apiKeys.Get(ctx, req.GetId())
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	key, err := s.apiKeys.Get(ctx, projectID, req.GetId())
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +91,11 @@ func (s *APIKeysService) GetAPIKey(ctx context.Context, req *serverv1.GetAPIKeyR
 }
 
 func (s *APIKeysService) DeleteAPIKey(ctx context.Context, req *serverv1.GetAPIKeyRequest) (*sharedv1.Empty, error) {
-	if err := s.apiKeys.Delete(ctx, req.GetId()); err != nil {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	if err := s.apiKeys.Delete(ctx, projectID, req.GetId()); err != nil {
 		return nil, err
 	}
 	return &sharedv1.Empty{}, nil

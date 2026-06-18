@@ -49,7 +49,7 @@ func (a *Auth) SignIn(ctx context.Context, cmd SignInCommand) (string, int64, er
 		UserID:    admin.ID,
 		Username:  admin.Email,
 		ActorKind: "admin",
-		Roles:     []string{"admin", admin.Role},
+		Roles:     []string{admin.Role},
 		ExpiresAt: now.Add(ttl).Unix(),
 		IssuedAt:  now.Unix(),
 	}

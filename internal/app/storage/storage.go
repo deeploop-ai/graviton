@@ -100,23 +100,23 @@ func (s *Storage) ListBuckets(ctx context.Context, projectID string, q databases
 	return buckets, list.TotalCount, nil
 }
 
-func (s *Storage) DeleteBucket(ctx context.Context, projectID, bucketID string) error {
+func (s *Storage) DeleteBucket(ctx context.Context, projectID, bucketID string, roles []string) error {
 	project, err := s.resolveProject(ctx, projectID)
 	if err != nil {
 		return err
 	}
 	// Delete all file objects in this bucket.
-	files, _, _, err := s.ListFiles(ctx, projectID, bucketID, databases.Query{PageSize: 1000}, []string{"admin"})
+	files, _, _, err := s.ListFiles(ctx, projectID, bucketID, databases.Query{PageSize: 1000}, roles)
 	if err != nil {
 		return err
 	}
 	for _, f := range files {
 		_ = s.store.Delete(ctx, defaultBucketName(s.cfg), objectKey(projectID, bucketID, f.ID))
 	}
-	return s.docDB.DeleteDocument(ctx, project.ID, "default", "buckets", bucketID)
+	return s.docDB.DeleteDocument(ctx, project.ID, "default", "buckets", bucketID, roles)
 }
 
-func (s *Storage) CreateFile(ctx context.Context, cmd CreateFileCommand, content io.Reader, size int64) (*storage.File, error) {
+func (s *Storage) CreateFile(ctx context.Context, cmd CreateFileCommand, content io.Reader, size int64, roles []string) (*storage.File, error) {
 	project, err := s.resolveProject(ctx, cmd.ProjectID)
 	if err != nil {
 		return nil, err
@@ -126,7 +126,7 @@ func (s *Storage) CreateFile(ctx context.Context, cmd CreateFileCommand, content
 	}
 
 	// Verify bucket exists.
-	if _, err := s.docDB.GetDocument(ctx, project.ID, "default", "buckets", cmd.BucketID); err != nil {
+	if _, err := s.docDB.GetDocument(ctx, project.ID, "default", "buckets", cmd.BucketID, roles); err != nil {
 		return nil, status.Error(codes.NotFound, "bucket not found")
 	}
 
@@ -152,7 +152,7 @@ func (s *Storage) CreateFile(ctx context.Context, cmd CreateFileCommand, content
 	}
 	if err := s.store.Put(ctx, defaultBucketName(s.cfg), objectKey(project.ID, cmd.BucketID, fileID), content, size, cmd.MimeType); err != nil {
 		// Attempt rollback metadata.
-		_ = s.docDB.DeleteDocument(ctx, project.ID, "default", "files", fileID)
+		_ = s.docDB.DeleteDocument(ctx, project.ID, "default", "files", fileID, databases.SystemRoles)
 		return nil, fmt.Errorf("upload file: %w", err)
 	}
 
@@ -169,12 +169,12 @@ func (s *Storage) CreateFile(ctx context.Context, cmd CreateFileCommand, content
 	}, nil
 }
 
-func (s *Storage) GetFile(ctx context.Context, projectID, bucketID, fileID string) (*storage.File, io.ReadCloser, error) {
+func (s *Storage) GetFile(ctx context.Context, projectID, bucketID, fileID string, roles []string) (*storage.File, io.ReadCloser, error) {
 	project, err := s.resolveProject(ctx, projectID)
 	if err != nil {
 		return nil, nil, err
 	}
-	doc, err := s.docDB.GetDocument(ctx, project.ID, "default", "files", fileID)
+	doc, err := s.docDB.GetDocument(ctx, project.ID, "default", "files", fileID, roles)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -192,7 +192,7 @@ func (s *Storage) GetFile(ctx context.Context, projectID, bucketID, fileID strin
 	return file, reader, nil
 }
 
-func (s *Storage) DeleteFile(ctx context.Context, projectID, bucketID, fileID string) error {
+func (s *Storage) DeleteFile(ctx context.Context, projectID, bucketID, fileID string, roles []string) error {
 	project, err := s.resolveProject(ctx, projectID)
 	if err != nil {
 		return err
@@ -200,7 +200,7 @@ func (s *Storage) DeleteFile(ctx context.Context, projectID, bucketID, fileID st
 	if err := s.store.Delete(ctx, defaultBucketName(s.cfg), objectKey(project.ID, bucketID, fileID)); err != nil {
 		// Continue to delete metadata even if object missing.
 	}
-	return s.docDB.DeleteDocument(ctx, project.ID, "default", "files", fileID)
+	return s.docDB.DeleteDocument(ctx, project.ID, "default", "files", fileID, roles)
 }
 
 func (s *Storage) ListFiles(ctx context.Context, projectID, bucketID string, q databases.Query, roles []string) ([]storage.File, int64, string, error) {

@@ -71,7 +71,7 @@ func (s *TeamsService) GetTeam(ctx context.Context, req *serverv1.GetTeamRequest
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	doc, err := s.teams.GetTeam(ctx, projectID, req.GetId())
+	doc, err := s.teams.GetTeam(ctx, projectID, req.GetId(), principalRoles(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (s *TeamsService) DeleteTeam(ctx context.Context, req *serverv1.GetTeamRequ
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	if err := s.teams.DeleteTeam(ctx, projectID, req.GetId()); err != nil {
+	if err := s.teams.DeleteTeam(ctx, projectID, req.GetId(), principalRoles(ctx)); err != nil {
 		return nil, err
 	}
 	return &sharedv1.Empty{}, nil

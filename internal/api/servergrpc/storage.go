@@ -94,7 +94,7 @@ func (s *StorageService) DeleteBucket(ctx context.Context, req *serverv1.GetBuck
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	if err := s.storage.DeleteBucket(ctx, projectID, req.GetId()); err != nil {
+	if err := s.storage.DeleteBucket(ctx, projectID, req.GetId(), principalRoles(ctx)); err != nil {
 		return nil, err
 	}
 	return &sharedv1.Empty{}, nil
@@ -113,7 +113,7 @@ func (s *StorageService) CreateFile(ctx context.Context, req *serverv1.CreateFil
 		MimeType:    req.GetMimeType(),
 		Metadata:    req.GetMetadata(),
 		Permissions: req.GetPermissions(),
-	}, bytes.NewReader(data), int64(len(data)))
+	}, bytes.NewReader(data), int64(len(data)), principalRoles(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func (s *StorageService) GetFile(ctx context.Context, req *serverv1.GetFileReque
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	file, _, err := s.storage.GetFile(ctx, projectID, req.GetBucketId(), req.GetFileId())
+	file, _, err := s.storage.GetFile(ctx, projectID, req.GetBucketId(), req.GetFileId(), principalRoles(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func (s *StorageService) DeleteFile(ctx context.Context, req *serverv1.GetFileRe
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	if err := s.storage.DeleteFile(ctx, projectID, req.GetBucketId(), req.GetFileId()); err != nil {
+	if err := s.storage.DeleteFile(ctx, projectID, req.GetBucketId(), req.GetFileId(), principalRoles(ctx)); err != nil {
 		return nil, err
 	}
 	return &sharedv1.Empty{}, nil

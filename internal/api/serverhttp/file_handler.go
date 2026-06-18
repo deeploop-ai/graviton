@@ -66,7 +66,6 @@ func (h *FileHandler) upload(w http.ResponseWriter, r *http.Request, pathParams 
 
 	fileHeader := r.MultipartForm.File["file"]
 	if len(fileHeader) == 0 {
-		// Also accept single part named "file".
 		file, fh, err := r.FormFile("file")
 		if err != nil {
 			httpError(w, status.Error(codes.InvalidArgument, "missing file"))
@@ -94,7 +93,7 @@ func (h *FileHandler) createFile(ctx context.Context, w http.ResponseWriter, pro
 		BucketID:  bucketID,
 		Name:      name,
 		MimeType:  contentType,
-	}, r, size)
+	}, r, size, roles)
 	if err != nil {
 		httpError(w, err)
 		return
@@ -129,7 +128,7 @@ func (h *FileHandler) download(w http.ResponseWriter, r *http.Request, pathParam
 		return
 	}
 
-	file, reader, err := h.storage.GetFile(ctx, projectID, bucketID, fileID)
+	file, reader, err := h.storage.GetFile(ctx, projectID, bucketID, fileID, principal.Roles)
 	if err != nil {
 		httpError(w, err)
 		return
@@ -137,10 +136,11 @@ func (h *FileHandler) download(w http.ResponseWriter, r *http.Request, pathParam
 	defer reader.Close()
 
 	w.Header().Set("Content-Type", file.MimeType)
+	safeName := safeFilename(file.Name)
 	if strings.HasSuffix(r.URL.Path, "/download") {
-		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, file.Name))
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, safeName))
 	} else {
-		w.Header().Set("Content-Disposition", fmt.Sprintf(`inline; filename="%s"`, file.Name))
+		w.Header().Set("Content-Disposition", fmt.Sprintf(`inline; filename="%s"`, safeName))
 	}
 	w.WriteHeader(http.StatusOK)
 	_, _ = io.Copy(w, reader)
@@ -164,10 +164,32 @@ func (h *FileHandler) authenticate(r *http.Request) (*shared.Principal, error) {
 }
 
 func (h *FileHandler) projectID(r *http.Request, p *shared.Principal) string {
-	if p.CredentialType == shared.CredentialTypeAPIKey {
+	if p == nil {
+		return ""
+	}
+	switch p.CredentialType {
+	case shared.CredentialTypeAPIKey:
+		return p.ProjectID
+	case shared.CredentialTypeToken, shared.CredentialTypeSession:
+		if p.ActorKind == shared.ActorKindAdmin {
+			if pid := strings.TrimSpace(r.Header.Get("X-Fleet-Project")); pid != "" {
+				return pid
+			}
+		}
+		return p.ProjectID
+	default:
 		return p.ProjectID
 	}
-	return r.Header.Get("X-Fleet-Project")
+}
+
+func safeFilename(name string) string {
+	name = strings.ReplaceAll(name, `"`, "_")
+	name = strings.ReplaceAll(name, "\n", "")
+	name = strings.ReplaceAll(name, "\r", "")
+	if name == "" {
+		return "download"
+	}
+	return name
 }
 
 func httpError(w http.ResponseWriter, err error) {
@@ -178,13 +200,17 @@ func httpError(w http.ResponseWriter, err error) {
 	httpStatus := runtime.HTTPStatusFromCode(st.Code())
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(httpStatus)
-	_, _ = w.Write([]byte(fmt.Sprintf(`{"error":{"type":"%s","message":"%s"}}`, st.Code().String(), st.Message())))
+	payload, _ := json.Marshal(map[string]any{
+		"error": map[string]string{
+			"type":    st.Code().String(),
+			"message": st.Message(),
+		},
+	})
+	_, _ = w.Write(payload)
 }
 
 func writeJSON(w http.ResponseWriter, code int, payload any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	// Simple manual JSON for the small fixed shape to avoid importing encoding/json here.
-	// The gateway already imports json elsewhere.
 	_ = json.NewEncoder(w).Encode(payload)
 }

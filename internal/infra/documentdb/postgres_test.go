@@ -3,7 +3,6 @@ package documentdb
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
 	"github.com/deeploop-ai/fleet/internal/testutil"
@@ -41,12 +40,14 @@ func TestPostgresDocumentDatabase_CRUD(t *testing.T) {
 		},
 	}, []databases.Permission{
 		{Type: "read", Role: "any"},
+		{Type: "update", Role: "any"},
+		{Type: "delete", Role: "any"},
 	})
 	require.NoError(t, err)
 	require.NotEmpty(t, created.ID)
 
 	// Get document.
-	got, err := docDB.GetDocument(ctx, projectID, "app", "posts", created.ID)
+	got, err := docDB.GetDocument(ctx, projectID, "app", "posts", created.ID, []string{"any"})
 	require.NoError(t, err)
 	require.Equal(t, "Hello World", got.Data["title"])
 
@@ -56,7 +57,7 @@ func TestPostgresDocumentDatabase_CRUD(t *testing.T) {
 		Data: map[string]any{
 			"views": 100,
 		},
-	}, nil)
+	}, nil, []string{"any"})
 	require.NoError(t, err)
 	require.Equal(t, float64(100), updated.Data["views"])
 
@@ -74,8 +75,8 @@ func TestPostgresDocumentDatabase_CRUD(t *testing.T) {
 	require.Equal(t, int64(1), count)
 
 	// Delete.
-	require.NoError(t, docDB.DeleteDocument(ctx, projectID, "app", "posts", created.ID))
-	got2, err := docDB.GetDocument(ctx, projectID, "app", "posts", created.ID)
+	require.NoError(t, docDB.DeleteDocument(ctx, projectID, "app", "posts", created.ID, []string{"any"}))
+	got2, err := docDB.GetDocument(ctx, projectID, "app", "posts", created.ID, []string{"any"})
 	require.NoError(t, err)
 	require.Nil(t, got2)
 }
@@ -119,9 +120,16 @@ func TestPostgresDocumentDatabase_Permissions(t *testing.T) {
 	require.Len(t, list.Documents, 1)
 
 	// Admin bypasses permissions.
-	list, err = docDB.ListDocuments(ctx, projectID, "default", "users", databases.Query{}, []string{"admin"})
+	list, err = docDB.ListDocuments(ctx, projectID, "default", "users", databases.Query{}, []string{"owner"})
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, len(list.Documents), 1)
 
-	_ = time.Now()
+	// Get without permission is denied.
+	_, err = docDB.GetDocument(ctx, projectID, "default", "users", created.ID, []string{"user:bob"})
+	require.ErrorIs(t, err, ErrPermissionDenied)
+
+	// Get with permission succeeds.
+	got, err := docDB.GetDocument(ctx, projectID, "default", "users", created.ID, []string{"user:alice"})
+	require.NoError(t, err)
+	require.Equal(t, "perm@fleet.local", got.Data["email"])
 }

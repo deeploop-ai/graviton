@@ -45,35 +45,35 @@ func (u *Users) ListUsers(ctx context.Context, projectID string, q databases.Que
 	return list.Documents, list.TotalCount, list.NextPageToken, nil
 }
 
-func (u *Users) GetUser(ctx context.Context, projectID, userID string) (*databases.Document, error) {
+func (u *Users) GetUser(ctx context.Context, projectID, userID string, roles []string) (*databases.Document, error) {
 	if _, err := u.resolveProject(ctx, projectID); err != nil {
 		return nil, err
 	}
-	return u.docDB.GetDocument(ctx, projectID, "default", "users", userID)
+	return u.docDB.GetDocument(ctx, projectID, "default", "users", userID, roles)
 }
 
-func (u *Users) UpdateUser(ctx context.Context, projectID, userID string, updates map[string]any) (*databases.Document, error) {
+func (u *Users) UpdateUser(ctx context.Context, projectID, userID string, updates map[string]any, roles []string) (*databases.Document, error) {
 	if _, err := u.resolveProject(ctx, projectID); err != nil {
 		return nil, err
 	}
 	doc := databases.Document{ID: userID, Data: updates}
-	updated, err := u.docDB.UpdateDocument(ctx, projectID, "default", "users", doc, nil)
+	updated, err := u.docDB.UpdateDocument(ctx, projectID, "default", "users", doc, nil, roles)
 	if err != nil {
 		return nil, fmt.Errorf("update user: %w", err)
 	}
 	return &updated, nil
 }
 
-func (u *Users) DeleteUser(ctx context.Context, projectID, userID string) error {
+func (u *Users) DeleteUser(ctx context.Context, projectID, userID string, roles []string) error {
 	if _, err := u.resolveProject(ctx, projectID); err != nil {
 		return err
 	}
-	return u.docDB.DeleteDocument(ctx, projectID, "default", "users", userID)
+	return u.docDB.DeleteDocument(ctx, projectID, "default", "users", userID, roles)
 }
 
-func (u *Users) UpdateUserStatus(ctx context.Context, projectID, userID, status string) (*databases.Document, error) {
+func (u *Users) UpdateUserStatus(ctx context.Context, projectID, userID, status string, roles []string) (*databases.Document, error) {
 	if status == "" {
 		status = "active"
 	}
-	return u.UpdateUser(ctx, projectID, userID, map[string]any{"status": status, "updated_at": time.Now().Format(time.RFC3339Nano)})
+	return u.UpdateUser(ctx, projectID, userID, map[string]any{"status": status, "updated_at": time.Now().Format(time.RFC3339Nano)}, roles)
 }

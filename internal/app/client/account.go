@@ -83,7 +83,7 @@ func (a *Account) SignUp(ctx context.Context, cmd SignUpCommand) (*User, *TokenB
 	list, err := a.docDB.ListDocuments(ctx, project.ID, "default", "users", databases.Query{
 		Queries:  []string{fmt.Sprintf(`equal("email","%s")`, strings.ReplaceAll(cmd.Email, `"`, `""`))},
 		PageSize: 1,
-	}, []string{"admin"})
+	}, databases.SystemRoles)
 	if err != nil {
 		return nil, nil, "", err
 	}
@@ -143,7 +143,7 @@ func (a *Account) SignIn(ctx context.Context, cmd SignInCommand) (*User, *TokenB
 	list, err := a.docDB.ListDocuments(ctx, project.ID, "default", "users", databases.Query{
 		Queries:  []string{fmt.Sprintf(`equal("email","%s")`, strings.ReplaceAll(cmd.Email, `"`, `""`))},
 		PageSize: 1,
-	}, []string{"admin"})
+	}, databases.SystemRoles)
 	if err != nil {
 		return nil, nil, "", err
 	}
@@ -165,7 +165,7 @@ func (a *Account) Me(ctx context.Context) (*User, error) {
 	if !ok || p.UserID == "" {
 		return nil, status.Error(codes.Unauthenticated, "unauthenticated")
 	}
-	doc, err := a.docDB.GetDocument(ctx, p.ProjectID, "default", "users", p.UserID)
+	doc, err := a.docDB.GetDocument(ctx, p.ProjectID, "default", "users", p.UserID, p.Roles)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +180,7 @@ func (a *Account) SignOut(ctx context.Context) error {
 	if !ok || p.SessionID == "" {
 		return nil
 	}
-	return a.docDB.DeleteDocument(ctx, p.ProjectID, "default", "sessions", p.SessionID)
+	return a.docDB.DeleteDocument(ctx, p.ProjectID, "default", "sessions", p.SessionID, p.Roles)
 }
 
 func (a *Account) createSessionAndTokens(ctx context.Context, projectID, userID, email string) (*User, *TokenBundle, string, error) {
@@ -247,7 +247,7 @@ func (a *Account) createSessionAndTokens(ctx context.Context, projectID, userID,
 	}
 
 	cookie := a.sessionCodec.Sign(projectID, sessionID)
-	user, _ := a.docDB.GetDocument(ctx, projectID, "default", "users", userID)
+	user, _ := a.docDB.GetDocument(ctx, projectID, "default", "users", userID, databases.SystemRoles)
 	return mapUserDoc(user), &TokenBundle{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,

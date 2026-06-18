@@ -58,7 +58,7 @@ func (s *UsersService) GetUser(ctx context.Context, req *serverv1.GetUserRequest
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	doc, err := s.users.GetUser(ctx, projectID, req.GetId())
+	doc, err := s.users.GetUser(ctx, projectID, req.GetId(), principalRoles(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (s *UsersService) UpdateUser(ctx context.Context, req *serverv1.UpdateUserR
 	if req.GetPrefs() != nil {
 		updates["prefs"] = req.GetPrefs().AsMap()
 	}
-	doc, err := s.users.UpdateUser(ctx, projectID, req.GetId(), updates)
+	doc, err := s.users.UpdateUser(ctx, projectID, req.GetId(), updates, principalRoles(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +95,7 @@ func (s *UsersService) DeleteUser(ctx context.Context, req *serverv1.GetUserRequ
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	if err := s.users.DeleteUser(ctx, projectID, req.GetId()); err != nil {
+	if err := s.users.DeleteUser(ctx, projectID, req.GetId(), principalRoles(ctx)); err != nil {
 		return nil, err
 	}
 	return &sharedv1.Empty{}, nil

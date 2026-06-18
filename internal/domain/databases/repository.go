@@ -21,9 +21,9 @@ type DocumentDB interface {
 
 	// Document
 	CreateDocument(ctx context.Context, projectID, databaseID, collectionID string, doc Document, perms []Permission) (Document, error)
-	GetDocument(ctx context.Context, projectID, databaseID, collectionID, docID string) (*Document, error)
-	UpdateDocument(ctx context.Context, projectID, databaseID, collectionID string, doc Document, perms []Permission) (Document, error)
-	DeleteDocument(ctx context.Context, projectID, databaseID, collectionID, docID string) error
+	GetDocument(ctx context.Context, projectID, databaseID, collectionID, docID string, roles []string) (*Document, error)
+	UpdateDocument(ctx context.Context, projectID, databaseID, collectionID string, doc Document, perms []Permission, roles []string) (Document, error)
+	DeleteDocument(ctx context.Context, projectID, databaseID, collectionID, docID string, roles []string) error
 	ListDocuments(ctx context.Context, projectID, databaseID, collectionID string, q Query, roles []string) (*DocumentList, error)
 	CountDocuments(ctx context.Context, projectID, databaseID, collectionID string, queries []string, roles []string) (int64, error)
 

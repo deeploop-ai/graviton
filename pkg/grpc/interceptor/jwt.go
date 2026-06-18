@@ -71,6 +71,9 @@ func (i *AuthInterceptor) UnaryAuthMiddleware(ctx context.Context, req any, info
 		if principal.CredentialType != shared.CredentialTypeAPIKey && principal.ActorKind != shared.ActorKindAdmin {
 			return nil, status.Error(codes.Unauthenticated, "developer API requires x-api-key header or admin session")
 		}
+		if principal.CredentialType == shared.CredentialTypeAPIKey && !apiKeyScopeAllowed(info.FullMethod, principal.Permissions) {
+			return nil, status.Error(codes.PermissionDenied, "api key missing required scope")
+		}
 	}
 
 	// Allow admin console sessions to target a specific project via header.

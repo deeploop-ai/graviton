@@ -23,6 +23,11 @@ import (
 var safeNameRe = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
 var docIDRe = regexp.MustCompile(`^[a-zA-Z0-9_.:-]{1,64}$`)
 
+const maxQueryLimit = 100
+
+// ErrPermissionDenied is returned when the caller lacks document-level permission.
+var ErrPermissionDenied = errors.New("permission denied")
+
 type postgresDocumentDB struct {
 	db *clients.Database
 }
@@ -243,7 +248,7 @@ func (p *postgresDocumentDB) CreateDocument(ctx context.Context, projectID, data
 	if err := p.setPermissions(ctx, schema, collectionID, doc.ID, internalID, perms); err != nil {
 		return doc, err
 	}
-	created, err := p.GetDocument(ctx, projectID, databaseID, collectionID, doc.ID)
+	created, err := p.GetDocument(ctx, projectID, databaseID, collectionID, doc.ID, databases.SystemRoles)
 	if err != nil {
 		return doc, err
 	}
@@ -253,22 +258,41 @@ func (p *postgresDocumentDB) CreateDocument(ctx context.Context, projectID, data
 	return *created, nil
 }
 
-func (p *postgresDocumentDB) GetDocument(ctx context.Context, projectID, databaseID, collectionID, docID string) (*databases.Document, error) {
+func (p *postgresDocumentDB) GetDocument(ctx context.Context, projectID, databaseID, collectionID, docID string, roles []string) (*databases.Document, error) {
+	if err := validateDocID(docID); err != nil {
+		return nil, err
+	}
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return nil, err
 	}
 	schema := schemaName(internalID, databaseID)
 	row := p.db.DB.QueryRowContext(ctx, fmt.Sprintf(`SELECT to_jsonb(d.*) AS doc FROM %s d WHERE d._id = ? AND d._tenant = ?`, tableName(schema, collectionID)), docID, internalID)
-	return scanDocumentJSON(row)
+	doc, err := scanDocumentJSON(row)
+	if err != nil {
+		return nil, err
+	}
+	if doc == nil {
+		return nil, nil
+	}
+	if err := p.checkDocumentPermission(ctx, schema, collectionID, docID, internalID, "read", roles); err != nil {
+		return nil, err
+	}
+	return doc, nil
 }
 
-func (p *postgresDocumentDB) UpdateDocument(ctx context.Context, projectID, databaseID, collectionID string, doc databases.Document, perms []databases.Permission) (databases.Document, error) {
+func (p *postgresDocumentDB) UpdateDocument(ctx context.Context, projectID, databaseID, collectionID string, doc databases.Document, perms []databases.Permission, roles []string) (databases.Document, error) {
+	if err := validateDocID(doc.ID); err != nil {
+		return doc, err
+	}
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return doc, err
 	}
 	schema := schemaName(internalID, databaseID)
+	if err := p.checkDocumentPermission(ctx, schema, collectionID, doc.ID, internalID, "update", roles); err != nil {
+		return doc, err
+	}
 	tbl := tableName(schema, collectionID)
 	setParts, args := buildUpdateParts(doc)
 	if len(setParts) == 0 {
@@ -287,7 +311,7 @@ func (p *postgresDocumentDB) UpdateDocument(ctx context.Context, projectID, data
 			return doc, err
 		}
 	}
-	updated, err := p.GetDocument(ctx, projectID, databaseID, collectionID, doc.ID)
+	updated, err := p.GetDocument(ctx, projectID, databaseID, collectionID, doc.ID, roles)
 	if err != nil {
 		return doc, err
 	}
@@ -297,12 +321,18 @@ func (p *postgresDocumentDB) UpdateDocument(ctx context.Context, projectID, data
 	return *updated, nil
 }
 
-func (p *postgresDocumentDB) DeleteDocument(ctx context.Context, projectID, databaseID, collectionID, docID string) error {
+func (p *postgresDocumentDB) DeleteDocument(ctx context.Context, projectID, databaseID, collectionID, docID string, roles []string) error {
+	if err := validateDocID(docID); err != nil {
+		return err
+	}
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return err
 	}
 	schema := schemaName(internalID, databaseID)
+	if err := p.checkDocumentPermission(ctx, schema, collectionID, docID, internalID, "delete", roles); err != nil {
+		return err
+	}
 	if err := p.clearPermissions(ctx, schema, collectionID, docID, internalID); err != nil {
 		return err
 	}
@@ -326,9 +356,9 @@ func (p *postgresDocumentDB) ListDocuments(ctx context.Context, projectID, datab
 
 	whereParts := []string{"d._tenant = ?"}
 	args := []any{internalID}
-	if !hasAdminRole(roles) {
+	if !bypassDocumentPermissions(roles) {
 		whereParts = append(whereParts, fmt.Sprintf(`EXISTS (SELECT 1 FROM %s p WHERE p._collection = ? AND p._document = d._id AND p._type = 'read' AND p._permission = ANY(?::text[]))`, permsTable))
-		args = append(args, collectionID, pgTextArray(roles))
+		args = append(args, collectionID, pgTextArray(expandPermissionRoles(roles)))
 	}
 
 	filterWhere, filterArgs, orderSQL, err := buildAppwriteQuery(parsed)
@@ -346,6 +376,9 @@ func (p *postgresDocumentDB) ListDocuments(ctx context.Context, projectID, datab
 	}
 	if limit == 0 {
 		limit = 50
+	}
+	if limit > maxQueryLimit {
+		limit = maxQueryLimit
 	}
 	offset := parsed.Offset
 	if q.PageToken != "" {
@@ -407,9 +440,9 @@ func (p *postgresDocumentDB) CountDocuments(ctx context.Context, projectID, data
 
 	whereParts := []string{"d._tenant = ?"}
 	args := []any{internalID}
-	if !hasAdminRole(roles) {
+	if !bypassDocumentPermissions(roles) {
 		whereParts = append(whereParts, fmt.Sprintf(`EXISTS (SELECT 1 FROM %s p WHERE p._collection = ? AND p._document = d._id AND p._type = 'read' AND p._permission = ANY(?::text[]))`, permsTable))
-		args = append(args, collectionID, pgTextArray(roles))
+		args = append(args, collectionID, pgTextArray(expandPermissionRoles(roles)))
 	}
 	filterWhere, filterArgs, _, err := buildAppwriteQuery(parsed)
 	if err != nil {
@@ -624,8 +657,18 @@ func formatDefault(v any, t string) string {
 			return "TRUE"
 		}
 		return "FALSE"
-	case "integer", "float":
-		return fmt.Sprint(v)
+	case "integer":
+		n, err := strconv.ParseInt(fmt.Sprint(v), 10, 64)
+		if err != nil {
+			return "0"
+		}
+		return strconv.FormatInt(n, 10)
+	case "float":
+		f, err := strconv.ParseFloat(fmt.Sprint(v), 64)
+		if err != nil {
+			return "0"
+		}
+		return strconv.FormatFloat(f, 'f', -1, 64)
 	default:
 		return quoteLiteral(fmt.Sprint(v))
 	}
@@ -777,7 +820,7 @@ func buildInsertParts(doc databases.Document) (columns string, placeholders stri
 
 func buildUpdateParts(doc databases.Document) (setParts []string, args []any) {
 	for k, v := range doc.Data {
-		if !safeNameRe.MatchString(k) {
+		if !safeNameRe.MatchString(k) || strings.HasPrefix(k, "_") {
 			continue
 		}
 		setParts = append(setParts, fmt.Sprintf("%s = ?", quoteIdent(k)))
@@ -831,13 +874,62 @@ func scanDocumentJSON(scanner interface{ Scan(dest ...any) error }) (*databases.
 	return doc, nil
 }
 
-func hasAdminRole(roles []string) bool {
+func bypassDocumentPermissions(roles []string) bool {
 	for _, r := range roles {
-		if r == "admin" || r == "owner" {
+		switch r {
+		case "__system__", "keys", "owner", "admin":
 			return true
 		}
 	}
 	return false
+}
+
+func expandPermissionRoles(roles []string) []string {
+	seen := make(map[string]struct{}, len(roles)+2)
+	out := make([]string, 0, len(roles)+2)
+	for _, r := range roles {
+		if _, ok := seen[r]; ok {
+			continue
+		}
+		seen[r] = struct{}{}
+		out = append(out, r)
+	}
+	for _, r := range []string{"any", "users"} {
+		if _, ok := seen[r]; !ok {
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
+func (p *postgresDocumentDB) checkDocumentPermission(ctx context.Context, schema, collectionID, docID string, tenant int64, permType string, roles []string) error {
+	if bypassDocumentPermissions(roles) {
+		return nil
+	}
+	permsTable := permsTableName(schema)
+	sql := fmt.Sprintf(`SELECT EXISTS(SELECT 1 FROM %s p WHERE p._tenant = ? AND p._collection = ? AND p._document = ? AND p._type = ? AND p._permission = ANY(?::text[]))`, permsTable)
+	var ok bool
+	if err := p.db.DB.QueryRowContext(ctx, sql, tenant, collectionID, docID, permType, pgTextArray(expandPermissionRoles(roles))).Scan(&ok); err != nil {
+		return err
+	}
+	if !ok {
+		return ErrPermissionDenied
+	}
+	return nil
+}
+
+func validateDocID(docID string) error {
+	if docID == "" {
+		return errors.New("document id is required")
+	}
+	if !docIDRe.MatchString(docID) {
+		return fmt.Errorf("invalid document id: %s", docID)
+	}
+	return nil
+}
+
+func hasAdminRole(roles []string) bool {
+	return bypassDocumentPermissions(roles)
 }
 
 func mapQueryField(field string) string {
@@ -858,7 +950,7 @@ func buildAppwriteQuery(parsed *query.Query) (string, []any, string, error) {
 	for _, f := range parsed.Filters {
 		field := mapQueryField(f.Attribute)
 		if !safeNameRe.MatchString(field) {
-			continue
+			return "", nil, "", fmt.Errorf("invalid query field: %s", f.Attribute)
 		}
 		col := "d." + quoteIdent(field)
 		switch f.Op {

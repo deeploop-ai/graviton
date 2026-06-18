@@ -20,7 +20,7 @@ import (
 func main() {
 	dsn := os.Getenv("FLEET_DATA_DATABASE_SOURCE")
 	if dsn == "" {
-		dsn = "postgres://fleet:fleet@127.0.0.1:5433/fleet?sslmode=disable"
+		dsn = "postgres://fleet:fleet@127.0.0.1:5432/fleet?sslmode=disable"
 	}
 	sqldb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
 	db := bun.NewDB(sqldb, pgdialect.New())

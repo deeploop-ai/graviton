@@ -51,7 +51,7 @@ func (t *Teams) CreateTeam(ctx context.Context, projectID, name string, perms []
 	if _, err := t.docDB.CreateDocument(ctx, projectID, "default", "teams", doc, defaultTeamPermissions(teamID, perms)); err != nil {
 		return nil, fmt.Errorf("create team: %w", err)
 	}
-	return t.docDB.GetDocument(ctx, projectID, "default", "teams", teamID)
+	return t.docDB.GetDocument(ctx, projectID, "default", "teams", teamID, databases.SystemRoles)
 }
 
 func (t *Teams) ListTeams(ctx context.Context, projectID string, q databases.Query, roles []string) ([]databases.Document, int64, string, error) {
@@ -65,18 +65,18 @@ func (t *Teams) ListTeams(ctx context.Context, projectID string, q databases.Que
 	return list.Documents, list.TotalCount, list.NextPageToken, nil
 }
 
-func (t *Teams) GetTeam(ctx context.Context, projectID, teamID string) (*databases.Document, error) {
+func (t *Teams) GetTeam(ctx context.Context, projectID, teamID string, roles []string) (*databases.Document, error) {
 	if _, err := t.resolveProject(ctx, projectID); err != nil {
 		return nil, err
 	}
-	return t.docDB.GetDocument(ctx, projectID, "default", "teams", teamID)
+	return t.docDB.GetDocument(ctx, projectID, "default", "teams", teamID, roles)
 }
 
-func (t *Teams) DeleteTeam(ctx context.Context, projectID, teamID string) error {
+func (t *Teams) DeleteTeam(ctx context.Context, projectID, teamID string, roles []string) error {
 	if _, err := t.resolveProject(ctx, projectID); err != nil {
 		return err
 	}
-	return t.docDB.DeleteDocument(ctx, projectID, "default", "teams", teamID)
+	return t.docDB.DeleteDocument(ctx, projectID, "default", "teams", teamID, roles)
 }
 
 func defaultTeamPermissions(teamID string, explicit []string) []databases.Permission {
