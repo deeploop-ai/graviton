@@ -10,12 +10,17 @@ export function ProjectBootstrap() {
   const { data: projects = [] } = useQuery({
     queryKey: ["projects"],
     queryFn: listProjects,
-    enabled: !projectId,
   });
 
   useEffect(() => {
-    if (!projectId && projects[0]?.id) {
-      selectProject(projects[0].id);
+    if (projects.length === 0) return;
+    const firstId = projects[0].id;
+    if (!projectId) {
+      selectProject(firstId);
+      return;
+    }
+    if (!projects.some((p) => p.id === projectId)) {
+      selectProject(firstId);
     }
   }, [projectId, projects, selectProject]);
 

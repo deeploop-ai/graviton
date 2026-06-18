@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { ProjectBootstrap } from "@/components/ProjectBootstrap";
+import { ProjectSelector } from "@/components/ProjectSelector";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Key, Users, Database, HardDrive, LogOut, Menu, X } from "lucide-react";
 
@@ -84,6 +85,9 @@ function SidebarContent({
         <Button variant="ghost" size="icon" className="md:hidden" onClick={onNavigate}>
           <X className="h-5 w-5" />
         </Button>
+      </div>
+      <div className="px-6 pt-4 pb-4 border-b">
+        <ProjectSelector />
       </div>
       <nav className="flex-1 p-4 space-y-1">
         {nav.map((item) => (

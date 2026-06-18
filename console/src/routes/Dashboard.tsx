@@ -7,11 +7,10 @@ import { listDatabases } from "@/api/databases";
 import { useAuth } from "@/hooks/useAuth";
 import { PageHeader } from "@/components/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function Dashboard() {
-  const { projectId, selectProject } = useAuth();
+  const { projectId } = useAuth();
 
   const { data: projects = [], isLoading: projectsLoading } = useQuery({
     queryKey: ["projects"],
@@ -44,40 +43,12 @@ export function Dashboard() {
     enabled: !!selectedProjectId,
   });
 
-  const handleSelectProject = (id: string) => {
-    selectProject(id);
-  };
-
   return (
     <div className="space-y-6">
-      <PageHeader title="Dashboard" description="Overview of your Fleet workspace" />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Active project</CardTitle>
-          <CardDescription>
-            Server-side resources are scoped to the selected project
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {projectsLoading ? (
-            <Skeleton className="h-10 w-64" />
-          ) : (
-            <Select value={selectedProjectId} onValueChange={handleSelectProject}>
-              <SelectTrigger className="w-64">
-                <SelectValue placeholder="Select project" />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </CardContent>
-      </Card>
+      <PageHeader
+        title="Dashboard"
+        description="Overview of your Fleet workspace. Switch the active project from the sidebar."
+      />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Projects" value={projects.length} isLoading={projectsLoading} />
