@@ -27,7 +27,7 @@ type postgresDocumentDatabase struct {
 	db *clients.Database
 }
 
-func NewPostgresDocumentDatabase(db *clients.Database) databases.DocumentDatabase {
+func NewPostgresDocumentDatabase(db *clients.Database) databases.DocumentDB {
 	return &postgresDocumentDatabase{db: db}
 }
 

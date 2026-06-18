@@ -21,14 +21,14 @@ import (
 type Account struct {
 	cfg          *config.AppConfig
 	projectRepo  projects.Repository
-	docDB        databases.DocumentDatabase
+	docDB        databases.DocumentDB
 	sessionCodec *auth.SessionCookieCodec
 }
 
 func NewAccount(
 	cfg *config.AppConfig,
 	projectRepo projects.Repository,
-	docDB databases.DocumentDatabase,
+	docDB databases.DocumentDB,
 ) *Account {
 	return &Account{
 		cfg:          cfg,
@@ -190,12 +190,12 @@ func (a *Account) createSessionAndTokens(ctx context.Context, projectID, userID,
 	sessionDoc := databases.Document{
 		ID: sessionID,
 		Data: map[string]any{
-			"user_id":      userID,
-			"secret_hash":  sessionSecret,
-			"provider":     "email",
-			"expire_at":    expireAt.Format(time.RFC3339Nano),
-			"user_agent":   "",
-			"ip":           "",
+			"user_id":     userID,
+			"secret_hash": sessionSecret,
+			"provider":    "email",
+			"expire_at":   expireAt.Format(time.RFC3339Nano),
+			"user_agent":  "",
+			"ip":          "",
 		},
 	}
 	sessionPerms := []databases.Permission{

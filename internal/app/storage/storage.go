@@ -19,14 +19,14 @@ import (
 type Storage struct {
 	cfg         *config.AppConfig
 	projectRepo projects.Repository
-	docDB       databases.DocumentDatabase
+	docDB       databases.DocumentDB
 	store       storage.ObjectStore
 }
 
 func NewStorage(
 	cfg *config.AppConfig,
 	projectRepo projects.Repository,
-	docDB databases.DocumentDatabase,
+	docDB databases.DocumentDB,
 	store storage.ObjectStore,
 ) *Storage {
 	return &Storage{cfg: cfg, projectRepo: projectRepo, docDB: docDB, store: store}

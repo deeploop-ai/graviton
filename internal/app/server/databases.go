@@ -11,10 +11,10 @@ import (
 
 type Databases struct {
 	projectRepo projects.Repository
-	docDB       databases.DocumentDatabase
+	docDB       databases.DocumentDB
 }
 
-func NewDatabases(projectRepo projects.Repository, docDB databases.DocumentDatabase) *Databases {
+func NewDatabases(projectRepo projects.Repository, docDB databases.DocumentDB) *Databases {
 	return &Databases{projectRepo: projectRepo, docDB: docDB}
 }
 

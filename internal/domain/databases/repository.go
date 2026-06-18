@@ -2,7 +2,7 @@ package databases
 
 import "context"
 
-type DocumentDatabase interface {
+type DocumentDB interface {
 	// Database / schema
 	CreateDatabase(ctx context.Context, projectID, id, name string) error
 	GetDatabase(ctx context.Context, projectID, id string) (*Collection, error)

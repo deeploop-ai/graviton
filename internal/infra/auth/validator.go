@@ -18,10 +18,10 @@ import (
 )
 
 type Validator struct {
-	cfg         *config.AppConfig
-	apiKeyRepo  projects.APIKeyRepository
-	adminRepo   projects.ConsoleAdminRepository
-	docDB       databases.DocumentDatabase
+	cfg          *config.AppConfig
+	apiKeyRepo   projects.APIKeyRepository
+	adminRepo    projects.ConsoleAdminRepository
+	docDB        databases.DocumentDB
 	sessionCodec *SessionCookieCodec
 }
 
@@ -29,7 +29,7 @@ func NewValidator(
 	cfg *config.AppConfig,
 	apiKeyRepo projects.APIKeyRepository,
 	adminRepo projects.ConsoleAdminRepository,
-	docDB databases.DocumentDatabase,
+	docDB databases.DocumentDB,
 ) *Validator {
 	return &Validator{
 		cfg:          cfg,

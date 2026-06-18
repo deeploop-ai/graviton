@@ -14,10 +14,10 @@ import (
 
 type Teams struct {
 	projectRepo projects.Repository
-	docDB       databases.DocumentDatabase
+	docDB       databases.DocumentDB
 }
 
-func NewTeams(projectRepo projects.Repository, docDB databases.DocumentDatabase) *Teams {
+func NewTeams(projectRepo projects.Repository, docDB databases.DocumentDB) *Teams {
 	return &Teams{projectRepo: projectRepo, docDB: docDB}
 }
 

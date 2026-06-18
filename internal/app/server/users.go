@@ -13,10 +13,10 @@ import (
 
 type Users struct {
 	projectRepo projects.Repository
-	docDB       databases.DocumentDatabase
+	docDB       databases.DocumentDB
 }
 
-func NewUsers(projectRepo projects.Repository, docDB databases.DocumentDatabase) *Users {
+func NewUsers(projectRepo projects.Repository, docDB databases.DocumentDB) *Users {
 	return &Users{projectRepo: projectRepo, docDB: docDB}
 }
 
