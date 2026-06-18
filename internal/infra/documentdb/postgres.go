@@ -23,15 +23,15 @@ import (
 var safeNameRe = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
 var docIDRe = regexp.MustCompile(`^[a-zA-Z0-9_.:-]{1,64}$`)
 
-type postgresDocumentDatabase struct {
+type postgresDocumentDB struct {
 	db *clients.Database
 }
 
 func NewPostgresDocumentDatabase(db *clients.Database) databases.DocumentDB {
-	return &postgresDocumentDatabase{db: db}
+	return &postgresDocumentDB{db: db}
 }
 
-func (p *postgresDocumentDatabase) CreateDatabase(ctx context.Context, projectID, id, name string) error {
+func (p *postgresDocumentDB) CreateDatabase(ctx context.Context, projectID, id, name string) error {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return err
@@ -54,7 +54,7 @@ func (p *postgresDocumentDatabase) CreateDatabase(ctx context.Context, projectID
 	return err
 }
 
-func (p *postgresDocumentDatabase) GetDatabase(ctx context.Context, projectID, id string) (*databases.Collection, error) {
+func (p *postgresDocumentDB) GetDatabase(ctx context.Context, projectID, id string) (*databases.Collection, error) {
 	m := new(model.DocumentDatabase)
 	err := p.db.NewSelect().Model(m).Where("project_id = ? AND id = ?", projectID, id).Scan(ctx)
 	if err != nil {
@@ -72,7 +72,7 @@ func (p *postgresDocumentDatabase) GetDatabase(ctx context.Context, projectID, i
 	}, nil
 }
 
-func (p *postgresDocumentDatabase) ListDatabases(ctx context.Context, projectID string) ([]databases.Collection, error) {
+func (p *postgresDocumentDB) ListDatabases(ctx context.Context, projectID string) ([]databases.Collection, error) {
 	var ms []model.DocumentDatabase
 	err := p.db.NewSelect().Model(&ms).Where("project_id = ?", projectID).Order("created_at DESC").Scan(ctx)
 	if err != nil {
@@ -91,7 +91,7 @@ func (p *postgresDocumentDatabase) ListDatabases(ctx context.Context, projectID 
 	return out, nil
 }
 
-func (p *postgresDocumentDatabase) DeleteDatabase(ctx context.Context, projectID, id string) error {
+func (p *postgresDocumentDB) DeleteDatabase(ctx context.Context, projectID, id string) error {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return err
@@ -104,7 +104,7 @@ func (p *postgresDocumentDatabase) DeleteDatabase(ctx context.Context, projectID
 	return err
 }
 
-func (p *postgresDocumentDatabase) CreateCollection(ctx context.Context, projectID, databaseID, collectionID, name string, attrs []databases.Attribute, idxs []databases.Index) error {
+func (p *postgresDocumentDB) CreateCollection(ctx context.Context, projectID, databaseID, collectionID, name string, attrs []databases.Attribute, idxs []databases.Index) error {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return err
@@ -126,7 +126,7 @@ func (p *postgresDocumentDatabase) CreateCollection(ctx context.Context, project
 	return p.createCollectionMetadata(ctx, projectID, databaseID, collectionID, name, attrs, idxs)
 }
 
-func (p *postgresDocumentDatabase) GetCollection(ctx context.Context, projectID, databaseID, collectionID string) (*databases.Collection, error) {
+func (p *postgresDocumentDB) GetCollection(ctx context.Context, projectID, databaseID, collectionID string) (*databases.Collection, error) {
 	m := new(model.DocumentCollection)
 	err := p.db.NewSelect().Model(m).
 		Where("project_id = ? AND database_id = ? AND id = ?", projectID, databaseID, collectionID).Scan(ctx)
@@ -139,7 +139,7 @@ func (p *postgresDocumentDatabase) GetCollection(ctx context.Context, projectID,
 	return p.mapCollection(ctx, m)
 }
 
-func (p *postgresDocumentDatabase) ListCollections(ctx context.Context, projectID, databaseID string) ([]databases.Collection, error) {
+func (p *postgresDocumentDB) ListCollections(ctx context.Context, projectID, databaseID string) ([]databases.Collection, error) {
 	var ms []model.DocumentCollection
 	err := p.db.NewSelect().Model(&ms).
 		Where("project_id = ? AND database_id = ?", projectID, databaseID).
@@ -158,7 +158,7 @@ func (p *postgresDocumentDatabase) ListCollections(ctx context.Context, projectI
 	return out, nil
 }
 
-func (p *postgresDocumentDatabase) DeleteCollection(ctx context.Context, projectID, databaseID, collectionID string) error {
+func (p *postgresDocumentDB) DeleteCollection(ctx context.Context, projectID, databaseID, collectionID string) error {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return err
@@ -172,7 +172,7 @@ func (p *postgresDocumentDatabase) DeleteCollection(ctx context.Context, project
 	return err
 }
 
-func (p *postgresDocumentDatabase) CreateAttribute(ctx context.Context, projectID, databaseID, collectionID string, attr databases.Attribute) error {
+func (p *postgresDocumentDB) CreateAttribute(ctx context.Context, projectID, databaseID, collectionID string, attr databases.Attribute) error {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return err
@@ -198,7 +198,7 @@ func (p *postgresDocumentDatabase) CreateAttribute(ctx context.Context, projectI
 	return err
 }
 
-func (p *postgresDocumentDatabase) CreateIndex(ctx context.Context, projectID, databaseID, collectionID string, idx databases.Index) error {
+func (p *postgresDocumentDB) CreateIndex(ctx context.Context, projectID, databaseID, collectionID string, idx databases.Index) error {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return err
@@ -219,7 +219,7 @@ func (p *postgresDocumentDatabase) CreateIndex(ctx context.Context, projectID, d
 	return err
 }
 
-func (p *postgresDocumentDatabase) CreateDocument(ctx context.Context, projectID, databaseID, collectionID string, doc databases.Document, perms []databases.Permission) (databases.Document, error) {
+func (p *postgresDocumentDB) CreateDocument(ctx context.Context, projectID, databaseID, collectionID string, doc databases.Document, perms []databases.Permission) (databases.Document, error) {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return doc, err
@@ -253,7 +253,7 @@ func (p *postgresDocumentDatabase) CreateDocument(ctx context.Context, projectID
 	return *created, nil
 }
 
-func (p *postgresDocumentDatabase) GetDocument(ctx context.Context, projectID, databaseID, collectionID, docID string) (*databases.Document, error) {
+func (p *postgresDocumentDB) GetDocument(ctx context.Context, projectID, databaseID, collectionID, docID string) (*databases.Document, error) {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return nil, err
@@ -263,7 +263,7 @@ func (p *postgresDocumentDatabase) GetDocument(ctx context.Context, projectID, d
 	return scanDocumentJSON(row)
 }
 
-func (p *postgresDocumentDatabase) UpdateDocument(ctx context.Context, projectID, databaseID, collectionID string, doc databases.Document, perms []databases.Permission) (databases.Document, error) {
+func (p *postgresDocumentDB) UpdateDocument(ctx context.Context, projectID, databaseID, collectionID string, doc databases.Document, perms []databases.Permission) (databases.Document, error) {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return doc, err
@@ -297,7 +297,7 @@ func (p *postgresDocumentDatabase) UpdateDocument(ctx context.Context, projectID
 	return *updated, nil
 }
 
-func (p *postgresDocumentDatabase) DeleteDocument(ctx context.Context, projectID, databaseID, collectionID, docID string) error {
+func (p *postgresDocumentDB) DeleteDocument(ctx context.Context, projectID, databaseID, collectionID, docID string) error {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return err
@@ -310,7 +310,7 @@ func (p *postgresDocumentDatabase) DeleteDocument(ctx context.Context, projectID
 	return err
 }
 
-func (p *postgresDocumentDatabase) ListDocuments(ctx context.Context, projectID, databaseID, collectionID string, q databases.Query, roles []string) (*databases.DocumentList, error) {
+func (p *postgresDocumentDB) ListDocuments(ctx context.Context, projectID, databaseID, collectionID string, q databases.Query, roles []string) (*databases.DocumentList, error) {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return nil, err
@@ -392,7 +392,7 @@ func (p *postgresDocumentDatabase) ListDocuments(ctx context.Context, projectID,
 	}, nil
 }
 
-func (p *postgresDocumentDatabase) CountDocuments(ctx context.Context, projectID, databaseID, collectionID string, queries []string, roles []string) (int64, error) {
+func (p *postgresDocumentDB) CountDocuments(ctx context.Context, projectID, databaseID, collectionID string, queries []string, roles []string) (int64, error) {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return 0, err
@@ -426,7 +426,7 @@ func (p *postgresDocumentDatabase) CountDocuments(ctx context.Context, projectID
 	return total, err
 }
 
-func (p *postgresDocumentDatabase) EnsureSystemCollections(ctx context.Context, projectID string, internalID int64) error {
+func (p *postgresDocumentDB) EnsureSystemCollections(ctx context.Context, projectID string, internalID int64) error {
 	dbID := "default"
 	schema := schemaName(internalID, dbID)
 	if err := p.ensureSchemaAndPerms(ctx, schema); err != nil {
@@ -492,7 +492,7 @@ func pgTextArray(items []string) string {
 	return `{` + strings.Join(parts, ",") + `}`
 }
 
-func (p *postgresDocumentDatabase) resolveInternalID(ctx context.Context, projectID string) (int64, error) {
+func (p *postgresDocumentDB) resolveInternalID(ctx context.Context, projectID string) (int64, error) {
 	var internalID int64
 	err := p.db.NewSelect().Model((*model.Project)(nil)).Column("internal_id").Where("id = ?", projectID).Scan(ctx, &internalID)
 	if err != nil {
@@ -504,14 +504,14 @@ func (p *postgresDocumentDatabase) resolveInternalID(ctx context.Context, projec
 	return internalID, nil
 }
 
-func (p *postgresDocumentDatabase) ensureSchemaAndPerms(ctx context.Context, schema string) error {
+func (p *postgresDocumentDB) ensureSchemaAndPerms(ctx context.Context, schema string) error {
 	if _, err := p.db.DB.ExecContext(ctx, fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS %s`, quoteIdent(schema))); err != nil {
 		return fmt.Errorf("create schema: %w", err)
 	}
 	return p.ensurePermsTable(ctx, schema)
 }
 
-func (p *postgresDocumentDatabase) ensurePermsTable(ctx context.Context, schema string) error {
+func (p *postgresDocumentDB) ensurePermsTable(ctx context.Context, schema string) error {
 	sql := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
 		_id BIGSERIAL PRIMARY KEY,
 		_tenant BIGINT NOT NULL,
@@ -534,7 +534,7 @@ func (p *postgresDocumentDatabase) ensurePermsTable(ctx context.Context, schema 
 	return err
 }
 
-func (p *postgresDocumentDatabase) createCollectionTable(ctx context.Context, schema, collectionID string, tenant int64, attrs []databases.Attribute) error {
+func (p *postgresDocumentDB) createCollectionTable(ctx context.Context, schema, collectionID string, tenant int64, attrs []databases.Attribute) error {
 	var colDefs []string
 	for _, attr := range attrs {
 		colDefs = append(colDefs, attributeColumnSQL(attr))
@@ -553,7 +553,7 @@ func (p *postgresDocumentDatabase) createCollectionTable(ctx context.Context, sc
 	return err
 }
 
-func (p *postgresDocumentDatabase) createCollectionIndex(ctx context.Context, schema, collectionID string, idx databases.Index) error {
+func (p *postgresDocumentDB) createCollectionIndex(ctx context.Context, schema, collectionID string, idx databases.Index) error {
 	var cols []string
 	for i, attr := range idx.Attributes {
 		if !safeNameRe.MatchString(attr) {
@@ -635,7 +635,7 @@ func quoteLiteral(s string) string {
 	return `'` + strings.ReplaceAll(s, `'`, `''`) + `'`
 }
 
-func (p *postgresDocumentDatabase) createCollectionMetadata(ctx context.Context, projectID, databaseID, collectionID, name string, attrs []databases.Attribute, idxs []databases.Index) error {
+func (p *postgresDocumentDB) createCollectionMetadata(ctx context.Context, projectID, databaseID, collectionID, name string, attrs []databases.Attribute, idxs []databases.Index) error {
 	coll := &model.DocumentCollection{
 		ID:               collectionID,
 		DatabaseID:       databaseID,
@@ -682,7 +682,7 @@ func (p *postgresDocumentDatabase) createCollectionMetadata(ctx context.Context,
 	return nil
 }
 
-func (p *postgresDocumentDatabase) mapCollection(ctx context.Context, m *model.DocumentCollection) (*databases.Collection, error) {
+func (p *postgresDocumentDB) mapCollection(ctx context.Context, m *model.DocumentCollection) (*databases.Collection, error) {
 	var attrs []model.DocumentAttribute
 	if err := p.db.NewSelect().Model(&attrs).Where("collection_id = ?", m.ID).Scan(ctx); err != nil {
 		return nil, err
@@ -724,7 +724,7 @@ func parsePermission(s string) databases.Permission {
 	return databases.Permission{Type: parts[0], Role: parts[1]}
 }
 
-func (p *postgresDocumentDatabase) setCollectionPermissions(ctx context.Context, projectID, databaseID, collectionID string, perms []databases.Permission) error {
+func (p *postgresDocumentDB) setCollectionPermissions(ctx context.Context, projectID, databaseID, collectionID string, perms []databases.Permission) error {
 	var raw []string
 	for _, perm := range perms {
 		raw = append(raw, fmt.Sprintf("%s:%s", perm.Type, perm.Role))
@@ -735,7 +735,7 @@ func (p *postgresDocumentDatabase) setCollectionPermissions(ctx context.Context,
 	return err
 }
 
-func (p *postgresDocumentDatabase) setPermissions(ctx context.Context, schema, collectionID, documentID string, tenant int64, perms []databases.Permission) error {
+func (p *postgresDocumentDB) setPermissions(ctx context.Context, schema, collectionID, documentID string, tenant int64, perms []databases.Permission) error {
 	if len(perms) == 0 {
 		return nil
 	}
@@ -753,7 +753,7 @@ func (p *postgresDocumentDatabase) setPermissions(ctx context.Context, schema, c
 	return err
 }
 
-func (p *postgresDocumentDatabase) clearPermissions(ctx context.Context, schema, collectionID, documentID string, tenant int64) error {
+func (p *postgresDocumentDB) clearPermissions(ctx context.Context, schema, collectionID, documentID string, tenant int64) error {
 	_, err := p.db.DB.ExecContext(ctx, fmt.Sprintf(`DELETE FROM %s WHERE _tenant = ? AND _collection = ? AND _document = ?`, permsTableName(schema)), tenant, collectionID, documentID)
 	return err
 }
