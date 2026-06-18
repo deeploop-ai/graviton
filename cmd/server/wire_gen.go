@@ -49,7 +49,7 @@ func wireBootstrap(app lynx.Lynx) (*boot.Bootstrap, func(), error) {
 	account := client.NewAccount(appConfig, projectsRepository, documentDB)
 	accountService := clientgrpc.NewAccountService(account)
 	healthService := servergrpc.NewHealthService()
-	projects := server.NewProjects(projectsRepository, documentDB)
+	projects := server.NewProjects(projectsRepository, documentDB, database)
 	projectsService := servergrpc.NewProjectsService(projects)
 	objectStore, err := storage.NewMinioObjectStore(appConfig)
 	if err != nil {

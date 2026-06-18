@@ -3,8 +3,10 @@ package documentdb
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
+	"github.com/deeploop-ai/fleet/internal/infra/bun/model"
 	"github.com/deeploop-ai/fleet/internal/testutil"
 	"github.com/stretchr/testify/require"
 )
@@ -132,4 +134,44 @@ func TestPostgresDocumentDatabase_Permissions(t *testing.T) {
 	got, err := docDB.GetDocument(ctx, projectID, "default", "users", created.ID, []string{"user:alice"})
 	require.NoError(t, err)
 	require.Equal(t, "perm@fleet.local", got.Data["email"])
+}
+
+func TestEnsureSystemCollections_MultipleProjects(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+	ctx := context.Background()
+	db := testutil.SetupTestDB(t)
+	defer db.Close()
+
+	docDB := NewPostgresDocumentDatabase(db)
+
+	projectA, internalA, cleanupA := testutil.CreateTestProject(ctx, db)
+	defer cleanupA()
+	require.NoError(t, docDB.EnsureSystemCollections(ctx, projectA, internalA))
+
+	// Second project must use a unique name (projects.name is unique).
+	projectB := &model.Project{
+		ID:        "test-project-b",
+		Name:      "Test Project B",
+		Status:    "active",
+		Settings:  map[string]any{},
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	_, err := db.NewInsert().Model(projectB).Exec(ctx)
+	require.NoError(t, err)
+	defer func() { _, _ = db.NewDelete().Model((*model.Project)(nil)).Where("id = ?", projectB.ID).Exec(ctx) }()
+	var internalB int64
+	require.NoError(t, db.NewSelect().Model((*model.Project)(nil)).Column("internal_id").Where("id = ?", projectB.ID).Scan(ctx, &internalB))
+
+	require.NoError(t, docDB.EnsureSystemCollections(ctx, projectB.ID, internalB))
+
+	collA, err := docDB.GetCollection(ctx, projectA, "default", "users")
+	require.NoError(t, err)
+	require.NotNil(t, collA)
+
+	collB, err := docDB.GetCollection(ctx, projectB.ID, "default", "users")
+	require.NoError(t, err)
+	require.NotNil(t, collB)
 }

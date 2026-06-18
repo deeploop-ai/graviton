@@ -4,10 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
 	"sort"
+	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -17,6 +20,8 @@ import (
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
 )
+
+var testDBSeq atomic.Uint64
 
 // TestDSN returns the DSN for integration tests.
 func TestDSN() string {
@@ -38,28 +43,75 @@ func AdminDSN() string {
 func SetupTestDB(t *testing.T) *clients.Database {
 	t.Helper()
 	adminDSN := AdminDSN()
-	testDSN := TestDSN()
+	baseDSN := TestDSN()
+	dbName := uniqueTestDBName()
+
+	testDSN, err := replaceDatabaseName(baseDSN, dbName)
+	if err != nil {
+		t.Fatalf("parse test dsn: %v", err)
+	}
 
 	adminDB := bun.NewDB(sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(adminDSN))), pgdialect.New())
 	defer adminDB.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	if _, err := adminDB.ExecContext(ctx, "DROP DATABASE IF EXISTS fleet_test"); err != nil {
-		t.Fatalf("drop test db: %v", err)
-	}
-	if _, err := adminDB.ExecContext(ctx, "CREATE DATABASE fleet_test"); err != nil {
+	if _, err := adminDB.ExecContext(ctx, "CREATE DATABASE "+dbName); err != nil {
 		t.Fatalf("create test db: %v", err)
 	}
+	t.Cleanup(func() {
+		cleanupCtx, cleanupCancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cleanupCancel()
+		cleanupDB := bun.NewDB(sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(adminDSN))), pgdialect.New())
+		defer cleanupDB.Close()
+		if err := dropTestDatabase(cleanupCtx, cleanupDB, dbName); err != nil {
+			t.Errorf("drop test db %s: %v", dbName, err)
+		}
+	})
 
 	sqldb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(testDSN)))
 	db := &clients.Database{DB: bun.NewDB(sqldb, pgdialect.New())}
+	t.Cleanup(func() { _ = db.Close() })
 
 	if err := runMigrations(ctx, db.DB); err != nil {
 		t.Fatalf("run migrations: %v", err)
 	}
 	return db
+}
+
+func uniqueTestDBName() string {
+	return fmt.Sprintf("%s_%d_%d", testDBPrefix(), os.Getpid(), testDBSeq.Add(1))
+}
+
+func testDBPrefix() string {
+	dsn := TestDSN()
+	u, err := url.Parse(dsn)
+	if err != nil || u.Path == "" || u.Path == "/" {
+		return "fleet_test"
+	}
+	return strings.TrimPrefix(u.Path, "/")
+}
+
+func replaceDatabaseName(dsn, dbName string) (string, error) {
+	u, err := url.Parse(dsn)
+	if err != nil {
+		return "", err
+	}
+	u.Path = "/" + dbName
+	return u.String(), nil
+}
+
+func dropTestDatabase(ctx context.Context, admin *bun.DB, dbName string) error {
+	if _, err := admin.ExecContext(ctx, `
+		SELECT pg_terminate_backend(pid)
+		FROM pg_stat_activity
+		WHERE datname = ? AND pid <> pg_backend_pid()
+	`, dbName); err != nil {
+		return err
+	}
+	_, err := admin.ExecContext(ctx, "DROP DATABASE IF EXISTS "+dbName)
+	return err
 }
 
 func runMigrations(ctx context.Context, db *bun.DB) error {

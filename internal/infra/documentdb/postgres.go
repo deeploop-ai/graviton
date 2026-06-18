@@ -17,6 +17,7 @@ import (
 	"github.com/deeploop-ai/fleet/pkg/crud"
 	"github.com/deeploop-ai/fleet/pkg/idgen"
 	"github.com/deeploop-ai/fleet/pkg/query"
+	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 )
 
@@ -34,6 +35,10 @@ type postgresDocumentDB struct {
 
 func NewPostgresDocumentDatabase(db *clients.Database) databases.DocumentDB {
 	return &postgresDocumentDB{db: db}
+}
+
+func (p *postgresDocumentDB) conn(ctx context.Context) bun.IDB {
+	return p.db.Conn(ctx)
 }
 
 func (p *postgresDocumentDB) CreateDatabase(ctx context.Context, projectID, id, name string) error {
@@ -133,7 +138,7 @@ func (p *postgresDocumentDB) CreateCollection(ctx context.Context, projectID, da
 
 func (p *postgresDocumentDB) GetCollection(ctx context.Context, projectID, databaseID, collectionID string) (*databases.Collection, error) {
 	m := new(model.DocumentCollection)
-	err := p.db.NewSelect().Model(m).
+	err := p.conn(ctx).NewSelect().Model(m).
 		Where("project_id = ? AND database_id = ? AND id = ?", projectID, databaseID, collectionID).Scan(ctx)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -190,6 +195,8 @@ func (p *postgresDocumentDB) CreateAttribute(ctx context.Context, projectID, dat
 	m := &model.DocumentAttribute{
 		ID:           attr.ID,
 		CollectionID: collectionID,
+		DatabaseID:   databaseID,
+		ProjectID:    projectID,
 		Key:          attr.Key,
 		Type:         attr.Type,
 		Required:     attr.Required,
@@ -215,6 +222,8 @@ func (p *postgresDocumentDB) CreateIndex(ctx context.Context, projectID, databas
 	m := &model.DocumentIndex{
 		ID:           idx.ID,
 		CollectionID: collectionID,
+		DatabaseID:   databaseID,
+		ProjectID:    projectID,
 		Type:         idx.Type,
 		Attributes:   idx.Attributes,
 		Orders:       idx.Orders,
@@ -467,14 +476,14 @@ func (p *postgresDocumentDB) EnsureSystemCollections(ctx context.Context, projec
 	}
 
 	// Ensure default database metadata row exists.
-	exists, err := p.db.NewSelect().Model((*model.DocumentDatabase)(nil)).
+	exists, err := p.conn(ctx).NewSelect().Model((*model.DocumentDatabase)(nil)).
 		Where("id = ? AND project_id = ?", dbID, projectID).Exists(ctx)
 	if err != nil {
 		return err
 	}
 	if !exists {
 		m := &model.DocumentDatabase{ID: dbID, ProjectID: projectID, Name: "default", CreatedAt: time.Now(), UpdatedAt: time.Now()}
-		if _, err := p.db.NewInsert().Model(m).Exec(ctx); err != nil {
+		if _, err := p.conn(ctx).NewInsert().Model(m).Exec(ctx); err != nil {
 			return err
 		}
 	}
@@ -527,7 +536,7 @@ func pgTextArray(items []string) string {
 
 func (p *postgresDocumentDB) resolveInternalID(ctx context.Context, projectID string) (int64, error) {
 	var internalID int64
-	err := p.db.NewSelect().Model((*model.Project)(nil)).Column("internal_id").Where("id = ?", projectID).Scan(ctx, &internalID)
+	err := p.conn(ctx).NewSelect().Model((*model.Project)(nil)).Column("internal_id").Where("id = ?", projectID).Scan(ctx, &internalID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return 0, fmt.Errorf("project not found: %s", projectID)
@@ -538,7 +547,7 @@ func (p *postgresDocumentDB) resolveInternalID(ctx context.Context, projectID st
 }
 
 func (p *postgresDocumentDB) ensureSchemaAndPerms(ctx context.Context, schema string) error {
-	if _, err := p.db.DB.ExecContext(ctx, fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS %s`, quoteIdent(schema))); err != nil {
+	if _, err := p.conn(ctx).ExecContext(ctx, fmt.Sprintf(`CREATE SCHEMA IF NOT EXISTS %s`, quoteIdent(schema))); err != nil {
 		return fmt.Errorf("create schema: %w", err)
 	}
 	return p.ensurePermsTable(ctx, schema)
@@ -555,15 +564,15 @@ func (p *postgresDocumentDB) ensurePermsTable(ctx context.Context, schema string
 		_created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 		UNIQUE (_tenant, _collection, _document, _type, _permission)
 	)`, permsTableName(schema))
-	if _, err := p.db.DB.ExecContext(ctx, sql); err != nil {
+	if _, err := p.conn(ctx).ExecContext(ctx, sql); err != nil {
 		return fmt.Errorf("create perms table: %w", err)
 	}
 	idx := fmt.Sprintf(`CREATE INDEX IF NOT EXISTS idx_perms_lookup ON %s (_tenant, _collection, _document, _type)`, permsTableName(schema))
-	if _, err := p.db.DB.ExecContext(ctx, idx); err != nil {
+	if _, err := p.conn(ctx).ExecContext(ctx, idx); err != nil {
 		return err
 	}
 	idx2 := fmt.Sprintf(`CREATE INDEX IF NOT EXISTS idx_perms_role ON %s (_tenant, _collection, _type, _permission)`, permsTableName(schema))
-	_, err := p.db.DB.ExecContext(ctx, idx2)
+	_, err := p.conn(ctx).ExecContext(ctx, idx2)
 	return err
 }
 
@@ -582,7 +591,7 @@ func (p *postgresDocumentDB) createCollectionTable(ctx context.Context, schema, 
 		%s,
 		UNIQUE (_id, _tenant)
 	)`, tableName(schema, collectionID), tenant, strings.Join(colDefs, ", "))
-	_, err := p.db.DB.ExecContext(ctx, sql)
+	_, err := p.conn(ctx).ExecContext(ctx, sql)
 	return err
 }
 
@@ -608,7 +617,7 @@ func (p *postgresDocumentDB) createCollectionIndex(ctx context.Context, schema, 
 	default:
 		sql = fmt.Sprintf(`CREATE INDEX IF NOT EXISTS %s ON %s (%s)`, idxName, tableName(schema, collectionID), strings.Join(cols, ", "))
 	}
-	_, err := p.db.DB.ExecContext(ctx, sql)
+	_, err := p.conn(ctx).ExecContext(ctx, sql)
 	return err
 }
 
@@ -689,13 +698,15 @@ func (p *postgresDocumentDB) createCollectionMetadata(ctx context.Context, proje
 		CreatedAt:        time.Now(),
 		UpdatedAt:        time.Now(),
 	}
-	if _, err := p.db.NewInsert().Model(coll).Exec(ctx); err != nil {
+	if _, err := p.conn(ctx).NewInsert().Model(coll).Exec(ctx); err != nil {
 		return err
 	}
 	for _, attr := range attrs {
 		m := &model.DocumentAttribute{
 			ID:           attr.ID,
 			CollectionID: collectionID,
+			DatabaseID:   databaseID,
+			ProjectID:    projectID,
 			Key:          attr.Key,
 			Type:         attr.Type,
 			Required:     attr.Required,
@@ -705,7 +716,7 @@ func (p *postgresDocumentDB) createCollectionMetadata(ctx context.Context, proje
 		if attr.Size > 0 {
 			m.Size = &attr.Size
 		}
-		if _, err := p.db.NewInsert().Model(m).Exec(ctx); err != nil {
+		if _, err := p.conn(ctx).NewInsert().Model(m).Exec(ctx); err != nil {
 			return err
 		}
 	}
@@ -713,12 +724,14 @@ func (p *postgresDocumentDB) createCollectionMetadata(ctx context.Context, proje
 		m := &model.DocumentIndex{
 			ID:           idx.ID,
 			CollectionID: collectionID,
+			DatabaseID:   databaseID,
+			ProjectID:    projectID,
 			Type:         idx.Type,
 			Attributes:   idx.Attributes,
 			Orders:       idx.Orders,
 			CreatedAt:    time.Now(),
 		}
-		if _, err := p.db.NewInsert().Model(m).Exec(ctx); err != nil {
+		if _, err := p.conn(ctx).NewInsert().Model(m).Exec(ctx); err != nil {
 			return err
 		}
 	}
@@ -727,11 +740,15 @@ func (p *postgresDocumentDB) createCollectionMetadata(ctx context.Context, proje
 
 func (p *postgresDocumentDB) mapCollection(ctx context.Context, m *model.DocumentCollection) (*databases.Collection, error) {
 	var attrs []model.DocumentAttribute
-	if err := p.db.NewSelect().Model(&attrs).Where("collection_id = ?", m.ID).Scan(ctx); err != nil {
+	if err := p.conn(ctx).NewSelect().Model(&attrs).
+		Where("project_id = ? AND database_id = ? AND collection_id = ?", m.ProjectID, m.DatabaseID, m.ID).
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 	var idxs []model.DocumentIndex
-	if err := p.db.NewSelect().Model(&idxs).Where("collection_id = ?", m.ID).Scan(ctx); err != nil {
+	if err := p.conn(ctx).NewSelect().Model(&idxs).
+		Where("project_id = ? AND database_id = ? AND collection_id = ?", m.ProjectID, m.DatabaseID, m.ID).
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 	c := &databases.Collection{
@@ -772,7 +789,7 @@ func (p *postgresDocumentDB) setCollectionPermissions(ctx context.Context, proje
 	for _, perm := range perms {
 		raw = append(raw, fmt.Sprintf("%s:%s", perm.Type, perm.Role))
 	}
-	_, err := p.db.DB.ExecContext(ctx,
+	_, err := p.conn(ctx).ExecContext(ctx,
 		`UPDATE document_collections SET permissions = ? WHERE project_id = ? AND database_id = ? AND id = ?`,
 		pgdialect.Array(raw), projectID, databaseID, collectionID)
 	return err

@@ -8,6 +8,7 @@ import (
 
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
 	"github.com/deeploop-ai/fleet/internal/domain/projects"
+	"github.com/deeploop-ai/fleet/internal/infra/clients"
 	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
 	"github.com/deeploop-ai/fleet/pkg/crud"
 	"github.com/deeploop-ai/fleet/pkg/idgen"
@@ -18,10 +19,11 @@ import (
 type Projects struct {
 	projectRepo projects.Repository
 	docDB       databases.DocumentDB
+	db          *clients.Database
 }
 
-func NewProjects(projectRepo projects.Repository, docDB databases.DocumentDB) *Projects {
-	return &Projects{projectRepo: projectRepo, docDB: docDB}
+func NewProjects(projectRepo projects.Repository, docDB databases.DocumentDB, db *clients.Database) *Projects {
+	return &Projects{projectRepo: projectRepo, docDB: docDB, db: db}
 }
 
 type CreateProjectCommand struct {
@@ -47,11 +49,17 @@ func (s *Projects) CreateProject(ctx context.Context, cmd CreateProjectCommand) 
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
-	if err := s.projectRepo.CreateProject(ctx, p); err != nil {
+	err := s.db.RunInTx(ctx, func(txCtx context.Context) error {
+		if err := s.projectRepo.CreateProject(txCtx, p); err != nil {
+			return fmt.Errorf("insert project: %w", err)
+		}
+		if err := s.docDB.EnsureSystemCollections(txCtx, p.ID, p.InternalID); err != nil {
+			return fmt.Errorf("ensure system collections: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
 		return nil, fmt.Errorf("create project: %w", err)
-	}
-	if err := s.docDB.EnsureSystemCollections(ctx, p.ID, p.InternalID); err != nil {
-		return nil, fmt.Errorf("ensure system collections: %w", err)
 	}
 	return p, nil
 }

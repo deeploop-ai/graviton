@@ -20,7 +20,7 @@ func NewProjectRepository(db *clients.Database) projects.Repository {
 
 func (r *projectRepo) CreateProject(ctx context.Context, p *projects.Project) error {
 	m := mapProjectToModel(p)
-	_, err := r.db.NewInsert().Model(m).Exec(ctx)
+	_, err := r.db.Conn(ctx).NewInsert().Model(m).Exec(ctx)
 	if err == nil {
 		p.InternalID = m.InternalID
 	}
