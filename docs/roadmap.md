@@ -1,0 +1,418 @@
+# Fleet 开发路线图
+
+> 本文档基于已完成 P0 底座，规划 Fleet 的短期、中期、长期开发方向。
+> 最新更新：2026-06-18。
+
+---
+
+## 1. 版本规划总览
+
+| 阶段 | 目标 | 时间范围 | 状态 |
+|------|------|----------|------|
+| **P0 底座** | 可运行的工程骨架：动态文档层、Admin Console、基础认证、Storage/Functions 端口 | 已完成 | 完成 |
+| **P1 MVP** | Client/Server 核心业务闭环：Account、Users、Teams、Databases Documents、Storage 交付、Functions 真实执行、Health | 短期：1-2 个月 | 规划中 |
+| **P2 增强** | Realtime、Webhooks/Events、Messaging、Project settings、Migrations、Tokens、Worker 框架 | 中期：3-6 个月 | 规划中 |
+| **P3 生态** | Sites、Proxy、VCS、GraphQL、Avatars、Locale、Advisor、多区域/水平扩展 | 长期：6-12 个月 | 规划中 |
+
+---
+
+## 2. 短期（Short-term，未来 1-2 个月）
+
+**目标**：让 Fleet 达到可用的 MVP 状态，支持一个典型应用从注册、项目管理、数据库、文件存储到函数执行的完整闭环。
+
+### 2.1 Client Account / Auth（最高优先级）
+
+Client API 是终端用户直接使用的能力，当前仅实现了邮箱注册/登录/登出/Me，需要补齐会话与账号管理。
+
+| 任务 | 说明 | 关键端点 / 文件 |
+|------|------|-----------------|
+| Refresh token | 用 refresh token 换取新的 access token | `POST /v1/account/sessions/token` |
+| 会话列表与删除 | 列出当前用户所有会话，可单独或全部删除 | `GET/DELETE /v1/account/sessions`、`DELETE /v1/account/sessions/{id}` |
+| 更新账号资料 | 修改 name、email、password | `PATCH /v1/account` |
+| 账号偏好 | 读写用户级 `prefs` JSON | `GET/PUT /v1/account/prefs` |
+| 匿名登录 | 创建无密码匿名用户 | `POST /v1/account/sessions/anonymous` |
+| Magic URL | 创建确认链接 + 确认登录 | `POST /v1/account/sessions/magic-url`、`PUT /v1/account/sessions/magic-url` |
+| 邮箱验证 | 发送验证邮件 + 确认 | `POST /v1/account/verification`、`PUT /v1/account/verification` |
+| 密码找回 | 创建找回链接 + 重置密码 | `POST /v1/account/recovery`、`PUT /v1/account/recovery` |
+| JWT 签发 | 用当前会话换取一次性 JWT | `POST /v1/account/jwt` |
+| OAuth2（占位） | Google / GitHub 授权与回调，先返回绑定用户 | `GET /v1/account/sessions/oauth2/{provider}`、`/v1/account/sessions/oauth2/callback/{provider}` |
+| MFA（占位） | factors 列表、TOTP 创建/验证/删除 | `GET/POST/PUT/DELETE /v1/account/mfa/*` |
+| 账号日志 | 列出最近登录/操作记录 | `GET /v1/account/logs` |
+
+**验收标准**：
+
+- 注册/登录后可获取 access/refresh token；refresh 成功；登出后 access token 失效且会话删除。
+- 更新 email 后需重新验证；密码修改需旧密码验证。
+- 所有新增端点均有 proto authz 注解、gRPC handler、use-case 单元测试。
+
+---
+
+### 2.2 Server Users 管理
+
+Server API 当前支持列表/获取/更新/删除，缺少创建用户、会话/令牌管理、labels/prefs 完整映射。
+
+| 任务 | 说明 | 关键端点 |
+|------|------|----------|
+| 创建用户 | 服务端创建用户并指定密码哈希 | `POST /v1/server/users` |
+| 完整更新字段 | labels、status、emailVerified、prefs 支持 `google.protobuf.Struct` | `PATCH /v1/server/users/{id}` |
+| 用户会话管理 | 列出/删除指定用户的 sessions | `GET/DELETE /v1/server/users/{id}/sessions` |
+| 用户令牌管理 | 列出/删除指定用户的 tokens | `GET/DELETE /v1/server/users/{id}/tokens` |
+| 密码重置 | 服务端直接重置密码 | `PATCH /v1/server/users/{id}/password` |
+| 模拟登录（占位） | 生成目标用户的 JWT 用于调试 | `POST /v1/server/users/{id}/tokens` |
+
+**验收标准**：
+
+- 服务端可创建用户并立即用其邮箱+密码登录成功。
+- labels/prefs 的 CRUD 在数据库层面正确存储为 JSONB。
+- 删除用户级联删除其 sessions/tokens。
+
+---
+
+### 2.3 Teams & Memberships
+
+当前仅实现团队 CRUD，需要成员、邀请、角色。
+
+| 任务 | 说明 | 关键端点 |
+|------|------|----------|
+| 成员 CRUD | 列出、创建、获取、更新、删除成员 | `/v1/server/teams/{id}/memberships` |
+| 邀请流程 | 创建邀请 → 被邀请人接受/拒绝 → 写入 `memberships` | `POST /v1/server/teams/{id}/memberships`、`PATCH /v1/server/teams/{id}/memberships/{id}/status` |
+| 角色体系 | owner / admin / member，影响 `team:{id}` 与 `member:{id}` role | `PATCH /v1/server/teams/{id}/memberships/{id}` |
+| 团队偏好 | `GET/PUT /v1/server/teams/{id}/prefs` | 扩展 `teams` 集合 |
+| Client Teams API | 当前用户创建/加入/退出团队 | `/v1/teams/*` |
+
+**验收标准**：
+
+- 邀请被接受后，被邀请人拥有 `team:{teamID}` read 权限。
+- owner 可删除团队；member 只能退出。
+- 删除团队级联删除 memberships。
+
+---
+
+### 2.4 Databases Documents（核心）
+
+当前只到 Collection/Attribute/Index，缺少 Document CRUD 和批量操作。
+
+| 任务 | 说明 | 关键端点 |
+|------|------|----------|
+| Document CRUD | 创建、获取、更新、删除文档 | `/v1/server/databases/{db}/collections/{coll}/documents` |
+| Document 列表/计数 | 带 Appwrite DSL 查询、权限过滤 | `GET /v1/server/databases/{db}/collections/{coll}/documents`、`/count` |
+| 批量操作 | 批量更新、删除、upsert | `PATCH/DELETE/POST /v1/server/databases/{db}/collections/{coll}/documents/bulk` |
+| 字段自增/自减 | 对数值字段做原子增减 | `PATCH /v1/server/databases/{db}/collections/{coll}/documents/{id}` |
+| Attribute 删除 | 删除属性并同步 `ALTER TABLE DROP COLUMN` | `DELETE /v1/server/databases/{db}/collections/{coll}/attributes/{key}` |
+| Index 删除 | 删除索引 | `DELETE /v1/server/databases/{db}/collections/{coll}/indexes/{id}` |
+| Collection 更新 | 修改 name / permissions | `PATCH /v1/server/databases/{db}/collections/{coll}` |
+| Client Database API | 终端用户在授权下读写文档 | `/v1/databases/{db}/collections/{coll}/documents/*` |
+| 权限中间件 | Document 级别 `_perms` 校验封装到拦截器或 use-case | `internal/domain/databases/permissions.go` |
+
+**验收标准**：
+
+- 可通过 Console 在任意 collection 中增删改查文档。
+- `equal`、`greaterThan`、`contains`、`orderDesc`、`limit` 等查询组合返回正确结果。
+- 普通用户只能读写自己有权限的文档；admin/key 可绕过。
+- 删除 attribute 时同步清理 `document_attributes` 元数据与表结构。
+
+---
+
+### 2.5 Storage 文件交付
+
+当前支持上传、下载、查看，缺少预览、公开访问、断点续传。
+
+| 任务 | 说明 | 关键端点 |
+|------|------|----------|
+| 文件预览/缩略图 | 图片裁剪/缩放（使用 `disintegration/imaging`） | `GET /v1/storage/buckets/{id}/files/{id}/preview` |
+| 公开 bucket | bucket 级 `public` 标志，允许匿名读取 | bucket metadata 增加 `public` 字段 |
+| File Token | 生成短期文件访问令牌 | `POST /v1/storage/buckets/{id}/files/{id}/tokens` |
+| 文件元数据更新 | 修改 name、metadata、permissions | `PATCH /v1/server/storage/buckets/{id}/files/{id}` |
+| 分片上传（占位） | 支持大文件分片上传与合并 | `POST /v1/storage/buckets/{id}/files/{id}/chunks` |
+| Usage 统计 | bucket/files 数量与容量统计 | `GET /v1/server/storage/usage` |
+
+**验收标准**：
+
+- 上传图片后可通过 `preview?width=200&height=200` 获取缩略图。
+- 公开 bucket 中的文件可在无 Authorization 时通过 `view` 访问。
+- File token 在过期前允许下载，过期后返回 401。
+
+---
+
+### 2.6 Functions 真实执行器
+
+当前为 stub，需要实现 Docker build & run。
+
+| 任务 | 说明 | 关键端点 / 组件 |
+|------|------|-----------------|
+| Runtime 列表 | 返回支持的运行时（node-18、python-3.11 等） | `GET /v1/server/functions/runtimes` |
+| Specification 列表 | 返回 CPU/内存规格 | `GET /v1/server/functions/specifications` |
+| Function CRUD | 创建/列表/获取/更新/删除函数 | `/v1/server/functions` |
+| Deployment CRUD | 上传代码包、列表、获取、删除 | `/v1/server/functions/{id}/deployments` |
+| Variables CRUD | 函数环境变量 | `/v1/server/functions/{id}/variables` |
+| Execution CRUD | 同步/异步执行、获取结果 | `POST/GET /v1/server/functions/{id}/executions` |
+| Docker build | 解压代码包，按运行时 Dockerfile 构建镜像 | `internal/infra/functions/docker.go` |
+| Docker run | 运行容器，收集 stdout/stderr，超时控制 | `internal/infra/functions/docker.go` |
+| 异步执行 Worker | `cmd/worker` 消费执行队列 | 新增 `cmd/worker` |
+| 构建队列 | Redis/PG 队列抽象（可用 Redis List 占位） | `internal/domain/shared/ports.go` |
+
+**验收标准**：
+
+- 上传一个 Node.js 函数后，可同步调用并返回 `console.log` 输出。
+- 函数执行超时后返回 500 并清理容器。
+- 异步执行可在 Console 中查看 execution 状态与日志。
+
+---
+
+### 2.7 Health & 可观测性
+
+| 任务 | 说明 | 关键端点 |
+|------|------|----------|
+| 健康检查 | DB、Redis、Storage 健康状态 | `GET /v1/server/health` |
+| 版本端点 | 返回版本与构建信息 | `GET /v1/server/health/version` |
+| 结构化日志 | 使用 `slog` 替换零散日志 | 全局中间件 |
+| 慢查询日志 | 动态文档层记录慢 SQL | `internal/infra/documentdb` |
+
+---
+
+### 2.8 Admin Console UI
+
+| 任务 | 说明 | 页面 |
+|------|------|------|
+| Storage 文件上传 | 在 Storage 页面直接上传文件、展示下载链接 | `console/src/routes/Storage.tsx` |
+| Databases 文档编辑器 | collection 下文档列表、新增/编辑/删除 | `console/src/routes/Databases.tsx` |
+| Attributes / Indexes 管理 | 在 collection 详情中增删属性与索引 | Databases 子页面 |
+| Teams Memberships | 管理团队邀请与成员 | 新增 `Teams.tsx` |
+| Functions 管理 | Functions / Deployments / Executions 页面 | 新增 `Functions.tsx` |
+| Settings 占位 | 项目基本信息、OAuth、SMTP（只读或简单表单） | 新增 `Settings.tsx` |
+
+**验收标准**：
+
+- Console 中可直接完成“创建 project → 创建 database → 创建 collection → 添加文档 → 上传文件”的闭环。
+- 401 时自动跳转登录；全局错误 toast 提示。
+
+---
+
+### 2.9 工程化与质量
+
+| 任务 | 说明 | 关键文件 |
+|------|------|----------|
+| API Key scope 校验 | 拦截器解析 scopes，对端点做细粒度授权 | `pkg/grpc/interceptor/scope.go` |
+| 单元测试补齐 | 每个新增 use-case 至少一个单元测试 | `internal/app/**/*_test.go` |
+| 集成测试 | Account、Databases Documents、Storage、Functions 端到端测试 | `tests/integration/*_test.go` |
+| Seed 数据增强 | 提供示例 collection、文件、函数 | `cmd/seed/main.go` |
+| GitHub Actions CI | lint、test、build、console-build | `.github/workflows/ci.yml` |
+| 代码格式化 | `gofumpt`、`eslint`、`prettier` | `Taskfile.yml` |
+
+**验收标准**：
+
+- CI 每次 PR 触发 `go test ./...` 和 `task build` 并通过。
+- API Key 没有 `users.write` scope 时无法调用 `UpdateUser`。
+
+---
+
+## 3. 中期（Medium-term，未来 3-6 个月）
+
+**目标**：把 MVP 打磨成可生产运行的 BaaS，补齐实时、事件、消息、项目设置、Worker 框架。
+
+### 3.1 Realtime
+
+| 任务 | 说明 | 关键组件 |
+|------|------|----------|
+| WebSocket 服务器 | Gorilla WebSocket，独立端口或复用 HTTP | `internal/api/realtime/server.go` |
+| 连接认证握手 | 用 JWT 或 session cookie 鉴权 | Realtime 握手协议 |
+| 频道订阅 | subscribe / unsubscribe `collections.{db}.{coll}`、`users.{id}` 等 | Channel manager |
+| 事件广播 | 数据库/存储/函数变更后广播事件 | PG `LISTEN/NOTIFY` 或 Redis Pub/Sub |
+| Presence | 在线状态、user/channel presence | Presence manager |
+| Ping/Pong | 心跳保活 | 协议层 |
+
+---
+
+### 3.2 Webhooks / Events
+
+| 任务 | 说明 | 关键组件 |
+|------|------|----------|
+| 事件目录 | 定义 `users.create`、`databases.documents.update`、`storage.files.create` 等 | `internal/domain/events/catalog.go` |
+| Webhook CRUD | 创建/列表/获取/更新/删除 webhook | `/v1/server/webhooks` |
+| 事件发布 | use-case 层在写操作后发布事件 | `internal/domain/events/publisher.go` |
+| 投递 Worker | HTTP 投递、HMAC 签名、重试、失败队列 | `cmd/worker` webhook 任务 |
+| 重试策略 | 指数退避、死信队列 | Queue adapter |
+
+---
+
+### 3.3 Messaging
+
+| 任务 | 说明 | 关键端点 |
+|------|------|----------|
+| Providers | SMTP、Sendgrid、Mailgun、Twilio、FCM、APNS 等 | `/v1/server/messaging/providers` |
+| Topics | 主题 CRUD | `/v1/server/messaging/topics` |
+| Subscribers | 订阅者 CRUD | `/v1/server/messaging/topics/{id}/subscribers` |
+| Messages | 创建邮件/SMS/Push 消息，异步发送 | `/v1/server/messaging/messages` |
+| 发送 Worker | 调用 provider SDK 投递 | `cmd/worker` messaging 任务 |
+
+---
+
+### 3.4 Project settings
+
+| 任务 | 说明 | 关键端点 |
+|------|------|----------|
+| Platforms | Web / Android / Apple / Linux / Windows 平台 CRUD | `/v1/server/projects/{id}/platforms` |
+| OAuth providers | 30+ 提供商配置，优先 Google/GitHub/Apple | `/v1/server/projects/{id}/oauth2` |
+| SMTP & Email templates | 邮件服务器配置与模板管理 | `/v1/server/projects/{id}/smtp`、`/email-templates` |
+| Policies | 密码策略、会话策略、用户限制等 | `/v1/server/projects/{id}/policies` |
+| Variables | 项目级环境变量 | `/v1/server/projects/{id}/variables` |
+| Mock phone numbers | 测试手机号 | `/v1/server/projects/{id}/mock-phones` |
+
+---
+
+### 3.5 高级数据库能力
+
+| 任务 | 说明 | 关键组件 |
+|------|------|----------|
+| Relationships | 一对一、一对多、多对多关系 | Collection metadata 与 SQL JOIN |
+| Transactions | 多文档事务接口 | `internal/infra/documentdb/transaction.go` |
+| VectorsDB | pgvector 向量索引与相似度搜索 | 新增 `vector` attribute 类型 |
+| 全文搜索 | 使用 `pg_trgm` 或 `to_tsvector` 优化 `search` | `buildAppwriteQuery` |
+| Geo 支持 | PostGIS point/polygon | 新增 `point`、`polygon` 类型 |
+
+---
+
+### 3.6 Worker 框架与队列
+
+| 任务 | 说明 | 关键组件 |
+|------|------|----------|
+| Queue 端口 | 抽象队列接口 | `internal/domain/shared/ports.go` |
+| Redis 队列实现 | 基于 Redis List / Stream | `internal/infra/queue/redis.go` |
+| Worker 二进制 | `cmd/worker` 启动消费者 | `cmd/worker/main.go`、`cmd/worker/provides.go` |
+| 任务注册 | Functions、Webhooks、Messaging、Builds 等任务类型 | `internal/app/worker/registry.go` |
+| 死信与重试 | 失败任务进入死信队列，可查看/重试 | Queue + DB |
+
+---
+
+### 3.7 安全与审计
+
+| 任务 | 说明 | 关键组件 |
+|------|------|----------|
+| 速率限制 | 按 IP / user / API Key 限流 | `pkg/ratelimit` + Redis |
+| 审计日志 | 记录关键管理操作 | `internal/infra/audit` |
+| API Key 轮换 | 支持 secret 重新生成 | `/v1/server/api-keys/{id}/rotate` |
+| 会话限制 | 最大并发会话数、异地登录提醒 | Account use-case |
+| 密码字典/历史 | 密码策略落地 | Project policies |
+
+---
+
+## 4. 长期（Long-term，未来 6-12 个月）
+
+**目标**：构建完整 BaaS 生态，支持多租户、站点托管、CI/CD 集成、GraphQL 与高级扩展。
+
+### 4.1 Sites（静态/SSR 站点托管）
+
+| 任务 | 说明 | 关键端点 |
+|------|------|----------|
+| Sites CRUD | 创建/列表/获取/更新/删除站点 | `/v1/server/sites` |
+| Frameworks 列表 | 支持的框架模板 | `/v1/server/sites/frameworks` |
+| Deployments | 上传构建产物、激活 deployment | `/v1/server/sites/{id}/deployments` |
+| 静态文件托管 | 从 Storage 或专用 bucket serve | Storage adapter 扩展 |
+| SSR 运行时 | 边缘/容器 SSR 执行 | Functions executor 扩展 |
+
+---
+
+### 4.2 Proxy（域名与路由）
+
+| 任务 | 说明 | 关键端点 |
+|------|------|----------|
+| Rules CRUD | API rule、site rule、function rule、redirect rule | `/v1/server/proxy/rules` |
+| 自定义域名 | CNAME 校验、TLS 证书自动申请 | Certificate worker |
+| 路由分发 | 根据域名/路径分发到对应服务 | Reverse proxy layer |
+
+---
+
+### 4.3 VCS（Git 集成）
+
+| 任务 | 说明 | 关键端点 |
+|------|------|----------|
+| GitHub OAuth | 授权、callback、installation | `/v1/server/vcs/github/authorize` |
+| Repositories | 列出仓库、分支、文件内容 | `/v1/server/vcs/github/repositories` |
+| 自动部署 | GitHub webhook 触发 Functions/Sites 构建 | Webhook handler |
+
+---
+
+### 4.4 GraphQL
+
+| 任务 | 说明 | 关键组件 |
+|------|------|----------|
+| Schema 生成 | 从 collection/attribute 自动生成 GraphQL schema | `internal/api/graphql/schema.go` |
+| Query/Mutation | 复用 REST 用例层 | `internal/api/graphql/resolver.go` |
+| 订阅 | 基于 Realtime 的事件订阅 | GraphQL subscriptions |
+
+---
+
+### 4.5 周边服务
+
+| 任务 | 说明 | 关键端点 |
+|------|------|----------|
+| Avatars | 头像、浏览器图标、favicon、国旗、QR 码、首字母头像 | `/v1/avatars/*` |
+| Locale | 国家、货币、语言、电话代码等静态数据 | `/v1/locale/*` |
+| Advisor | 项目诊断报告与建议 | `/v1/server/advisor/*` |
+
+---
+
+### 4.6 扩展性与平台化
+
+| 任务 | 说明 | 关键组件 |
+|------|------|----------|
+| 水平扩展 | gRPC 服务多实例、负载均衡 | Deployment / Helm chart |
+| 多区域存储 | S3 跨区域复制、就近读取 | Storage adapter |
+| 只读副本 | 查询路由到 PostgreSQL 只读副本 | `internal/infra/clients/database.go` |
+| SDK 生成 | 根据 proto 生成 Go/JS/Flutter/Python SDK | `cmd/gensdk` |
+| 计费/用量 | 按 API 调用、存储、函数执行时长计费 | Usage aggregator worker |
+| 高级可观测性 | OpenTelemetry、分布式追踪、告警 | `telemetry` config |
+
+---
+
+## 5. 里程碑与验收标准
+
+### M1：P1 MVP 可用（短期结束）
+
+- [ ] Client Account 完整会话与账号管理。
+- [ ] Server Users / Teams / Memberships 管理可用。
+- [ ] Databases Documents CRUD、批量操作、Client API 权限可用。
+- [ ] Storage preview、公开 bucket、file token 可用。
+- [ ] Functions 可上传代码、构建、同步/异步执行。
+- [ ] Admin Console 覆盖 Project、Database、Storage、Teams、Functions 页面。
+- [ ] CI 绿，集成测试覆盖核心流程。
+
+### M2：P2 生产就绪（中期结束）
+
+- [ ] Realtime 可订阅数据库变更。
+- [ ] Webhooks 可创建并成功投递事件。
+- [ ] Messaging 可发送邮件/SMS/Push。
+- [ ] Project settings（OAuth、SMTP、Policies）可用。
+- [ ] Worker 框架运行 Functions / Webhooks / Messaging / Builds。
+- [ ] 速率限制、审计日志、API Key 轮换上线。
+- [ ] 通过负载与混沌测试。
+
+### M3：P3 生态完整（长期结束）
+
+- [ ] Sites / Proxy / VCS / GraphQL 上线。
+- [ ] 多区域部署与水平扩展方案稳定运行。
+- [ ] 官方 SDK 发布到包管理器。
+- [ ] 完整的运营仪表盘与 SLA 监控。
+
+---
+
+## 6. 风险与依赖
+
+| 风险 | 影响 | 缓解措施 |
+|------|------|----------|
+| Docker executor 安全隔离复杂 | Functions 执行可能威胁主机 | 使用 gVisor/Firecracker 或限制容器资源与网络 |
+| Realtime 水平扩展 | 多实例间事件广播需要共享状态 | 优先 Redis Pub/Sub，后期评估 NATS |
+| OAuth provider 数量庞大 | 30+ 提供商配置维护成本高 | 先实现 Google/GitHub/Apple，其余按需 |
+| 文件预览性能 | 大图缩放消耗 CPU/内存 | 限制最大尺寸、异步生成、可选外部 CDN |
+| 动态 schema 迁移 | attribute/index 变更可能影响大数据量表 | 使用 `ALTER TABLE` 时加锁评估、提供异步迁移 |
+| pgvector / PostGIS 依赖 | 增加部署复杂度 | 在 Docker Compose 中预装扩展，文档说明 |
+
+---
+
+## 7. 参考
+
+- `docs/appwrite-go-migration-modules.md`：Appwrite 功能迁移全景。
+- `docs/p0-foundation-design.md`：P0 底座设计。
+- `docs/completed-tasks.md`：已完成任务清单。
+- `README.md`：快速开始。
+- `AGENTS.md`：开发约定。
