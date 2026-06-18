@@ -9,6 +9,7 @@ import {
   type Database,
   type Collection,
 } from "@/api/databases";
+import { useAuth } from "@/hooks/useAuth";
 import { PageHeader } from "@/components/PageHeader";
 import { LoadingTable } from "@/components/LoadingTable";
 import { EmptyState } from "@/components/EmptyState";
@@ -20,6 +21,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 
 export function Databases() {
+  const { projectId } = useAuth();
   const queryClient = useQueryClient();
   const [dbName, setDbName] = useState("");
   const [dbId, setDbId] = useState("");
@@ -28,8 +30,9 @@ export function Databases() {
   const [collId, setCollId] = useState("");
 
   const { data: databases = [], isLoading: dbLoading } = useQuery({
-    queryKey: ["databases"],
+    queryKey: ["databases", projectId],
     queryFn: listDatabases,
+    enabled: !!projectId,
   });
 
   const { data: collections = [], isLoading: collLoading } = useQuery({

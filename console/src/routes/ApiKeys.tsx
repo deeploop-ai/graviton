@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { listAPIKeys, createAPIKey, deleteAPIKey, type APIKey } from "@/api/apiKeys";
+import { useAuth } from "@/hooks/useAuth";
 import { PageHeader } from "@/components/PageHeader";
 import { LoadingTable } from "@/components/LoadingTable";
 import { EmptyState } from "@/components/EmptyState";
@@ -14,14 +15,16 @@ import { Badge } from "@/components/ui/badge";
 import { Copy, Trash2 } from "lucide-react";
 
 export function ApiKeys() {
+  const { projectId } = useAuth();
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [scopes, setScopes] = useState("");
   const [createdSecret, setCreatedSecret] = useState<string | null>(null);
 
   const { data: keys = [], isLoading } = useQuery({
-    queryKey: ["api-keys"],
+    queryKey: ["api-keys", projectId],
     queryFn: listAPIKeys,
+    enabled: !!projectId,
   });
 
   const create = useMutation({

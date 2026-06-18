@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { ProjectBootstrap } from "@/components/ProjectBootstrap";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Key, Users, Database, HardDrive, LogOut, Menu, X } from "lucide-react";
 
@@ -27,6 +28,7 @@ export function Layout() {
 
   return (
     <div className="flex h-screen bg-background">
+      <ProjectBootstrap />
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-64 border-r bg-card flex-col">
         <SidebarContent onNavigate={closeMobile} onLogout={handleLogout} />

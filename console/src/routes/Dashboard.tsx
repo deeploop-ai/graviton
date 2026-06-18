@@ -11,14 +11,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function Dashboard() {
-  const { selectProject } = useAuth();
+  const { projectId, selectProject } = useAuth();
 
   const { data: projects = [], isLoading: projectsLoading } = useQuery({
     queryKey: ["projects"],
     queryFn: listProjects,
   });
 
-  const selectedProjectId = localStorage.getItem("fleet_console_project") || projects[0]?.id || "";
+  const selectedProjectId = projectId || "";
 
   const { data: apiKeys = [] } = useQuery({
     queryKey: ["api-keys", selectedProjectId],

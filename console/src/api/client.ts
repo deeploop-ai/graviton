@@ -11,6 +11,7 @@ export const api = axios.create({
 export function setAuthToken(token: string | null) {
   if (token) {
     localStorage.setItem("fleet_console_token", token);
+    authRedirecting = false;
   } else {
     localStorage.removeItem("fleet_console_token");
   }
@@ -64,9 +65,10 @@ api.interceptors.response.use(
 
     if (status === 401) {
       const isLoginRequest = error?.config?.url === "/console/auth/sign-in";
+      const isMissingProject = message.includes("missing project context");
       if (isLoginRequest) {
         toast.error(message);
-      } else if (!authRedirecting) {
+      } else if (!isMissingProject && !authRedirecting) {
         authRedirecting = true;
         toast.error("Session expired. Please sign in again.");
         clearAuthToken();

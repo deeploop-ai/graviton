@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { listUsers, type User } from "@/api/users";
+import { useAuth } from "@/hooks/useAuth";
 import { PageHeader } from "@/components/PageHeader";
 import { LoadingTable } from "@/components/LoadingTable";
 import { EmptyState } from "@/components/EmptyState";
@@ -8,9 +9,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 
 export function Users() {
+  const { projectId } = useAuth();
+
   const { data: users = [], isLoading } = useQuery({
-    queryKey: ["users"],
+    queryKey: ["users", projectId],
     queryFn: listUsers,
+    enabled: !!projectId,
   });
 
   return (

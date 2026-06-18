@@ -11,6 +11,7 @@ import {
   type Bucket,
   type FileItem,
 } from "@/api/storage";
+import { useAuth } from "@/hooks/useAuth";
 import { PageHeader } from "@/components/PageHeader";
 import { LoadingTable } from "@/components/LoadingTable";
 import { EmptyState } from "@/components/EmptyState";
@@ -23,13 +24,15 @@ import { Badge } from "@/components/ui/badge";
 import { Download, Trash2, UploadCloud } from "lucide-react";
 
 export function Storage() {
+  const { projectId } = useAuth();
   const queryClient = useQueryClient();
   const [bucketName, setBucketName] = useState("");
   const [selectedBucket, setSelectedBucket] = useState<string | null>(null);
 
   const { data: buckets = [], isLoading: bucketsLoading } = useQuery({
-    queryKey: ["buckets"],
+    queryKey: ["buckets", projectId],
     queryFn: listBuckets,
+    enabled: !!projectId,
   });
 
   const { data: files = [], isLoading: filesLoading } = useQuery({
