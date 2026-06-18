@@ -10,18 +10,19 @@ import (
 	"time"
 
 	"github.com/deeploop-ai/fleet/internal/infra/bun/model"
+	"github.com/deeploop-ai/fleet/internal/pkg/database"
 	"github.com/deeploop-ai/fleet/pkg/idgen"
 	"github.com/deeploop-ai/fleet/pkg/password"
+	"github.com/joho/godotenv"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
 )
 
 func main() {
-	dsn := os.Getenv("FLEET_DATA_DATABASE_SOURCE")
-	if dsn == "" {
-		dsn = "postgres://fleet:fleet@127.0.0.1:5432/fleet?sslmode=disable"
-	}
+	_ = godotenv.Load()
+
+	dsn := database.SourceFromEnv()
 	sqldb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(dsn)))
 	db := bun.NewDB(sqldb, pgdialect.New())
 	defer db.Close()
