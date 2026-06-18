@@ -8,7 +8,17 @@ const routeNames: Record<string, string> = {
   users: "Users",
   storage: "Storage",
   databases: "Databases",
+  new: "新建",
+  edit: "编辑",
+  collections: "Collections",
+  files: "Files",
 };
+
+function segmentLabel(segment: string, prevSegment?: string): string {
+  if (routeNames[segment]) return routeNames[segment];
+  if (prevSegment && segment.length > 8) return segment.slice(0, 8) + "…";
+  return segment;
+}
 
 export function PageHeader({ title, description }: { title: string; description?: string }) {
   const location = useLocation();
@@ -16,7 +26,7 @@ export function PageHeader({ title, description }: { title: string; description?
 
   return (
     <div className="mb-8 space-y-2">
-      <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+      <nav className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
         <Link to="/console" className="flex items-center gap-1 hover:text-foreground">
           <Home className="h-3.5 w-3.5" />
           <span className="sr-only">Dashboard</span>
@@ -24,14 +34,16 @@ export function PageHeader({ title, description }: { title: string; description?
         {segments.map((segment, idx) => {
           const path = "/console/" + segments.slice(0, idx + 1).join("/");
           const isLast = idx === segments.length - 1;
+          const prev = idx > 0 ? segments[idx - 1] : undefined;
+          const label = segmentLabel(segment, prev);
           return (
             <div key={path} className="flex items-center gap-2">
               <ChevronRight className="h-3.5 w-3.5" />
               {isLast ? (
-                <span className="text-foreground font-medium">{routeNames[segment] || segment}</span>
+                <span className="text-foreground font-medium">{label}</span>
               ) : (
                 <Link to={path} className="hover:text-foreground">
-                  {routeNames[segment] || segment}
+                  {label}
                 </Link>
               )}
             </div>

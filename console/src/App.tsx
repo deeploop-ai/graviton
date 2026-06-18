@@ -5,11 +5,34 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { Layout } from "@/components/Layout";
 import { Login } from "@/routes/Login";
 import { Dashboard } from "@/routes/Dashboard";
-import { Projects } from "@/routes/Projects";
-import { ApiKeys } from "@/routes/ApiKeys";
-import { Users } from "@/routes/Users";
-import { Storage } from "@/routes/Storage";
-import { Databases } from "@/routes/Databases";
+import {
+  ProjectsListPage,
+  ProjectNewPage,
+  ProjectDetailPage,
+} from "@/routes/projects/pages";
+import {
+  ApiKeysListPage,
+  ApiKeyNewPage,
+  ApiKeyDetailPage,
+} from "@/routes/api-keys/pages";
+import {
+  UsersListPage,
+  UserDetailPage,
+  UserEditPage,
+} from "@/routes/users/pages";
+import {
+  StorageListPage,
+  BucketNewPage,
+  BucketDetailPage,
+  FileDetailPage,
+} from "@/routes/storage/pages";
+import {
+  DatabasesListPage,
+  DatabaseNewPage,
+  DatabaseDetailPage,
+  CollectionNewPage,
+  CollectionDetailPage,
+} from "@/routes/databases/pages";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,11 +64,29 @@ function AppRoutes() {
         }
       >
         <Route index element={<Dashboard />} />
-        <Route path="projects" element={<Projects />} />
-        <Route path="api-keys" element={<ApiKeys />} />
-        <Route path="users" element={<Users />} />
-        <Route path="storage" element={<Storage />} />
-        <Route path="databases" element={<Databases />} />
+
+        <Route path="projects" element={<ProjectsListPage />} />
+        <Route path="projects/new" element={<ProjectNewPage />} />
+        <Route path="projects/:id" element={<ProjectDetailPage />} />
+
+        <Route path="api-keys" element={<ApiKeysListPage />} />
+        <Route path="api-keys/new" element={<ApiKeyNewPage />} />
+        <Route path="api-keys/:id" element={<ApiKeyDetailPage />} />
+
+        <Route path="users" element={<UsersListPage />} />
+        <Route path="users/:id" element={<UserDetailPage />} />
+        <Route path="users/:id/edit" element={<UserEditPage />} />
+
+        <Route path="storage" element={<StorageListPage />} />
+        <Route path="storage/new" element={<BucketNewPage />} />
+        <Route path="storage/:bucketId" element={<BucketDetailPage />} />
+        <Route path="storage/:bucketId/files/:fileId" element={<FileDetailPage />} />
+
+        <Route path="databases" element={<DatabasesListPage />} />
+        <Route path="databases/new" element={<DatabaseNewPage />} />
+        <Route path="databases/:dbId" element={<DatabaseDetailPage />} />
+        <Route path="databases/:dbId/collections/new" element={<CollectionNewPage />} />
+        <Route path="databases/:dbId/collections/:collId" element={<CollectionDetailPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/console" replace />} />
     </Routes>

@@ -23,6 +23,11 @@ export async function listBuckets(): Promise<Bucket[]> {
   return res.data.buckets ?? [];
 }
 
+export async function getBucket(id: string): Promise<Bucket> {
+  const res = await api.get<Bucket>(`/server/storage/buckets/${id}`);
+  return res.data;
+}
+
 export async function createBucket(input: {
   name: string;
 }): Promise<Bucket> {
@@ -30,11 +35,22 @@ export async function createBucket(input: {
   return res.data;
 }
 
+export async function deleteBucket(id: string): Promise<void> {
+  await api.delete(`/server/storage/buckets/${id}`);
+}
+
 export async function listFiles(bucketId: string): Promise<FileItem[]> {
   const res = await api.get<{ files: FileItem[] }>(
     `/server/storage/buckets/${bucketId}/files`
   );
   return res.data.files ?? [];
+}
+
+export async function getFile(bucketId: string, fileId: string): Promise<FileItem> {
+  const res = await api.get<FileItem>(
+    `/server/storage/buckets/${bucketId}/files/${fileId}`
+  );
+  return res.data;
 }
 
 export async function uploadFile(

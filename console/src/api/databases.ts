@@ -39,6 +39,11 @@ export async function listDatabases(): Promise<Database[]> {
   return res.data.databases ?? [];
 }
 
+export async function getDatabase(id: string): Promise<Database> {
+  const res = await api.get<Database>(`/server/databases/${id}`);
+  return res.data;
+}
+
 export async function createDatabase(input: {
   id: string;
   name: string;
@@ -47,11 +52,25 @@ export async function createDatabase(input: {
   return res.data;
 }
 
+export async function deleteDatabase(id: string): Promise<void> {
+  await api.delete(`/server/databases/${id}`);
+}
+
 export async function listCollections(databaseId: string): Promise<Collection[]> {
   const res = await api.get<{ collections: Collection[] }>(
     `/server/databases/${databaseId}/collections`
   );
   return res.data.collections ?? [];
+}
+
+export async function getCollection(
+  databaseId: string,
+  collectionId: string
+): Promise<Collection> {
+  const res = await api.get<Collection>(
+    `/server/databases/${databaseId}/collections/${collectionId}`
+  );
+  return res.data;
 }
 
 export async function createCollection(
@@ -63,6 +82,15 @@ export async function createCollection(
     input
   );
   return res.data;
+}
+
+export async function deleteCollection(
+  databaseId: string,
+  collectionId: string
+): Promise<void> {
+  await api.delete(
+    `/server/databases/${databaseId}/collections/${collectionId}`
+  );
 }
 
 export async function createAttribute(

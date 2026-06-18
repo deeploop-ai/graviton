@@ -20,6 +20,11 @@ export async function listUsers(): Promise<User[]> {
   return res.data.users ?? [];
 }
 
+export async function getUser(id: string): Promise<User> {
+  const res = await api.get<User>(`/server/users/${id}`);
+  return res.data;
+}
+
 export async function updateUser(
   id: string,
   input: { status?: string }

@@ -19,6 +19,11 @@ export async function listProjects(): Promise<Project[]> {
   return res.data.projects ?? [];
 }
 
+export async function getProject(id: string): Promise<Project> {
+  const res = await api.get<Project>(`/server/projects/${id}`);
+  return res.data;
+}
+
 export async function createProject(input: {
   name: string;
   description?: string;

@@ -20,6 +20,11 @@ export async function listAPIKeys(): Promise<APIKey[]> {
   return res.data.api_keys ?? [];
 }
 
+export async function getAPIKey(id: string): Promise<APIKey> {
+  const res = await api.get<APIKey>(`/server/api-keys/${id}`);
+  return res.data;
+}
+
 export async function createAPIKey(input: {
   name: string;
   scopes?: string[];
