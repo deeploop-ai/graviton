@@ -84,6 +84,23 @@ func TestAccount_SignUpSignInMe(t *testing.T) {
 
 	// Sign out.
 	require.NoError(t, account.SignOut(meCtx))
+
+	// Refresh token after sign-in (new session from sign-in above).
+	signInUser, refreshTokens, _, err := account.SignIn(ctx, SignInCommand{
+		ProjectID: projectID,
+		Email:     "account-test@fleet.local",
+		Password:  "User@123",
+	})
+	require.NoError(t, err)
+	newTokens, _, err := account.RefreshToken(ctx, RefreshTokenCommand{
+		ProjectID:    projectID,
+		RefreshToken: refreshTokens.RefreshToken,
+	})
+	require.NoError(t, err)
+	require.NotEmpty(t, newTokens.AccessToken)
+	require.NotEmpty(t, newTokens.RefreshToken)
+	require.NotEqual(t, refreshTokens.AccessToken, newTokens.AccessToken)
+	_ = signInUser
 }
 
 func buildTestConfig() *config.AppConfig {

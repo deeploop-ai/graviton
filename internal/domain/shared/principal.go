@@ -61,3 +61,19 @@ func (p *Principal) HasScope(scope string) bool {
 	}
 	return false
 }
+
+func (p *Principal) HasPermission(perm string) bool {
+	return p.HasRole(perm) || p.HasScope(perm)
+}
+
+func (p *Principal) HasAnyPermission(perms []string) bool {
+	if len(perms) == 0 {
+		return true
+	}
+	for _, perm := range perms {
+		if p.HasPermission(perm) {
+			return true
+		}
+	}
+	return false
+}

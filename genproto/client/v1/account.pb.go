@@ -496,6 +496,102 @@ func (x *SignInResponse) GetTokens() *TokenBundle {
 	return nil
 }
 
+type RefreshTokenRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	RefreshToken  string                 `protobuf:"bytes,2,opt,name=refresh_token,json=refreshToken,proto3" json:"refresh_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RefreshTokenRequest) Reset() {
+	*x = RefreshTokenRequest{}
+	mi := &file_client_v1_account_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RefreshTokenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RefreshTokenRequest) ProtoMessage() {}
+
+func (x *RefreshTokenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RefreshTokenRequest.ProtoReflect.Descriptor instead.
+func (*RefreshTokenRequest) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *RefreshTokenRequest) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+func (x *RefreshTokenRequest) GetRefreshToken() string {
+	if x != nil {
+		return x.RefreshToken
+	}
+	return ""
+}
+
+type RefreshTokenResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Tokens        *TokenBundle           `protobuf:"bytes,1,opt,name=tokens,proto3" json:"tokens,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RefreshTokenResponse) Reset() {
+	*x = RefreshTokenResponse{}
+	mi := &file_client_v1_account_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RefreshTokenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RefreshTokenResponse) ProtoMessage() {}
+
+func (x *RefreshTokenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RefreshTokenResponse.ProtoReflect.Descriptor instead.
+func (*RefreshTokenResponse) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *RefreshTokenResponse) GetTokens() *TokenBundle {
+	if x != nil {
+		return x.Tokens
+	}
+	return nil
+}
+
 var File_client_v1_account_proto protoreflect.FileDescriptor
 
 const file_client_v1_account_proto_rawDesc = "" +
@@ -538,12 +634,19 @@ const file_client_v1_account_proto_rawDesc = "" +
 	"\x06tokens\x18\x02 \x01(\v2\x1c.fleet.client.v1.TokenBundleR\x06tokens\"z\n" +
 	"\x0eSignInResponse\x122\n" +
 	"\aaccount\x18\x01 \x01(\v2\x18.fleet.client.v1.AccountR\aaccount\x124\n" +
-	"\x06tokens\x18\x02 \x01(\v2\x1c.fleet.client.v1.TokenBundleR\x06tokens2\xbf\x03\n" +
+	"\x06tokens\x18\x02 \x01(\v2\x1c.fleet.client.v1.TokenBundleR\x06tokens\"Y\n" +
+	"\x13RefreshTokenRequest\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x01 \x01(\tR\tprojectId\x12#\n" +
+	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\"L\n" +
+	"\x14RefreshTokenResponse\x124\n" +
+	"\x06tokens\x18\x01 \x01(\v2\x1c.fleet.client.v1.TokenBundleR\x06tokens2\xd1\x04\n" +
 	"\x0eAccountService\x12o\n" +
 	"\x06SignUp\x12\x1e.fleet.client.v1.SignUpRequest\x1a\x1f.fleet.client.v1.SignUpResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/sign-up\x12o\n" +
-	"\x06SignIn\x12\x1e.fleet.client.v1.SignInRequest\x1a\x1f.fleet.client.v1.SignInResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/sign-in\x12i\n" +
-	"\aSignOut\x12\x1f.fleet.client.v1.SignOutRequest\x1a\x16.fleet.shared.v1.Empty\"%\x8a\xb2\x19\x02\b\x02\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/v1/account/sign-out\x12X\n" +
-	"\x02Me\x12\x1a.fleet.client.v1.MeRequest\x1a\x18.fleet.client.v1.Account\"\x1c\x8a\xb2\x19\x02\b\x02\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/account/me\x1a\x06\x92\xb2\x19\x02\b\x02B:Z8github.com/deeploop-ai/fleet/genproto/client/v1;clientv1b\x06proto3"
+	"\x06SignIn\x12\x1e.fleet.client.v1.SignInRequest\x1a\x1f.fleet.client.v1.SignInResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/sign-in\x12p\n" +
+	"\aSignOut\x12\x1f.fleet.client.v1.SignOutRequest\x1a\x16.fleet.shared.v1.Empty\",\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/v1/account/sign-out\x12\x81\x01\n" +
+	"\fRefreshToken\x12$.fleet.client.v1.RefreshTokenRequest\x1a%.fleet.client.v1.RefreshTokenResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/refresh\x12_\n" +
+	"\x02Me\x12\x1a.fleet.client.v1.MeRequest\x1a\x18.fleet.client.v1.Account\"#\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/account/me\x1a\x06\x92\xb2\x19\x02\b\x02B:Z8github.com/deeploop-ai/fleet/genproto/client/v1;clientv1b\x06proto3"
 
 var (
 	file_client_v1_account_proto_rawDescOnce sync.Once
@@ -557,7 +660,7 @@ func file_client_v1_account_proto_rawDescGZIP() []byte {
 	return file_client_v1_account_proto_rawDescData
 }
 
-var file_client_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_client_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_client_v1_account_proto_goTypes = []any{
 	(*SignUpRequest)(nil),         // 0: fleet.client.v1.SignUpRequest
 	(*SignInRequest)(nil),         // 1: fleet.client.v1.SignInRequest
@@ -567,29 +670,34 @@ var file_client_v1_account_proto_goTypes = []any{
 	(*TokenBundle)(nil),           // 5: fleet.client.v1.TokenBundle
 	(*SignUpResponse)(nil),        // 6: fleet.client.v1.SignUpResponse
 	(*SignInResponse)(nil),        // 7: fleet.client.v1.SignInResponse
-	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
-	(*v1.Empty)(nil),              // 9: fleet.shared.v1.Empty
+	(*RefreshTokenRequest)(nil),   // 8: fleet.client.v1.RefreshTokenRequest
+	(*RefreshTokenResponse)(nil),  // 9: fleet.client.v1.RefreshTokenResponse
+	(*timestamppb.Timestamp)(nil), // 10: google.protobuf.Timestamp
+	(*v1.Empty)(nil),              // 11: fleet.shared.v1.Empty
 }
 var file_client_v1_account_proto_depIdxs = []int32{
-	8,  // 0: fleet.client.v1.Account.created_at:type_name -> google.protobuf.Timestamp
-	8,  // 1: fleet.client.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
+	10, // 0: fleet.client.v1.Account.created_at:type_name -> google.protobuf.Timestamp
+	10, // 1: fleet.client.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
 	4,  // 2: fleet.client.v1.SignUpResponse.account:type_name -> fleet.client.v1.Account
 	5,  // 3: fleet.client.v1.SignUpResponse.tokens:type_name -> fleet.client.v1.TokenBundle
 	4,  // 4: fleet.client.v1.SignInResponse.account:type_name -> fleet.client.v1.Account
 	5,  // 5: fleet.client.v1.SignInResponse.tokens:type_name -> fleet.client.v1.TokenBundle
-	0,  // 6: fleet.client.v1.AccountService.SignUp:input_type -> fleet.client.v1.SignUpRequest
-	1,  // 7: fleet.client.v1.AccountService.SignIn:input_type -> fleet.client.v1.SignInRequest
-	2,  // 8: fleet.client.v1.AccountService.SignOut:input_type -> fleet.client.v1.SignOutRequest
-	3,  // 9: fleet.client.v1.AccountService.Me:input_type -> fleet.client.v1.MeRequest
-	6,  // 10: fleet.client.v1.AccountService.SignUp:output_type -> fleet.client.v1.SignUpResponse
-	7,  // 11: fleet.client.v1.AccountService.SignIn:output_type -> fleet.client.v1.SignInResponse
-	9,  // 12: fleet.client.v1.AccountService.SignOut:output_type -> fleet.shared.v1.Empty
-	4,  // 13: fleet.client.v1.AccountService.Me:output_type -> fleet.client.v1.Account
-	10, // [10:14] is the sub-list for method output_type
-	6,  // [6:10] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	5,  // 6: fleet.client.v1.RefreshTokenResponse.tokens:type_name -> fleet.client.v1.TokenBundle
+	0,  // 7: fleet.client.v1.AccountService.SignUp:input_type -> fleet.client.v1.SignUpRequest
+	1,  // 8: fleet.client.v1.AccountService.SignIn:input_type -> fleet.client.v1.SignInRequest
+	2,  // 9: fleet.client.v1.AccountService.SignOut:input_type -> fleet.client.v1.SignOutRequest
+	8,  // 10: fleet.client.v1.AccountService.RefreshToken:input_type -> fleet.client.v1.RefreshTokenRequest
+	3,  // 11: fleet.client.v1.AccountService.Me:input_type -> fleet.client.v1.MeRequest
+	6,  // 12: fleet.client.v1.AccountService.SignUp:output_type -> fleet.client.v1.SignUpResponse
+	7,  // 13: fleet.client.v1.AccountService.SignIn:output_type -> fleet.client.v1.SignInResponse
+	11, // 14: fleet.client.v1.AccountService.SignOut:output_type -> fleet.shared.v1.Empty
+	9,  // 15: fleet.client.v1.AccountService.RefreshToken:output_type -> fleet.client.v1.RefreshTokenResponse
+	4,  // 16: fleet.client.v1.AccountService.Me:output_type -> fleet.client.v1.Account
+	12, // [12:17] is the sub-list for method output_type
+	7,  // [7:12] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_client_v1_account_proto_init() }
@@ -603,7 +711,7 @@ func file_client_v1_account_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_client_v1_account_proto_rawDesc), len(file_client_v1_account_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

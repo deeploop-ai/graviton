@@ -20,10 +20,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AccountService_SignUp_FullMethodName  = "/fleet.client.v1.AccountService/SignUp"
-	AccountService_SignIn_FullMethodName  = "/fleet.client.v1.AccountService/SignIn"
-	AccountService_SignOut_FullMethodName = "/fleet.client.v1.AccountService/SignOut"
-	AccountService_Me_FullMethodName      = "/fleet.client.v1.AccountService/Me"
+	AccountService_SignUp_FullMethodName       = "/fleet.client.v1.AccountService/SignUp"
+	AccountService_SignIn_FullMethodName       = "/fleet.client.v1.AccountService/SignIn"
+	AccountService_SignOut_FullMethodName      = "/fleet.client.v1.AccountService/SignOut"
+	AccountService_RefreshToken_FullMethodName = "/fleet.client.v1.AccountService/RefreshToken"
+	AccountService_Me_FullMethodName           = "/fleet.client.v1.AccountService/Me"
 )
 
 // AccountServiceClient is the client API for AccountService service.
@@ -33,6 +34,7 @@ type AccountServiceClient interface {
 	SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*SignUpResponse, error)
 	SignIn(ctx context.Context, in *SignInRequest, opts ...grpc.CallOption) (*SignInResponse, error)
 	SignOut(ctx context.Context, in *SignOutRequest, opts ...grpc.CallOption) (*v1.Empty, error)
+	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
 	Me(ctx context.Context, in *MeRequest, opts ...grpc.CallOption) (*Account, error)
 }
 
@@ -74,6 +76,16 @@ func (c *accountServiceClient) SignOut(ctx context.Context, in *SignOutRequest, 
 	return out, nil
 }
 
+func (c *accountServiceClient) RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RefreshTokenResponse)
+	err := c.cc.Invoke(ctx, AccountService_RefreshToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *accountServiceClient) Me(ctx context.Context, in *MeRequest, opts ...grpc.CallOption) (*Account, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Account)
@@ -91,6 +103,7 @@ type AccountServiceServer interface {
 	SignUp(context.Context, *SignUpRequest) (*SignUpResponse, error)
 	SignIn(context.Context, *SignInRequest) (*SignInResponse, error)
 	SignOut(context.Context, *SignOutRequest) (*v1.Empty, error)
+	RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
 	Me(context.Context, *MeRequest) (*Account, error)
 	mustEmbedUnimplementedAccountServiceServer()
 }
@@ -110,6 +123,9 @@ func (UnimplementedAccountServiceServer) SignIn(context.Context, *SignInRequest)
 }
 func (UnimplementedAccountServiceServer) SignOut(context.Context, *SignOutRequest) (*v1.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method SignOut not implemented")
+}
+func (UnimplementedAccountServiceServer) RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RefreshToken not implemented")
 }
 func (UnimplementedAccountServiceServer) Me(context.Context, *MeRequest) (*Account, error) {
 	return nil, status.Error(codes.Unimplemented, "method Me not implemented")
@@ -189,6 +205,24 @@ func _AccountService_SignOut_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AccountService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefreshTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).RefreshToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_RefreshToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).RefreshToken(ctx, req.(*RefreshTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AccountService_Me_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MeRequest)
 	if err := dec(in); err != nil {
@@ -225,6 +259,10 @@ var AccountService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SignOut",
 			Handler:    _AccountService_SignOut_Handler,
+		},
+		{
+			MethodName: "RefreshToken",
+			Handler:    _AccountService_RefreshToken_Handler,
 		},
 		{
 			MethodName: "Me",

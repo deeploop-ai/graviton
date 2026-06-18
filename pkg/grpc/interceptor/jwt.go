@@ -18,22 +18,28 @@ import (
 type Validator interface {
 	ValidateToken(ctx context.Context, token string) (*shared.Principal, error)
 	ValidateCredential(ctx context.Context, raw string, credentialType shared.CredentialType) (*shared.Principal, error)
+	ValidateAdminProjectAccess(ctx context.Context, principal *shared.Principal) error
 }
 
 type AuthInterceptor struct {
-	validator     Validator
-	publicMethods map[string]struct{}
-	apiKeyMethods map[string]struct{}
+	validator         Validator
+	publicMethods     map[string]struct{}
+	apiKeyMethods     map[string]struct{}
+	permissionMethods map[string][]string
 }
 
-func NewAuthInterceptor(validator Validator, publicMethods, apiKeyMethods []string) (*AuthInterceptor, error) {
+func NewAuthInterceptor(validator Validator, publicMethods, apiKeyMethods []string, permissionMethods map[string][]string) (*AuthInterceptor, error) {
 	if validator == nil {
 		return nil, errors.New("validator cannot be nil")
 	}
 	i := &AuthInterceptor{
-		validator:     validator,
-		publicMethods: make(map[string]struct{}),
-		apiKeyMethods: make(map[string]struct{}),
+		validator:         validator,
+		publicMethods:     make(map[string]struct{}),
+		apiKeyMethods:     make(map[string]struct{}),
+		permissionMethods: permissionMethods,
+	}
+	if i.permissionMethods == nil {
+		i.permissionMethods = map[string][]string{}
 	}
 	for _, m := range publicMethods {
 		i.publicMethods[m] = struct{}{}
@@ -80,6 +86,15 @@ func (i *AuthInterceptor) UnaryAuthMiddleware(ctx context.Context, req any, info
 	if principal.ActorKind == shared.ActorKindAdmin {
 		if projectID := firstMetadataValue(md, "x-fleet-project"); projectID != "" {
 			principal.ProjectID = projectID
+		}
+		if err := i.validator.ValidateAdminProjectAccess(ctx, principal); err != nil {
+			return nil, err
+		}
+	}
+
+	if perms := i.permissionMethods[info.FullMethod]; len(perms) > 0 {
+		if !principal.HasAnyPermission(perms) {
+			return nil, status.Error(codes.PermissionDenied, "missing required permission")
 		}
 	}
 

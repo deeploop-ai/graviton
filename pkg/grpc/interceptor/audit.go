@@ -1,0 +1,62 @@
+package interceptor
+
+import (
+	"context"
+
+	"github.com/deeploop-ai/fleet/internal/domain/audit"
+	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
+)
+
+type AuditInterceptor struct {
+	repo audit.Repository
+}
+
+func NewAuditInterceptor(repo audit.Repository) *AuditInterceptor {
+	return &AuditInterceptor{repo: repo}
+}
+
+func (a *AuditInterceptor) UnaryAuditMiddleware(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
+	resp, err := handler(ctx, req)
+	if a.repo == nil {
+		return resp, err
+	}
+
+	entry := &audit.Entry{
+		Action: info.FullMethod,
+		Status: auditStatus(err),
+	}
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		entry.IP = firstMetadataValue(md, "x-forwarded-for")
+		if entry.IP == "" {
+			entry.IP = firstMetadataValue(md, "x-real-ip")
+		}
+		entry.UserAgent = firstMetadataValue(md, "grpcgateway-user-agent")
+		if entry.UserAgent == "" {
+			entry.UserAgent = firstMetadataValue(md, "user-agent")
+		}
+	}
+	if p, ok := contexts.Principal(ctx); ok && p != nil {
+		entry.ActorID = string(p.ActorID)
+		entry.ActorKind = string(p.ActorKind)
+		entry.ProjectID = p.ProjectID
+	}
+	if logErr := a.repo.Insert(context.Background(), entry); logErr != nil {
+		// Best-effort audit logging; do not fail the request.
+		_ = logErr
+	}
+	return resp, err
+}
+
+func auditStatus(err error) string {
+	if err == nil {
+		return "success"
+	}
+	if st, ok := status.FromError(err); ok && st.Code() != codes.OK {
+		return st.Code().String()
+	}
+	return "error"
+}

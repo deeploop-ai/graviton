@@ -24,12 +24,17 @@ service AccountService {
 
   rpc SignOut(SignOutRequest) returns (shared.v1.Empty) {
     option (google.api.http) = { post: "/v1/account/sign-out", body: "*" };
-    option (fleet.shared.v1.method_auth) = { access: ACCESS_AUTHENTICATED };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+  }
+
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {
+    option (google.api.http) = { post: "/v1/account/refresh", body: "*" };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 
   rpc Me(MeRequest) returns (Account) {
     option (google.api.http) = { get: "/v1/account/me" };
-    option (fleet.shared.v1.method_auth) = { access: ACCESS_AUTHENTICATED };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 }
 
@@ -78,4 +83,13 @@ message SignUpResponse {
 message SignInResponse {
   Account account = 1;
   TokenBundle tokens = 2;
+}
+
+message RefreshTokenRequest {
+  string project_id = 1;
+  string refresh_token = 2;
+}
+
+message RefreshTokenResponse {
+  TokenBundle tokens = 1;
 }

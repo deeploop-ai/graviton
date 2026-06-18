@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS console_admin_projects CASCADE;
+DROP TABLE IF EXISTS audit_logs CASCADE;

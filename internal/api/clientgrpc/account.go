@@ -70,6 +70,17 @@ func (s *AccountService) Me(ctx context.Context, _ *clientv1.MeRequest) (*client
 	return mapUser(user), nil
 }
 
+func (s *AccountService) RefreshToken(ctx context.Context, req *clientv1.RefreshTokenRequest) (*clientv1.RefreshTokenResponse, error) {
+	tokens, _, err := s.account.RefreshToken(ctx, client.RefreshTokenCommand{
+		ProjectID:    req.GetProjectId(),
+		RefreshToken: req.GetRefreshToken(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &clientv1.RefreshTokenResponse{Tokens: mapTokens(tokens)}, nil
+}
+
 func mapUser(u *client.User) *clientv1.Account {
 	if u == nil {
 		return nil

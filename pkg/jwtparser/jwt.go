@@ -11,6 +11,12 @@ const (
 	ClaimVarProjectID = "project_id"
 	ClaimVarSessionID = "session_id"
 	ClaimVarRoles     = "roles"
+	ClaimVarTokenType = "token_type"
+)
+
+const (
+	TokenTypeAccess  = "access"
+	TokenTypeRefresh = "refresh"
 )
 
 type Claims struct {
@@ -20,6 +26,7 @@ type Claims struct {
 	ActorKind string   `json:"akd,omitempty"` // end_user / admin / service
 	ProjectID string   `json:"pid,omitempty"`
 	SessionID string   `json:"sid,omitempty"`
+	TokenType string   `json:"ttp,omitempty"` // access / refresh
 	Roles     []string `json:"rls,omitempty"`
 	Scopes    []string `json:"scp,omitempty"`
 	ExpiresAt int64    `json:"exp,omitempty"`

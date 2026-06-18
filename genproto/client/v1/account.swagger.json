@@ -46,6 +46,38 @@
         ]
       }
     },
+    "/v1/account/refresh": {
+      "post": {
+        "operationId": "AccountService_RefreshToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1RefreshTokenResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1RefreshTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountService"
+        ]
+      }
+    },
     "/v1/account/sign-in": {
       "post": {
         "operationId": "AccountService_SignIn",
@@ -227,6 +259,25 @@
     },
     "v1Empty": {
       "type": "object"
+    },
+    "v1RefreshTokenRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "refreshToken": {
+          "type": "string"
+        }
+      }
+    },
+    "v1RefreshTokenResponse": {
+      "type": "object",
+      "properties": {
+        "tokens": {
+          "$ref": "#/definitions/v1TokenBundle"
+        }
+      }
     },
     "v1SignOutRequest": {
       "type": "object",

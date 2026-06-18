@@ -18,25 +18,28 @@ import (
 )
 
 type Validator struct {
-	cfg          *config.AppConfig
-	apiKeyRepo   projects.APIKeyRepository
-	adminRepo    projects.ConsoleAdminRepository
-	docDB        databases.DocumentDB
-	sessionCodec *SessionCookieCodec
+	cfg               *config.AppConfig
+	apiKeyRepo        projects.APIKeyRepository
+	adminRepo         projects.ConsoleAdminRepository
+	adminProjectRepo  projects.ConsoleAdminProjectRepository
+	docDB             databases.DocumentDB
+	sessionCodec      *SessionCookieCodec
 }
 
 func NewValidator(
 	cfg *config.AppConfig,
 	apiKeyRepo projects.APIKeyRepository,
 	adminRepo projects.ConsoleAdminRepository,
+	adminProjectRepo projects.ConsoleAdminProjectRepository,
 	docDB databases.DocumentDB,
 ) *Validator {
 	return &Validator{
-		cfg:          cfg,
-		apiKeyRepo:   apiKeyRepo,
-		adminRepo:    adminRepo,
-		docDB:        docDB,
-		sessionCodec: NewSessionCookieCodec(cfg.GetSecurity().GetJwt().GetSecret()),
+		cfg:              cfg,
+		apiKeyRepo:       apiKeyRepo,
+		adminRepo:        adminRepo,
+		adminProjectRepo: adminProjectRepo,
+		docDB:            docDB,
+		sessionCodec:     NewSessionCookieCodec(cfg.GetSecurity().GetJwt().GetSecret()),
 	}
 }
 
@@ -117,6 +120,9 @@ func (v *Validator) principalFromJWT(ctx context.Context, claims *jwtparser.Clai
 				return nil, err
 			}
 		}
+		if claims.TokenType != "" && claims.TokenType != jwtparser.TokenTypeAccess {
+			return nil, status.Error(codes.Unauthenticated, "invalid token type")
+		}
 		return &shared.Principal{
 			ActorID:        idgen.ID(claims.UserID),
 			ActorKind:      shared.ActorKindEndUser,
@@ -173,6 +179,26 @@ func (v *Validator) validateEndUserSession(ctx context.Context, projectID, sessi
 		if err == nil && expireAt.Before(time.Now()) {
 			return status.Error(codes.Unauthenticated, "session expired")
 		}
+	}
+	return nil
+}
+
+func (v *Validator) ValidateAdminProjectAccess(ctx context.Context, principal *shared.Principal) error {
+	if principal == nil || principal.ActorKind != shared.ActorKindAdmin {
+		return nil
+	}
+	if principal.ProjectID == "" {
+		return nil
+	}
+	if principal.IsPlatformAdmin {
+		return nil
+	}
+	has, err := v.adminProjectRepo.HasProjectAccess(ctx, principal.UserID, principal.ProjectID)
+	if err != nil {
+		return status.Error(codes.Internal, "admin project access check failed")
+	}
+	if !has {
+		return status.Error(codes.PermissionDenied, "admin has no access to project")
 	}
 	return nil
 }

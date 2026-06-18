@@ -51,6 +51,11 @@ type SignInCommand struct {
 	Password  string
 }
 
+type RefreshTokenCommand struct {
+	ProjectID    string
+	RefreshToken string
+}
+
 type User struct {
 	ID            string
 	Email         string
@@ -183,6 +188,27 @@ func (a *Account) SignOut(ctx context.Context) error {
 	return a.docDB.DeleteDocument(ctx, p.ProjectID, "default", "sessions", p.SessionID, p.Roles)
 }
 
+func (a *Account) RefreshToken(ctx context.Context, cmd RefreshTokenCommand) (*TokenBundle, string, error) {
+	claims, ok := jwtparser.Parse([]byte(a.cfg.GetSecurity().GetJwt().GetSecret()), cmd.RefreshToken)
+	if !ok {
+		return nil, "", status.Error(codes.Unauthenticated, "invalid refresh token")
+	}
+	if claims.TokenType != jwtparser.TokenTypeRefresh || claims.ActorKind != "end_user" {
+		return nil, "", status.Error(codes.Unauthenticated, "invalid refresh token")
+	}
+	projectID := claims.ProjectID
+	if cmd.ProjectID != "" && cmd.ProjectID != projectID {
+		return nil, "", status.Error(codes.Unauthenticated, "invalid refresh token")
+	}
+	if claims.SessionID == "" || claims.UserID == "" {
+		return nil, "", status.Error(codes.Unauthenticated, "invalid refresh token")
+	}
+	if err := a.ensureActiveSession(ctx, projectID, claims.SessionID, claims.UserID); err != nil {
+		return nil, "", err
+	}
+	return a.issueTokens(projectID, claims.UserID, claims.Username, claims.SessionID)
+}
+
 func (a *Account) createSessionAndTokens(ctx context.Context, projectID, userID, email string) (*User, *TokenBundle, string, error) {
 	expireAt := time.Now().Add(7 * 24 * time.Hour)
 	sessionID := idgen.UUID().String()
@@ -213,6 +239,15 @@ func (a *Account) createSessionAndTokens(ctx context.Context, projectID, userID,
 		return nil, nil, "", err
 	}
 
+	tokens, cookie, err := a.issueTokens(projectID, userID, email, sessionID)
+	if err != nil {
+		return nil, nil, "", err
+	}
+	user, _ := a.docDB.GetDocument(ctx, projectID, "default", "users", userID, databases.SystemRoles)
+	return mapUserDoc(user), tokens, cookie, nil
+}
+
+func (a *Account) issueTokens(projectID, userID, email, sessionID string) (*TokenBundle, string, error) {
 	accessTTL := 15 * time.Minute
 	if d, err := time.ParseDuration(a.cfg.GetSecurity().GetJwt().GetAccessTtl()); err == nil {
 		accessTTL = d
@@ -230,29 +265,59 @@ func (a *Account) createSessionAndTokens(ctx context.Context, projectID, userID,
 		ActorKind: "end_user",
 		ProjectID: projectID,
 		SessionID: sessionID,
+		TokenType: jwtparser.TokenTypeAccess,
 		Roles:     []string{"users", fmt.Sprintf("user:%s", userID)},
 		ExpiresAt: now.Add(accessTTL).Unix(),
 		IssuedAt:  now.Unix(),
 	}
 	accessToken, err := jwtparser.Generate([]byte(a.cfg.GetSecurity().GetJwt().GetSecret()), accessClaims)
 	if err != nil {
-		return nil, nil, "", err
+		return nil, "", err
 	}
 	refreshClaims := accessClaims
 	refreshClaims.TokenID = idgen.UUID().String()
+	refreshClaims.TokenType = jwtparser.TokenTypeRefresh
 	refreshClaims.ExpiresAt = now.Add(refreshTTL).Unix()
 	refreshToken, err := jwtparser.Generate([]byte(a.cfg.GetSecurity().GetJwt().GetSecret()), refreshClaims)
 	if err != nil {
-		return nil, nil, "", err
+		return nil, "", err
 	}
 
 	cookie := a.sessionCodec.Sign(projectID, sessionID)
-	user, _ := a.docDB.GetDocument(ctx, projectID, "default", "users", userID, databases.SystemRoles)
-	return mapUserDoc(user), &TokenBundle{
+	return &TokenBundle{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 		ExpiresAt:    accessClaims.ExpiresAt,
 	}, cookie, nil
+}
+
+func (a *Account) ensureActiveSession(ctx context.Context, projectID, sessionID, userID string) error {
+	sessionDoc, err := a.docDB.GetDocument(ctx, projectID, "default", "sessions", sessionID, databases.SystemRoles)
+	if err != nil {
+		return status.Error(codes.Unauthenticated, "session lookup failed")
+	}
+	if sessionDoc == nil {
+		return status.Error(codes.Unauthenticated, "session not found or revoked")
+	}
+	if uid, _ := sessionDoc.Data["user_id"].(string); uid != userID {
+		return status.Error(codes.Unauthenticated, "invalid session")
+	}
+	if expireAtRaw, ok := sessionDoc.Data["expire_at"]; ok {
+		if expireAt, err := parseSessionTime(expireAtRaw); err == nil && expireAt.Before(time.Now()) {
+			return status.Error(codes.Unauthenticated, "session expired")
+		}
+	}
+	return nil
+}
+
+func parseSessionTime(v any) (time.Time, error) {
+	switch t := v.(type) {
+	case time.Time:
+		return t, nil
+	case string:
+		return time.Parse(time.RFC3339Nano, t)
+	}
+	return time.Time{}, fmt.Errorf("unsupported time type")
 }
 
 func mapUserDoc(doc *databases.Document) *User {
