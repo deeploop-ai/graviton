@@ -23,15 +23,15 @@
 
 ## 0. 环境准备（必做）
 
-| # | 验收项 | 操作步骤 | 预期结果 | 通过 |
-|---|--------|----------|----------|------|
-| 0.1 | 基础设施启动 | `task up` | Postgres / Redis / MinIO 容器健康 | [ ] |
-| 0.2 | 环境变量 | 复制 `.env.example` → `.env`，设置 `FLEET_SECURITY_JWT_SECRET` 等非空值 | 服务可读取配置 | [ ] |
-| 0.3 | 数据库迁移 | `task migrate` | `000001`、`000002` 迁移成功；存在 `audit_logs`、`console_admin_projects` 表 | [ ] |
-| 0.4 | 种子数据 | `go run ./cmd/seed`（或项目文档约定方式） | 输出含 `default` 项目、admin 账号、API Key secret | [ ] |
-| 0.5 | Console 构建 | `task console-build`（若验收嵌入版 Console） | `console/dist/` 生成且无报错 | [ ] |
-| 0.6 | 服务启动 | `task dev-server` 或 `task build && ./bin/server` | gRPC / HTTP / Metrics 均监听；无启动 panic | [ ] |
-| 0.7 | 健康检查 | `GET /v1/health` | `{"status":"ok"}` 或等价 200 响应 | [ ] |
+| # | 验收项 | 操作步骤 | 预期结果 | 通过  |
+|---|--------|----------|----------|-----|
+| 0.1 | 基础设施启动 | `task up` | Postgres / Redis / MinIO 容器健康 | [x] |
+| 0.2 | 环境变量 | 复制 `.env.example` → `.env`，设置 `FLEET_SECURITY_JWT_SECRET` 等非空值 | 服务可读取配置 | [x] |
+| 0.3 | 数据库迁移 | `task migrate` | `000001`、`000002` 迁移成功；存在 `audit_logs`、`console_admin_projects` 表 | [x] |
+| 0.4 | 种子数据 | `go run ./cmd/seed`（或项目文档约定方式） | 输出含 `default` 项目、admin 账号、API Key secret | [x] |
+| 0.5 | Console 构建 | `task console-build`（若验收嵌入版 Console） | `console/dist/` 生成且无报错 | [x] |
+| 0.6 | 服务启动 | `task dev-server` 或 `task build && ./bin/server` | gRPC / HTTP / Metrics 均监听；无启动 panic | [x] |
+| 0.7 | 健康检查 | `GET /v1/health` | `{"status":"ok"}` 或等价 200 响应 | [x] |
 
 **记录 seed 输出（验收过程使用）：**
 
@@ -45,12 +45,12 @@ Console Admin: admin@fleet.local / Admin@123
 
 ## 1. 工程化与构建
 
-| # | 验收项 | 操作步骤 | 预期结果 | 通过 |
-|---|--------|----------|----------|------|
-| 1.1 | 单元测试 | `go test ./... -short` | 全部 PASS（集成测试可跳过） | [ ] |
-| 1.2 | 全量测试 | `go test ./...`（可选，需本地 Postgres） | 全部 PASS | [ ] |
-| 1.3 | 编译 | `task build` 或 `go build ./cmd/server` | 生成可执行文件，无编译错误 | [ ] |
-| 1.4 | Console 开发构建 | `task console-build` | 前端产物可嵌入 Go binary | [ ] |
+| # | 验收项 | 操作步骤 | 预期结果 | 通过  |
+|---|--------|----------|----------|-----|
+| 1.1 | 单元测试 | `go test ./... -short` | 全部 PASS（集成测试可跳过） | [x] |
+| 1.2 | 全量测试 | `go test ./...`（可选，需本地 Postgres） | 全部 PASS | [x] |
+| 1.3 | 编译 | `task build` 或 `go build ./cmd/server` | 生成可执行文件，无编译错误 | [x] |
+| 1.4 | Console 开发构建 | `task console-build` | 前端产物可嵌入 Go binary | [x] |
 
 ---
 
@@ -58,19 +58,19 @@ Console Admin: admin@fleet.local / Admin@123
 
 **公共请求头说明**：以下 JSON API 经 grpc-gateway，Content-Type 为 `application/json`。
 
-| # | 验收项 | 操作步骤 | 预期结果 | 通过 |
-|---|--------|----------|----------|------|
-| 2.1 | 注册 | `POST /v1/account/sign-up`，body 含 `project_id=default`、email、password、name | 201/200；返回 `account` + `tokens`（含 access_token、refresh_token） | [ ] |
-| 2.2 | 重复注册 | 同一 project + email 再次注册 | 失败，`AlreadyExists` 或等价错误 | [ ] |
-| 2.3 | 登录 | `POST /v1/account/sign-in` | 返回用户信息与 token 对 | [ ] |
-| 2.4 | 错误密码 | 错误 password 登录 | `Unauthenticated` | [ ] |
-| 2.5 | 获取当前用户 | `GET /v1/account/me`，Header `Authorization: Bearer <access_token>` | 返回当前用户信息（email/name 等） | [ ] |
-| 2.6 | 无 Token 访问 Me | 不带 Authorization 调用 Me | `Unauthenticated` | [ ] |
-| 2.7 | 登出 | `POST /v1/account/sign-out`，带 access token | 成功；session 文档被删除 | [ ] |
-| 2.8 | 登出后 Me | 登出后用**同一 access token** 再调 Me | 失败（session 已失效 / token 不可用） | [ ] |
-| 2.9 | Refresh Token | `POST /v1/account/refresh`，body：`project_id` + `refresh_token` | 返回新的 access_token 与 refresh_token | [ ] |
-| 2.10 | 无效 Refresh | 使用伪造或过期的 refresh_token | `Unauthenticated` | [ ] |
-| 2.11 | Access 当 Refresh | 用 access_token 调 refresh 接口 | 失败（token type 不匹配） | [ ] |
+| # | 验收项 | 操作步骤 | 预期结果 | 通过  |
+|---|--------|----------|----------|-----|
+| 2.1 | 注册 | `POST /v1/account/sign-up`，body 含 `project_id=default`、email、password、name | 201/200；返回 `account` + `tokens`（含 access_token、refresh_token） | [x] |
+| 2.2 | 重复注册 | 同一 project + email 再次注册 | 失败，`AlreadyExists` 或等价错误 | [x] |
+| 2.3 | 登录 | `POST /v1/account/sign-in` | 返回用户信息与 token 对 | [x] |
+| 2.4 | 错误密码 | 错误 password 登录 | `Unauthenticated` | [x] |
+| 2.5 | 获取当前用户 | `GET /v1/account/me`，Header `Authorization: Bearer <access_token>` | 返回当前用户信息（email/name 等） | [x] |
+| 2.6 | 无 Token 访问 Me | 不带 Authorization 调用 Me | `Unauthenticated` | [x] |
+| 2.7 | 登出 | `POST /v1/account/sign-out`，带 access token | 成功；session 文档被删除 | [x] |
+| 2.8 | 登出后 Me | 登出后用**同一 access token** 再调 Me | 失败（session 已失效 / token 不可用） | [x] |
+| 2.9 | Refresh Token | `POST /v1/account/refresh`，body：`project_id` + `refresh_token` | 返回新的 access_token 与 refresh_token | [x] |
+| 2.10 | 无效 Refresh | 使用伪造或过期的 refresh_token | `Unauthenticated` | [x] |
+| 2.11 | Access 当 Refresh | 用 access_token 调 refresh 接口 | 失败（token type 不匹配） | [x] |
 
 **示例（注册）：**
 
@@ -92,14 +92,14 @@ curl -s -X POST http://localhost:8088/v1/account/refresh \
 
 ## 3. Console 管理后台
 
-| # | 验收项 | 操作步骤 | 预期结果 | 通过 |
-|---|--------|----------|----------|------|
-| 3.1 | 页面可访问 | 浏览器打开 `/console/` | SPA 加载，显示登录页 | [ ] |
-| 3.2 | 管理员登录 | `admin@fleet.local` / `Admin@123` | 进入 Dashboard，无报错 toast | [ ] |
-| 3.3 | 错误凭据 | 错误密码登录 | 提示错误，停留在登录页 | [ ] |
-| 3.4 | Projects 页 | 导航至 Projects | 列表展示项目（含 `default`） | [ ] |
-| 3.5 | API Keys 页 | 导航至 Api Keys | 可列表；创建后**仅一次**显示 secret | [ ] |
-| 3.6 | Users 页 | 导航至 Users（需先选择/绑定项目） | 展示通过 Client 注册的用户 | [ ] |
+| # | 验收项 | 操作步骤 | 预期结果 | 通过  |
+|---|--------|----------|----------|-----|
+| 3.1 | 页面可访问 | 浏览器打开 `/console/` | SPA 加载，显示登录页 | [x] |
+| 3.2 | 管理员登录 | `admin@fleet.local` / `Admin@123` | 进入 Dashboard，无报错 toast | [x] |
+| 3.3 | 错误凭据 | 错误密码登录 | 提示错误，停留在登录页 | [x] |
+| 3.4 | Projects 页 | 导航至 Projects | 列表展示项目（含 `default`） | [x] |
+| 3.5 | API Keys 页 | 导航至 Api Keys | 可列表；创建后**仅一次**显示 secret | [x] |
+| 3.6 | Users 页 | 导航至 Users（需先选择/绑定项目） | 展示通过 Client 注册的用户 | [x] |
 | 3.7 | Storage 页 | 创建 Bucket、上传文件（若 UI 支持） | Bucket / File 列表有数据 | [ ] |
 | 3.8 | Databases 页 | 创建 Database / Collection | 元数据 catalog 可查看 | [ ] |
 | 3.9 | 登出 / 会话 | 刷新页面或重新打开 | 未登录时跳转登录；已登录保持状态 | [ ] |
