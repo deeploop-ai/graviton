@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package fleet.server.v1;
+
+option go_package = "github.com/deeploop-ai/fleet/genproto/server/v1;serverv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+import "shared/v1/authz.proto";
+import "shared/v1/common.proto";
+
+service UsersService {
+  option (fleet.shared.v1.service_auth) = { default_access: ACCESS_API_KEY };
+
+  rpc ListUsers(shared.v1.ListRequest) returns (ListUsersResponse) {
+    option (google.api.http) = { get: "/v1/server/users" };
+  }
+
+  rpc GetUser(GetUserRequest) returns (User) {
+    option (google.api.http) = { get: "/v1/server/users/{id}" };
+  }
+
+  rpc UpdateUser(UpdateUserRequest) returns (User) {
+    option (google.api.http) = { patch: "/v1/server/users/{id}", body: "*" };
+  }
+
+  rpc DeleteUser(GetUserRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { delete: "/v1/server/users/{id}" };
+  }
+}
+
+message GetUserRequest {
+  string id = 1;
+}
+
+message UpdateUserRequest {
+  string id = 1;
+  string status = 2;
+  google.protobuf.Struct labels = 3;
+  google.protobuf.Struct prefs = 4;
+}
+
+message ListUsersResponse {
+  repeated User users = 1;
+  shared.v1.ListResponseMeta meta = 2;
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string status = 4;
+  bool email_verified = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}

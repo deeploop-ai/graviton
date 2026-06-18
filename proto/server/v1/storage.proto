@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package fleet.server.v1;
+
+option go_package = "github.com/deeploop-ai/fleet/genproto/server/v1;serverv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "shared/v1/authz.proto";
+import "shared/v1/common.proto";
+
+service StorageService {
+  option (fleet.shared.v1.service_auth) = { default_access: ACCESS_API_KEY };
+
+  rpc CreateBucket(CreateBucketRequest) returns (Bucket) {
+    option (google.api.http) = { post: "/v1/server/storage/buckets", body: "*" };
+  }
+
+  rpc ListBuckets(shared.v1.ListRequest) returns (ListBucketsResponse) {
+    option (google.api.http) = { get: "/v1/server/storage/buckets" };
+  }
+
+  rpc GetBucket(GetBucketRequest) returns (Bucket) {
+    option (google.api.http) = { get: "/v1/server/storage/buckets/{id}" };
+  }
+
+  rpc DeleteBucket(GetBucketRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { delete: "/v1/server/storage/buckets/{id}" };
+  }
+
+  rpc CreateFile(CreateFileRequest) returns (File) {
+    option (google.api.http) = { post: "/v1/server/storage/buckets/{bucket_id}/files", body: "*" };
+  }
+
+  rpc ListFiles(ListFilesRequest) returns (ListFilesResponse) {
+    option (google.api.http) = { get: "/v1/server/storage/buckets/{bucket_id}/files" };
+  }
+
+  rpc GetFile(GetFileRequest) returns (File) {
+    option (google.api.http) = { get: "/v1/server/storage/buckets/{bucket_id}/files/{file_id}" };
+  }
+
+  rpc DeleteFile(GetFileRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { delete: "/v1/server/storage/buckets/{bucket_id}/files/{file_id}" };
+  }
+}
+
+message CreateBucketRequest {
+  string name = 1;
+  repeated string permissions = 2;
+}
+
+message GetBucketRequest {
+  string id = 1;
+}
+
+message ListBucketsResponse {
+  repeated Bucket buckets = 1;
+  shared.v1.ListResponseMeta meta = 2;
+}
+
+message Bucket {
+  string id = 1;
+  string name = 2;
+  repeated string permissions = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+}
+
+message CreateFileRequest {
+  string bucket_id = 1;
+  string name = 2;
+  string mime_type = 3;
+  bytes data = 4;
+  map<string, string> metadata = 5;
+  repeated string permissions = 6;
+}
+
+message ListFilesRequest {
+  string bucket_id = 1;
+  repeated string queries = 2;
+  int32 page_size = 3;
+  string page_token = 4;
+}
+
+message GetFileRequest {
+  string bucket_id = 1;
+  string file_id = 2;
+}
+
+message ListFilesResponse {
+  repeated File files = 1;
+  shared.v1.ListResponseMeta meta = 2;
+}
+
+message File {
+  string id = 1;
+  string bucket_id = 2;
+  string name = 3;
+  string mime_type = 4;
+  int64 size = 5;
+  map<string, string> metadata = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}

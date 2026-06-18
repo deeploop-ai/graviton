@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package fleet.client.v1;
+
+option go_package = "github.com/deeploop-ai/fleet/genproto/client/v1;clientv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "shared/v1/authz.proto";
+import "shared/v1/common.proto";
+
+service AccountService {
+  option (fleet.shared.v1.service_auth) = { default_access: ACCESS_AUTHENTICATED };
+
+  rpc SignUp(SignUpRequest) returns (SignUpResponse) {
+    option (google.api.http) = { post: "/v1/account/sign-up", body: "*" };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+  }
+
+  rpc SignIn(SignInRequest) returns (SignInResponse) {
+    option (google.api.http) = { post: "/v1/account/sign-in", body: "*" };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+  }
+
+  rpc SignOut(SignOutRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { post: "/v1/account/sign-out", body: "*" };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_AUTHENTICATED };
+  }
+
+  rpc Me(MeRequest) returns (Account) {
+    option (google.api.http) = { get: "/v1/account/me" };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_AUTHENTICATED };
+  }
+}
+
+message SignUpRequest {
+  string email = 1;
+  string password = 2;
+  string name = 3;
+  string project_id = 4;
+}
+
+message SignInRequest {
+  string email = 1;
+  string password = 2;
+  string project_id = 3;
+}
+
+message SignOutRequest {
+  string project_id = 1;
+}
+
+message MeRequest {
+  string project_id = 1;
+}
+
+message Account {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string status = 4;
+  bool email_verified = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message TokenBundle {
+  string access_token = 1;
+  string refresh_token = 2;
+  int64 expires_at = 3;
+}
+
+message SignUpResponse {
+  Account account = 1;
+  TokenBundle tokens = 2;
+}
+
+message SignInResponse {
+  Account account = 1;
+  TokenBundle tokens = 2;
+}

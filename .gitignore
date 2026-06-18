@@ -1,0 +1,22 @@
+.env
+.env.local
+configs/config.yaml
+*.log
+server.log
+server.err
+bin/
+dist/
+vendor/
+data/files/
+*.exe
+*.dll
+*.test
+*.out
+.idea/
+.vscode/
+coverage.html
+coverage.out
+
+# Console
+console/node_modules/
+console/dist/

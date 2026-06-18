@@ -1,0 +1,147 @@
+syntax = "proto3";
+
+package fleet.server.v1;
+
+option go_package = "github.com/deeploop-ai/fleet/genproto/server/v1;serverv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "shared/v1/authz.proto";
+import "shared/v1/common.proto";
+
+service DatabasesService {
+  option (fleet.shared.v1.service_auth) = { default_access: ACCESS_API_KEY };
+
+  rpc CreateDatabase(CreateDatabaseRequest) returns (Database) {
+    option (google.api.http) = { post: "/v1/server/databases", body: "*" };
+  }
+
+  rpc ListDatabases(shared.v1.ListRequest) returns (ListDatabasesResponse) {
+    option (google.api.http) = { get: "/v1/server/databases" };
+  }
+
+  rpc GetDatabase(GetDatabaseRequest) returns (Database) {
+    option (google.api.http) = { get: "/v1/server/databases/{id}" };
+  }
+
+  rpc DeleteDatabase(GetDatabaseRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { delete: "/v1/server/databases/{id}" };
+  }
+
+  rpc CreateCollection(CreateCollectionRequest) returns (Collection) {
+    option (google.api.http) = { post: "/v1/server/databases/{database_id}/collections", body: "*" };
+  }
+
+  rpc ListCollections(ListCollectionsRequest) returns (ListCollectionsResponse) {
+    option (google.api.http) = { get: "/v1/server/databases/{database_id}/collections" };
+  }
+
+  rpc GetCollection(GetCollectionRequest) returns (Collection) {
+    option (google.api.http) = { get: "/v1/server/databases/{database_id}/collections/{collection_id}" };
+  }
+
+  rpc DeleteCollection(GetCollectionRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { delete: "/v1/server/databases/{database_id}/collections/{collection_id}" };
+  }
+
+  rpc CreateAttribute(CreateAttributeRequest) returns (Attribute) {
+    option (google.api.http) = { post: "/v1/server/databases/{database_id}/collections/{collection_id}/attributes", body: "*" };
+  }
+
+  rpc CreateIndex(CreateIndexRequest) returns (Index) {
+    option (google.api.http) = { post: "/v1/server/databases/{database_id}/collections/{collection_id}/indexes", body: "*" };
+  }
+}
+
+message CreateDatabaseRequest {
+  string id = 1;
+  string name = 2;
+}
+
+message GetDatabaseRequest {
+  string id = 1;
+}
+
+message ListDatabasesResponse {
+  repeated Database databases = 1;
+  shared.v1.ListResponseMeta meta = 2;
+}
+
+message Database {
+  string id = 1;
+  string name = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+message CreateCollectionRequest {
+  string database_id = 1;
+  string id = 2;
+  string name = 3;
+  repeated string permissions = 4;
+}
+
+message ListCollectionsRequest {
+  string database_id = 1;
+  repeated string queries = 2;
+  int32 page_size = 3;
+  string page_token = 4;
+}
+
+message GetCollectionRequest {
+  string database_id = 1;
+  string collection_id = 2;
+}
+
+message ListCollectionsResponse {
+  repeated Collection collections = 1;
+  shared.v1.ListResponseMeta meta = 2;
+}
+
+message Collection {
+  string id = 1;
+  string database_id = 2;
+  string name = 3;
+  repeated string permissions = 4;
+  repeated Attribute attributes = 5;
+  repeated Index indexes = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message CreateAttributeRequest {
+  string database_id = 1;
+  string collection_id = 2;
+  string key = 3;
+  string type = 4;
+  int32 size = 5;
+  bool required = 6;
+  bool array = 7;
+  string default_value = 8;
+}
+
+message Attribute {
+  string id = 1;
+  string key = 2;
+  string type = 3;
+  int32 size = 4;
+  bool required = 5;
+  bool array = 6;
+  string default_value = 7;
+}
+
+message CreateIndexRequest {
+  string database_id = 1;
+  string collection_id = 2;
+  string id = 3;
+  string type = 4;
+  repeated string attributes = 5;
+  repeated string orders = 6;
+}
+
+message Index {
+  string id = 1;
+  string type = 2;
+  repeated string attributes = 3;
+  repeated string orders = 4;
+}

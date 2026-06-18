@@ -1,0 +1,28 @@
+import { api } from "./client";
+
+export interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListProjectsResponse {
+  projects: Project[];
+  meta?: { total_count?: number; page_size?: number };
+}
+
+export async function listProjects(): Promise<Project[]> {
+  const res = await api.get<ListProjectsResponse>("/server/projects");
+  return res.data.projects ?? [];
+}
+
+export async function createProject(input: {
+  name: string;
+  description?: string;
+}): Promise<Project> {
+  const res = await api.post<Project>("/server/projects", input);
+  return res.data;
+}

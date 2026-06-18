@@ -1,0 +1,108 @@
+syntax = "proto3";
+
+package fleet.api.config;
+
+option go_package = "github.com/deeploop-ai/fleet/internal/pkg/config";
+
+message AppConfig {
+  Server server = 1;
+  Security security = 2;
+  Data data = 3;
+  Storage storage = 4;
+  Functions functions = 5;
+  Telemetry telemetry = 6;
+}
+
+message Server {
+  GRPC grpc = 1;
+  Http http = 2;
+  Http metrics = 3;
+}
+
+message GRPC {
+  string addr = 1;
+  string timeout = 2;
+}
+
+message Http {
+  message Cors {
+    repeated string allow_origins = 1;
+    repeated string allow_methods = 2;
+    repeated string allow_headers = 3;
+    repeated string expose_headers = 4;
+    bool allow_credentials = 5;
+    int32 max_age = 6;
+  }
+  string addr = 1;
+  string timeout = 2;
+  Cors cors = 3;
+}
+
+message Security {
+  message Jwt {
+    string secret = 1;
+    string access_ttl = 2;
+    string refresh_ttl = 3;
+  }
+  message ApiKey {
+    string header = 1;
+  }
+  Jwt jwt = 1;
+  ApiKey api_key = 2;
+}
+
+message Database {
+  message Pool {
+    int32 max_idle_conns = 1;
+    int32 max_open_conns = 2;
+    string conn_max_lifetime = 3;
+    string conn_max_idle_time = 4;
+  }
+  string source = 1;
+  bool debug = 2;
+  Pool pool = 3;
+}
+
+message Redis {
+  string addr = 1;
+  string password = 2;
+  int32 db = 3;
+}
+
+message Data {
+  Database database = 1;
+  Redis redis = 2;
+}
+
+message Storage {
+  message S3 {
+    string endpoint = 1;
+    string region = 2;
+    string bucket = 3;
+    string access_key_id = 4;
+    string secret_access_key = 5;
+    bool use_ssl = 6;
+  }
+  message Local {
+    string path = 1;
+  }
+  string provider = 1;
+  S3 s3 = 2;
+  Local local = 3;
+}
+
+message Functions {
+  message Docker {
+    string host = 1;
+    string network = 2;
+    string registry = 3;
+  }
+  string executor = 1;
+  Docker docker = 2;
+}
+
+message Telemetry {
+  bool enabled = 1;
+  string otlp_endpoint = 2;
+  string service_name = 3;
+}

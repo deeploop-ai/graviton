@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package fleet.server.v1;
+
+option go_package = "github.com/deeploop-ai/fleet/genproto/server/v1;serverv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "shared/v1/authz.proto";
+import "shared/v1/common.proto";
+
+service TeamsService {
+  option (fleet.shared.v1.service_auth) = { default_access: ACCESS_API_KEY };
+
+  rpc CreateTeam(CreateTeamRequest) returns (Team) {
+    option (google.api.http) = { post: "/v1/server/teams", body: "*" };
+  }
+
+  rpc ListTeams(shared.v1.ListRequest) returns (ListTeamsResponse) {
+    option (google.api.http) = { get: "/v1/server/teams" };
+  }
+
+  rpc GetTeam(GetTeamRequest) returns (Team) {
+    option (google.api.http) = { get: "/v1/server/teams/{id}" };
+  }
+
+  rpc DeleteTeam(GetTeamRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { delete: "/v1/server/teams/{id}" };
+  }
+}
+
+message CreateTeamRequest {
+  string name = 1;
+  repeated string permissions = 2;
+}
+
+message GetTeamRequest {
+  string id = 1;
+}
+
+message ListTeamsResponse {
+  repeated Team teams = 1;
+  shared.v1.ListResponseMeta meta = 2;
+}
+
+message Team {
+  string id = 1;
+  string name = 2;
+  int32 total = 3;
+  repeated string permissions = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}

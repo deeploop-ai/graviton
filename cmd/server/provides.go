@@ -1,0 +1,69 @@
+package main
+
+import (
+	"github.com/deeploop-ai/fleet/internal/api"
+	"github.com/deeploop-ai/fleet/internal/app"
+	"github.com/deeploop-ai/fleet/internal/domain"
+	"github.com/deeploop-ai/fleet/internal/infra"
+	"github.com/deeploop-ai/fleet/internal/infra/server"
+	config "github.com/deeploop-ai/fleet/internal/pkg/config"
+	"github.com/google/wire"
+	"github.com/lynx-go/lynx"
+	"github.com/lynx-go/lynx/boot"
+	lynxgrpc "github.com/lynx-go/lynx/server/grpc"
+)
+
+//go:generate wire
+
+var ProviderSet = wire.NewSet(
+	boot.New,
+	api.ProviderSet,
+	app.ProviderSet,
+	infra.ProviderSet,
+	domain.ProviderSet,
+
+	NewComponents,
+	NewComponentBuilders,
+	NewComponentBuilderSetFunc,
+	NewOnStarts,
+	NewOnStops,
+	NewAppConfig,
+)
+
+func NewAppConfig(app lynx.Lynx) (*config.AppConfig, error) {
+	var c config.AppConfig
+	if err := app.Config().Unmarshal(&c, lynx.TagNameJSON); err != nil {
+		return nil, err
+	}
+	return &c, nil
+}
+
+func NewComponents(
+	grpcServer *lynxgrpc.Server,
+	gatewayServer *server.GRPCGatewayServer,
+	metricsServer *server.MetricsServer,
+) []lynx.Component {
+	return []lynx.Component{
+		grpcServer,
+		gatewayServer,
+		metricsServer,
+	}
+}
+
+func NewComponentBuilders() []lynx.ComponentBuilder {
+	return nil
+}
+
+func NewComponentBuilderSetFunc() lynx.ComponentBuilderSetFunc {
+	return func() lynx.ComponentBuilderSet {
+		return nil
+	}
+}
+
+func NewOnStarts() lynx.OnStartHooks {
+	return lynx.OnStartHooks{}
+}
+
+func NewOnStops() lynx.OnStopHooks {
+	return lynx.OnStopHooks{}
+}

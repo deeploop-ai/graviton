@@ -1,0 +1,60 @@
+server:
+  grpc:
+    addr: ":8088"
+    timeout: "30s"
+  http:
+    addr: ":9099"
+    timeout: "60s"
+    cors:
+      allow_origins: ["*"]
+      allow_methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+      allow_headers: ["Content-Type", "Authorization", "X-Api-Key", "X-Fleet-Project", "X-Request-Id", "X-Correlation-Id"]
+      allow_credentials: true
+      max_age: 3600
+  metrics:
+    addr: ":9100"
+
+security:
+  jwt:
+    secret: ""              # env: FLEET_SECURITY_JWT_SECRET
+    access_ttl: "15m"
+    refresh_ttl: "7d"
+  api_key:
+    header: "x-api-key"
+
+data:
+  database:
+    source: ""              # env: FLEET_DATA_DATABASE_SOURCE
+    debug: true
+    pool:
+      max_idle_conns: 4
+      max_open_conns: 16
+      conn_max_lifetime: "1h"
+      conn_max_idle_time: "30m"
+  redis:
+    addr: "127.0.0.1:6379"
+    password: ""            # env: FLEET_DATA_REDIS_PASSWORD
+    db: 0
+
+storage:
+  provider: "s3"            # or "minio" / "local"
+  s3:
+    endpoint: ""            # env: FLEET_STORAGE_S3_ENDPOINT
+    region: "us-east-1"
+    bucket: "fleet-storage"
+    access_key_id: ""       # env: FLEET_STORAGE_S3_ACCESS_KEY
+    secret_access_key: ""   # env: FLEET_STORAGE_S3_SECRET_KEY
+  local:
+    path: "./data/files"
+
+functions:
+  executor: "docker"
+  docker:
+    host: "unix:///var/run/docker.sock"
+    network: "fleet-functions"
+    registry: "fleet-funcs"
+
+telemetry:
+  enabled: false
+  otlp_endpoint: ""
+  service_name: "fleet"

@@ -1,0 +1,63 @@
+package shared
+
+import "github.com/deeploop-ai/fleet/pkg/idgen"
+
+type ActorKind string
+
+const (
+	ActorKindEndUser ActorKind = "end_user"
+	ActorKindAdmin   ActorKind = "admin"
+	ActorKindService ActorKind = "service"
+)
+
+func (k ActorKind) IsValid() bool {
+	switch k {
+	case ActorKindEndUser, ActorKindAdmin, ActorKindService:
+		return true
+	}
+	return false
+}
+
+type CredentialType string
+
+const (
+	CredentialTypeToken   CredentialType = "token"
+	CredentialTypeSession CredentialType = "session"
+	CredentialTypeAPIKey  CredentialType = "api_key"
+)
+
+type Principal struct {
+	ActorID         idgen.ID
+	ActorKind       ActorKind
+	CredentialType  CredentialType
+	IsPlatformAdmin bool
+	ProjectID       string
+	UserID          string
+	APIKeyID        string
+	SessionID       string
+	Roles           []string
+	Permissions     []string // scopes for API keys
+	Email           string
+}
+
+func (p *Principal) IsAuthenticated() bool {
+	return p != nil && (p.UserID != "" || p.APIKeyID != "")
+}
+
+func (p *Principal) HasRole(role string) bool {
+	for _, r := range p.Roles {
+		if r == role {
+			return true
+		}
+	}
+	return false
+}
+
+func (p *Principal) HasScope(scope string) bool {
+	for _, s := range p.Permissions {
+		if s == scope {
+			return true
+		}
+	}
+	return false
+}

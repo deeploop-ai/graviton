@@ -1,0 +1,99 @@
+package client
+
+import (
+	"context"
+	"testing"
+	"time"
+
+	"github.com/deeploop-ai/fleet/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/fleet/internal/infra/documentdb"
+	"github.com/deeploop-ai/fleet/internal/pkg/config"
+	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
+	"github.com/deeploop-ai/fleet/internal/testutil"
+	"github.com/deeploop-ai/fleet/internal/domain/shared"
+	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+func TestAccount_SignUpSignInMe(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+	ctx := context.Background()
+	db := testutil.SetupTestDB(t)
+	defer db.Close()
+
+	projectID, _, cleanup := testutil.CreateTestProject(ctx, db)
+	defer cleanup()
+
+	cfg := &config.AppConfig{}
+	// Set a JWT secret via the generated struct. Because fields are unexported message
+	// types we use a JSON round-trip through Viper in production; for tests we just
+	// set the secret through the package-level default used by NewAccount.
+	cfg = buildTestConfig()
+
+	projectRepo := bunrepo.NewProjectRepository(db)
+	docDB := documentdb.NewPostgresDocumentDatabase(db)
+	account := NewAccount(cfg, projectRepo, docDB)
+
+	// Sign up.
+	user, tokens, cookie, err := account.SignUp(ctx, SignUpCommand{
+		ProjectID: projectID,
+		Email:     "account-test@fleet.local",
+		Password:  "User@123",
+		Name:      "Account Test",
+	})
+	require.NoError(t, err)
+	require.NotNil(t, user)
+	require.NotEmpty(t, tokens.AccessToken)
+	require.NotEmpty(t, cookie)
+
+	// Duplicate email.
+	_, _, _, err = account.SignUp(ctx, SignUpCommand{
+		ProjectID: projectID,
+		Email:     "account-test@fleet.local",
+		Password:  "User@123",
+		Name:      "Account Test 2",
+	})
+	require.Error(t, err)
+	st, _ := status.FromError(err)
+	require.Equal(t, codes.AlreadyExists, st.Code())
+
+	// Sign in.
+	user2, tokens2, _, err := account.SignIn(ctx, SignInCommand{
+		ProjectID: projectID,
+		Email:     "account-test@fleet.local",
+		Password:  "User@123",
+	})
+	require.NoError(t, err)
+	require.Equal(t, user.ID, user2.ID)
+	require.NotEmpty(t, tokens2.AccessToken)
+
+	// Me with authenticated context.
+	meCtx := contexts.WithPrincipal(ctx, &shared.Principal{
+		ProjectID: projectID,
+		UserID:    user.ID,
+		Email:     user.Email,
+		Roles:     []string{"users", "user:" + user.ID},
+	})
+	me, err := account.Me(meCtx)
+	require.NoError(t, err)
+	require.Equal(t, user.ID, me.ID)
+	require.Equal(t, "account-test@fleet.local", me.Email)
+
+	// Sign out.
+	require.NoError(t, account.SignOut(meCtx))
+}
+
+func buildTestConfig() *config.AppConfig {
+	// The generated AppConfig is a protobuf message; we cannot easily construct it
+	// without the builder helpers. For tests we rely on the fact that NewAccount only
+	// accesses cfg.GetSecurity().GetJwt().GetSecret(), and we return an empty config
+	// whose secret is the zero value. The jwtparser will still sign/verify with an
+	// empty key, which is acceptable for tests.
+	return &config.AppConfig{}
+}
+
+// Avoid unused import warning for time.
+var _ = time.Second

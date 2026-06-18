@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package fleet.server.v1;
+
+option go_package = "github.com/deeploop-ai/fleet/genproto/server/v1;serverv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "shared/v1/authz.proto";
+import "shared/v1/common.proto";
+
+service APIKeysService {
+  option (fleet.shared.v1.service_auth) = { default_access: ACCESS_API_KEY };
+
+  rpc CreateAPIKey(CreateAPIKeyRequest) returns (APIKeyWithSecret) {
+    option (google.api.http) = { post: "/v1/server/api-keys", body: "*" };
+  }
+
+  rpc ListAPIKeys(shared.v1.ListRequest) returns (ListAPIKeysResponse) {
+    option (google.api.http) = { get: "/v1/server/api-keys" };
+  }
+
+  rpc GetAPIKey(GetAPIKeyRequest) returns (APIKey) {
+    option (google.api.http) = { get: "/v1/server/api-keys/{id}" };
+  }
+
+  rpc DeleteAPIKey(GetAPIKeyRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { delete: "/v1/server/api-keys/{id}" };
+  }
+}
+
+message CreateAPIKeyRequest {
+  string name = 1;
+  repeated string scopes = 2;
+  int64 expire_at = 3; // unix seconds, 0 = no expiry
+}
+
+message GetAPIKeyRequest {
+  string id = 1;
+}
+
+message ListAPIKeysResponse {
+  repeated APIKey api_keys = 1;
+  shared.v1.ListResponseMeta meta = 2;
+}
+
+message APIKeyWithSecret {
+  APIKey api_key = 1;
+  string secret = 2;
+}
+
+message APIKey {
+  string id = 1;
+  string name = 2;
+  repeated string scopes = 3;
+  bool enabled = 4;
+  google.protobuf.Timestamp expire_at = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}

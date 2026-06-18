@@ -1,0 +1,36 @@
+import { api } from "./client";
+
+export interface APIKey {
+  id: string;
+  name: string;
+  scopes: string[];
+  enabled: boolean;
+  expire_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListAPIKeysResponse {
+  api_keys: APIKey[];
+  meta?: { total_count?: number };
+}
+
+export async function listAPIKeys(): Promise<APIKey[]> {
+  const res = await api.get<ListAPIKeysResponse>("/server/api-keys");
+  return res.data.api_keys ?? [];
+}
+
+export async function createAPIKey(input: {
+  name: string;
+  scopes?: string[];
+}): Promise<{ api_key: APIKey; secret: string }> {
+  const res = await api.post<{ api_key: APIKey; secret: string }>(
+    "/server/api-keys",
+    input
+  );
+  return res.data;
+}
+
+export async function deleteAPIKey(id: string): Promise<void> {
+  await api.delete(`/server/api-keys/${id}`);
+}

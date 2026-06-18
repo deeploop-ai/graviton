@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package fleet.shared.v1;
+
+option go_package = "github.com/deeploop-ai/fleet/genproto/shared/v1;sharedv1";
+
+import "google/protobuf/descriptor.proto";
+
+enum AccessLevel {
+  ACCESS_LEVEL_UNSPECIFIED = 0;
+  ACCESS_PUBLIC = 1;
+  ACCESS_AUTHENTICATED = 2;
+  ACCESS_PERMISSION = 3;
+  ACCESS_API_KEY = 4;
+}
+
+message MethodAuth {
+  AccessLevel access = 1;
+  repeated string permissions = 2;
+}
+
+message ServiceAuth {
+  AccessLevel default_access = 1;
+}
+
+extend google.protobuf.MethodOptions {
+  MethodAuth method_auth = 52001;
+}
+
+extend google.protobuf.ServiceOptions {
+  ServiceAuth service_auth = 52002;
+}

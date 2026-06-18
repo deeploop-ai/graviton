@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package fleet.server.v1;
+
+option go_package = "github.com/deeploop-ai/fleet/genproto/server/v1;serverv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "shared/v1/authz.proto";
+import "shared/v1/common.proto";
+
+service ProjectsService {
+  option (fleet.shared.v1.service_auth) = { default_access: ACCESS_API_KEY };
+
+  rpc CreateProject(CreateProjectRequest) returns (Project) {
+    option (google.api.http) = { post: "/v1/server/projects", body: "*" };
+  }
+
+  rpc ListProjects(shared.v1.ListRequest) returns (ListProjectsResponse) {
+    option (google.api.http) = { get: "/v1/server/projects" };
+  }
+
+  rpc GetProject(GetProjectRequest) returns (Project) {
+    option (google.api.http) = { get: "/v1/server/projects/{id}" };
+  }
+}
+
+message CreateProjectRequest {
+  string name = 1;
+  string description = 2;
+}
+
+message GetProjectRequest {
+  string id = 1;
+}
+
+message ListProjectsResponse {
+  repeated Project projects = 1;
+  shared.v1.ListResponseMeta meta = 2;
+}
+
+message Project {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string status = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}

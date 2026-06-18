@@ -1,0 +1,106 @@
+version: '3'
+dotenv: ['.env']
+
+tasks:
+  install-tools:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+      - go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+      - go install github.com/bufbuild/buf/cmd/buf@v1.63.0
+      - go install github.com/google/wire/cmd/wire@latest
+
+  generate-config:
+    dir: '{{.USER_WORKING_DIR}}/internal/pkg/config'
+    cmds:
+      - protoc -I. --go_out=. --go_opt=paths=source_relative ./config.proto
+
+  generate-proto:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - buf generate
+
+  up:
+    dir: '{{.USER_WORKING_DIR}}/docker/local'
+    cmds:
+      - docker compose up -d
+
+  down:
+    dir: '{{.USER_WORKING_DIR}}/docker/local'
+    cmds:
+      - docker compose down
+
+  clean:
+    dir: '{{.USER_WORKING_DIR}}/docker/local'
+    cmds:
+      - docker compose down -v
+
+  migrate:
+    dir: '{{.USER_WORKING_DIR}}'
+    vars:
+      MIGRATE_DSN: '{{if .FLEET_DATA_DATABASE_SOURCE}}{{.FLEET_DATA_DATABASE_SOURCE}}{{else}}postgres://{{default "fleet" .POSTGRES_USER}}:{{default "fleet" .POSTGRES_PASSWORD}}@{{default "127.0.0.1" .POSTGRES_HOST}}:{{default "5432" .POSTGRES_PORT}}/{{default "fleet" .POSTGRES_DB}}?sslmode=disable{{end}}'
+    cmds:
+      - migrate -path ./db/migrations -database "{{.MIGRATE_DSN}}" up
+
+  wire-server:
+    dir: '{{.USER_WORKING_DIR}}/cmd/server'
+    cmds:
+      - go mod tidy
+      - go run -mod=mod github.com/google/wire/cmd/wire
+
+  wire-all:
+    cmds:
+      - task: wire-server
+
+  generate-all:
+    cmds:
+      - task: generate-proto
+      - task: generate-config
+      - task: wire-all
+
+  console-install:
+    dir: '{{.USER_WORKING_DIR}}/console'
+    cmds:
+      - npm install
+
+  console-build:
+    dir: '{{.USER_WORKING_DIR}}/console'
+    cmds:
+      - npm run build
+
+  console-dev:
+    dir: '{{.USER_WORKING_DIR}}/console'
+    cmds:
+      - npm run dev
+
+  dev-server:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - go run ./cmd/server
+
+  build:
+    dir: '{{.USER_WORKING_DIR}}'
+    deps:
+      - console-build
+    cmds:
+      - go build -ldflags "-X main.Version={{.VERSION}}" -o ./bin/ ./cmd/server
+    vars:
+      VERSION:
+        sh: git describe --tags --always
+
+  test:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - go test -v ./... -cover
+
+  build-docker:
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - docker build -t {{.DOCKER_IMAGE}} .
+    vars:
+      GIT_VERSION:
+        sh: git describe --tags --always
+      VERSION: 1.0.0
+      TIMESTAMP:
+        sh: '{{if eq .OS "Windows_NT"}}powershell -NoProfile -Command Get-Date -Format "yyyyMMddHHmmss"{{else}}date +%Y%m%d%H%M%S{{end}}'
+      DOCKER_IMAGE: 'fleet:{{.VERSION}}-{{.GIT_VERSION}}-{{.TIMESTAMP}}'

@@ -1,0 +1,154 @@
+package documentdb
+
+import "github.com/deeploop-ai/fleet/internal/domain/databases"
+
+type systemCollectionSpec struct {
+	id          string
+	name        string
+	attrs       []databases.Attribute
+	indexes     []databases.Index
+	permissions []databases.Permission
+}
+
+func systemCollectionSpecs(projectID string) []systemCollectionSpec {
+	return []systemCollectionSpec{
+		{
+			id:   "users",
+			name: "users",
+			attrs: []databases.Attribute{
+				{ID: "users_email", Key: "email", Type: "email", Size: 320},
+				{ID: "users_password_hash", Key: "password_hash", Type: "string", Size: 512},
+				{ID: "users_name", Key: "name", Type: "string", Size: 256},
+				{ID: "users_status", Key: "status", Type: "string", Size: 64, Default: "active"},
+				{ID: "users_email_verified", Key: "email_verified", Type: "boolean", Default: false},
+				{ID: "users_phone", Key: "phone", Type: "string", Size: 64},
+				{ID: "users_phone_verified", Key: "phone_verified", Type: "boolean", Default: false},
+				{ID: "users_labels", Key: "labels", Type: "json"},
+				{ID: "users_prefs", Key: "prefs", Type: "json"},
+			},
+			indexes: []databases.Index{
+				{ID: "users_email_unique", Type: "unique", Attributes: []string{"email"}},
+			},
+			permissions: []databases.Permission{
+				{Type: "create", Role: "any"},
+				{Type: "read", Role: "user:{id}"},
+				{Type: "read", Role: "keys"},
+				{Type: "read", Role: "admin"},
+				{Type: "update", Role: "user:{id}"},
+				{Type: "update", Role: "keys"},
+				{Type: "update", Role: "admin"},
+				{Type: "delete", Role: "user:{id}"},
+				{Type: "delete", Role: "keys"},
+				{Type: "delete", Role: "admin"},
+			},
+		},
+		{
+			id:   "sessions",
+			name: "sessions",
+			attrs: []databases.Attribute{
+				{ID: "sessions_user_id", Key: "user_id", Type: "string", Size: 64},
+				{ID: "sessions_secret_hash", Key: "secret_hash", Type: "string", Size: 512},
+				{ID: "sessions_provider", Key: "provider", Type: "string", Size: 64, Default: "email"},
+				{ID: "sessions_user_agent", Key: "user_agent", Type: "string", Size: 1024},
+				{ID: "sessions_ip", Key: "ip", Type: "string", Size: 64},
+				{ID: "sessions_country", Key: "country", Type: "string", Size: 8},
+				{ID: "sessions_factors", Key: "factors", Type: "json"},
+				{ID: "sessions_expire_at", Key: "expire_at", Type: "datetime"},
+			},
+			indexes: []databases.Index{
+				{ID: "sessions_user_id", Type: "key", Attributes: []string{"user_id"}},
+			},
+			permissions: []databases.Permission{
+				{Type: "create", Role: "user:{id}"},
+				{Type: "create", Role: "keys"},
+				{Type: "create", Role: "admin"},
+				{Type: "read", Role: "user:{id}"},
+				{Type: "read", Role: "keys"},
+				{Type: "read", Role: "admin"},
+				{Type: "update", Role: "user:{id}"},
+				{Type: "update", Role: "keys"},
+				{Type: "update", Role: "admin"},
+				{Type: "delete", Role: "user:{id}"},
+				{Type: "delete", Role: "keys"},
+				{Type: "delete", Role: "admin"},
+			},
+		},
+		{
+			id:   "buckets",
+			name: "buckets",
+			attrs: []databases.Attribute{
+				{ID: "buckets_name", Key: "name", Type: "string", Size: 256},
+				{ID: "buckets_permissions", Key: "permissions", Type: "json"},
+			},
+			indexes: []databases.Index{
+				{ID: "buckets_name", Type: "key", Attributes: []string{"name"}},
+			},
+			permissions: []databases.Permission{
+				{Type: "create", Role: "keys"},
+				{Type: "create", Role: "admin"},
+				{Type: "read", Role: "any"},
+				{Type: "read", Role: "keys"},
+				{Type: "read", Role: "admin"},
+				{Type: "update", Role: "keys"},
+				{Type: "update", Role: "admin"},
+				{Type: "delete", Role: "keys"},
+				{Type: "delete", Role: "admin"},
+			},
+		},
+		{
+			id:   "files",
+			name: "files",
+			attrs: []databases.Attribute{
+				{ID: "files_bucket_id", Key: "bucket_id", Type: "string", Size: 64},
+				{ID: "files_name", Key: "name", Type: "string", Size: 256},
+				{ID: "files_mime_type", Key: "mime_type", Type: "string", Size: 128},
+				{ID: "files_size", Key: "size", Type: "integer"},
+				{ID: "files_metadata", Key: "metadata", Type: "json"},
+			},
+			indexes: []databases.Index{
+				{ID: "files_bucket_id", Type: "key", Attributes: []string{"bucket_id"}},
+				{ID: "files_name_fulltext", Type: "fulltext", Attributes: []string{"name"}},
+			},
+			permissions: []databases.Permission{
+				{Type: "create", Role: "users"},
+				{Type: "create", Role: "keys"},
+				{Type: "create", Role: "admin"},
+				{Type: "read", Role: "any"},
+				{Type: "read", Role: "keys"},
+				{Type: "read", Role: "admin"},
+				{Type: "update", Role: "user:{id}"},
+				{Type: "update", Role: "keys"},
+				{Type: "update", Role: "admin"},
+				{Type: "delete", Role: "user:{id}"},
+				{Type: "delete", Role: "keys"},
+				{Type: "delete", Role: "admin"},
+			},
+		},
+		{
+			id:   "teams",
+			name: "teams",
+			attrs: []databases.Attribute{
+				{ID: "teams_name", Key: "name", Type: "string", Size: 256},
+				{ID: "teams_permissions", Key: "permissions", Type: "json"},
+				{ID: "teams_total", Key: "total", Type: "integer", Default: 0},
+			},
+			indexes: []databases.Index{
+				{ID: "teams_name", Type: "key", Attributes: []string{"name"}},
+			},
+			permissions: []databases.Permission{
+				{Type: "create", Role: "users"},
+				{Type: "create", Role: "keys"},
+				{Type: "create", Role: "admin"},
+				{Type: "read", Role: "any"},
+				{Type: "read", Role: "keys"},
+				{Type: "read", Role: "admin"},
+				{Type: "update", Role: "team:{id}"},
+				{Type: "update", Role: "keys"},
+				{Type: "update", Role: "admin"},
+				{Type: "delete", Role: "team:{id}"},
+				{Type: "delete", Role: "keys"},
+				{Type: "delete", Role: "admin"},
+			},
+		},
+	}
+}

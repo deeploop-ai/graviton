@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package fleet.shared.v1;
+
+option go_package = "github.com/deeploop-ai/fleet/genproto/shared/v1;sharedv1";
+
+message ListRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+  string filter = 3;
+  string order_by = 4;
+  repeated string queries = 5;
+}
+
+message ListResponseMeta {
+  int32 page_size = 1;
+  string next_page_token = 2;
+  string prev_page_token = 3;
+  int32 total_count = 4;
+}
+
+message Empty {}
