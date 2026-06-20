@@ -32,6 +32,8 @@ import {
   DatabaseDetailPage,
   CollectionNewPage,
   CollectionDetailPage,
+  DocumentNewPage,
+  DocumentDetailPage,
 } from "@/routes/databases/pages";
 
 const queryClient = new QueryClient({
@@ -87,6 +89,8 @@ function AppRoutes() {
         <Route path="databases/:dbId" element={<DatabaseDetailPage />} />
         <Route path="databases/:dbId/collections/new" element={<CollectionNewPage />} />
         <Route path="databases/:dbId/collections/:collId" element={<CollectionDetailPage />} />
+        <Route path="databases/:dbId/collections/:collId/documents/new" element={<DocumentNewPage />} />
+        <Route path="databases/:dbId/collections/:collId/documents/:docId" element={<DocumentDetailPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/console" replace />} />
     </Routes>

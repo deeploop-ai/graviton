@@ -34,6 +34,13 @@ export interface Collection {
   updated_at: string;
 }
 
+export interface Document {
+  id: string;
+  data: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
 function normalizeIndex(index: Index): Index {
   return {
     ...index,
@@ -143,4 +150,60 @@ export async function createIndex(
     input
   );
   return res.data;
+}
+
+export async function listDocuments(
+  databaseId: string,
+  collectionId: string
+): Promise<Document[]> {
+  const res = await api.get<{ documents: Document[] }>(
+    `/server/databases/${databaseId}/collections/${collectionId}/documents`
+  );
+  return res.data.documents ?? [];
+}
+
+export async function getDocument(
+  databaseId: string,
+  collectionId: string,
+  documentId: string
+): Promise<Document> {
+  const res = await api.get<Document>(
+    `/server/databases/${databaseId}/collections/${collectionId}/documents/${documentId}`
+  );
+  return res.data;
+}
+
+export async function createDocument(
+  databaseId: string,
+  collectionId: string,
+  input: { data: Record<string, unknown>; document_id?: string }
+): Promise<Document> {
+  const res = await api.post<Document>(
+    `/server/databases/${databaseId}/collections/${collectionId}/documents`,
+    input
+  );
+  return res.data;
+}
+
+export async function updateDocument(
+  databaseId: string,
+  collectionId: string,
+  documentId: string,
+  data: Record<string, unknown>
+): Promise<Document> {
+  const res = await api.patch<Document>(
+    `/server/databases/${databaseId}/collections/${collectionId}/documents/${documentId}`,
+    { data }
+  );
+  return res.data;
+}
+
+export async function deleteDocument(
+  databaseId: string,
+  collectionId: string,
+  documentId: string
+): Promise<void> {
+  await api.delete(
+    `/server/databases/${databaseId}/collections/${collectionId}/documents/${documentId}`
+  );
 }

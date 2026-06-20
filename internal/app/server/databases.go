@@ -135,6 +135,133 @@ func (d *Databases) CreateIndex(ctx context.Context, projectID, databaseID, coll
 	return d.docDB.CreateIndex(ctx, projectID, databaseID, collectionID, idx)
 }
 
+func (d *Databases) ensureCollection(ctx context.Context, projectID, databaseID, collectionID string) error {
+	if err := d.ValidateIdentifier(databaseID); err != nil {
+		return status.Error(codes.InvalidArgument, "database_id is required")
+	}
+	if err := d.ValidateIdentifier(collectionID); err != nil {
+		return status.Error(codes.InvalidArgument, "collection_id is required")
+	}
+	if _, err := d.resolveProject(ctx, projectID); err != nil {
+		return err
+	}
+	col, err := d.docDB.GetCollection(ctx, projectID, databaseID, collectionID)
+	if err != nil {
+		return err
+	}
+	if col == nil {
+		return status.Error(codes.NotFound, "collection not found")
+	}
+	return nil
+}
+
+func (d *Databases) CreateDocument(
+	ctx context.Context,
+	projectID, databaseID, collectionID, documentID string,
+	data map[string]any,
+	perms []databases.Permission,
+	roles []string,
+) (*databases.Document, error) {
+	if err := d.ensureCollection(ctx, projectID, databaseID, collectionID); err != nil {
+		return nil, err
+	}
+	if len(data) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "data is required")
+	}
+	doc := databases.Document{ID: documentID, Data: data}
+	created, err := d.docDB.CreateDocument(ctx, projectID, databaseID, collectionID, doc, perms)
+	if err != nil {
+		return nil, fmt.Errorf("create document: %w", err)
+	}
+	got, err := d.docDB.GetDocument(ctx, projectID, databaseID, collectionID, created.ID, roles)
+	if err != nil {
+		return nil, err
+	}
+	if got == nil {
+		return nil, status.Error(codes.NotFound, "document not found after create")
+	}
+	return got, nil
+}
+
+func (d *Databases) ListDocuments(
+	ctx context.Context,
+	projectID, databaseID, collectionID string,
+	q databases.Query,
+	roles []string,
+) ([]databases.Document, int64, string, error) {
+	if err := d.ensureCollection(ctx, projectID, databaseID, collectionID); err != nil {
+		return nil, 0, "", err
+	}
+	list, err := d.docDB.ListDocuments(ctx, projectID, databaseID, collectionID, q, roles)
+	if err != nil {
+		return nil, 0, "", err
+	}
+	return list.Documents, list.TotalCount, list.NextPageToken, nil
+}
+
+func (d *Databases) GetDocument(
+	ctx context.Context,
+	projectID, databaseID, collectionID, documentID string,
+	roles []string,
+) (*databases.Document, error) {
+	if err := d.ensureCollection(ctx, projectID, databaseID, collectionID); err != nil {
+		return nil, err
+	}
+	doc, err := d.docDB.GetDocument(ctx, projectID, databaseID, collectionID, documentID, roles)
+	if err != nil {
+		return nil, err
+	}
+	if doc == nil {
+		return nil, status.Error(codes.NotFound, "document not found")
+	}
+	return doc, nil
+}
+
+func (d *Databases) UpdateDocument(
+	ctx context.Context,
+	projectID, databaseID, collectionID, documentID string,
+	data map[string]any,
+	roles []string,
+) (*databases.Document, error) {
+	if err := d.ensureCollection(ctx, projectID, databaseID, collectionID); err != nil {
+		return nil, err
+	}
+	if len(data) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "data is required")
+	}
+	updated, err := d.docDB.UpdateDocument(ctx, projectID, databaseID, collectionID, databases.Document{
+		ID:   documentID,
+		Data: data,
+	}, nil, roles)
+	if err != nil {
+		return nil, fmt.Errorf("update document: %w", err)
+	}
+	return &updated, nil
+}
+
+func (d *Databases) DeleteDocument(
+	ctx context.Context,
+	projectID, databaseID, collectionID, documentID string,
+	roles []string,
+) error {
+	if err := d.ensureCollection(ctx, projectID, databaseID, collectionID); err != nil {
+		return err
+	}
+	return d.docDB.DeleteDocument(ctx, projectID, databaseID, collectionID, documentID, roles)
+}
+
+func (d *Databases) CountDocuments(
+	ctx context.Context,
+	projectID, databaseID, collectionID string,
+	queries []string,
+	roles []string,
+) (int64, error) {
+	if err := d.ensureCollection(ctx, projectID, databaseID, collectionID); err != nil {
+		return 0, err
+	}
+	return d.docDB.CountDocuments(ctx, projectID, databaseID, collectionID, queries, roles)
+}
+
 // MapAttributeType normalizes a validated attribute type to lowercase.
 func (d *Databases) MapAttributeType(t string) string {
 	return strings.ToLower(t)

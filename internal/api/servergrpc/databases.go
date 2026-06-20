@@ -10,6 +10,7 @@ import (
 	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -199,6 +200,117 @@ func (s *DatabasesService) CreateIndex(ctx context.Context, req *serverv1.Create
 	}, nil
 }
 
+func (s *DatabasesService) CreateDocument(ctx context.Context, req *serverv1.CreateDocumentRequest) (*serverv1.Document, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	data := map[string]any{}
+	if req.GetData() != nil {
+		data = req.GetData().AsMap()
+	}
+	perms, err := databases.ParsePermissionStrings(req.GetPermissions())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	doc, err := s.databases.CreateDocument(
+		ctx,
+		projectID,
+		req.GetDatabaseId(),
+		req.GetCollectionId(),
+		req.GetDocumentId(),
+		data,
+		perms,
+		principalRoles(ctx),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return mapDocument(doc)
+}
+
+func (s *DatabasesService) ListDocuments(ctx context.Context, req *serverv1.ListDocumentsRequest) (*serverv1.ListDocumentsResponse, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	docs, total, _, err := s.databases.ListDocuments(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), databases.Query{
+		Queries:   req.GetQueries(),
+		PageSize:  req.GetPageSize(),
+		PageToken: req.GetPageToken(),
+	}, principalRoles(ctx))
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*serverv1.Document, len(docs))
+	for i := range docs {
+		mapped, err := mapDocument(&docs[i])
+		if err != nil {
+			return nil, err
+		}
+		out[i] = mapped
+	}
+	return &serverv1.ListDocumentsResponse{
+		Documents: out,
+		Meta:      &sharedv1.ListResponseMeta{PageSize: req.GetPageSize(), TotalCount: int32(total)},
+	}, nil
+}
+
+func (s *DatabasesService) GetDocument(ctx context.Context, req *serverv1.GetDocumentRequest) (*serverv1.Document, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	doc, err := s.databases.GetDocument(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), req.GetDocumentId(), principalRoles(ctx))
+	if err != nil {
+		return nil, err
+	}
+	return mapDocument(doc)
+}
+
+func (s *DatabasesService) UpdateDocument(ctx context.Context, req *serverv1.UpdateDocumentRequest) (*serverv1.Document, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	doc, err := s.databases.UpdateDocument(
+		ctx,
+		projectID,
+		req.GetDatabaseId(),
+		req.GetCollectionId(),
+		req.GetDocumentId(),
+		updateData(req.GetData()),
+		principalRoles(ctx),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return mapDocument(doc)
+}
+
+func (s *DatabasesService) DeleteDocument(ctx context.Context, req *serverv1.GetDocumentRequest) (*sharedv1.Empty, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	if err := s.databases.DeleteDocument(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), req.GetDocumentId(), principalRoles(ctx)); err != nil {
+		return nil, err
+	}
+	return &sharedv1.Empty{}, nil
+}
+
+func (s *DatabasesService) CountDocuments(ctx context.Context, req *serverv1.ListDocumentsRequest) (*serverv1.CountDocumentsResponse, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	count, err := s.databases.CountDocuments(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), req.GetQueries(), principalRoles(ctx))
+	if err != nil {
+		return nil, err
+	}
+	return &serverv1.CountDocumentsResponse{Count: count}, nil
+}
+
 func mapDatabase(c *databases.Collection) *serverv1.Database {
 	if c == nil {
 		return nil
@@ -244,4 +356,27 @@ func mapCollection(c *databases.Collection) *serverv1.Collection {
 		})
 	}
 	return out
+}
+
+func mapDocument(doc *databases.Document) (*serverv1.Document, error) {
+	if doc == nil {
+		return nil, nil
+	}
+	data, err := structpb.NewStruct(doc.Data)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "document data is not serializable")
+	}
+	return &serverv1.Document{
+		Id:        doc.ID,
+		Data:      data,
+		CreatedAt: timestamppb.New(doc.CreatedAt),
+		UpdatedAt: timestamppb.New(doc.UpdatedAt),
+	}, nil
+}
+
+func updateData(s *structpb.Struct) map[string]any {
+	if s == nil {
+		return map[string]any{}
+	}
+	return s.AsMap()
 }

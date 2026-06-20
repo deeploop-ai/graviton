@@ -1,0 +1,75 @@
+package server
+
+import (
+	"context"
+	"testing"
+
+	"github.com/deeploop-ai/fleet/internal/domain/databases"
+	"github.com/deeploop-ai/fleet/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/fleet/internal/infra/documentdb"
+	"github.com/deeploop-ai/fleet/internal/testutil"
+	"github.com/stretchr/testify/require"
+)
+
+// TestDatabases_DocumentCRUD covers P1 Sprint 1 document API use cases.
+func TestDatabases_DocumentCRUD(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	ctx := context.Background()
+	db := testutil.SetupTestDB(t)
+	defer db.Close()
+
+	projectID, internalID, cleanup := testutil.CreateTestProject(ctx, db)
+	defer cleanup()
+
+	docDB := documentdb.NewPostgresDocumentDB(db)
+	require.NoError(t, docDB.EnsureSystemCollections(ctx, projectID, internalID))
+
+	uc := NewDatabases(bunrepo.NewProjectRepository(db), docDB)
+	roles := []string{"keys"}
+
+	const (
+		dbID   = "app"
+		collID = "posts"
+	)
+	require.NoError(t, uc.CreateDatabase(ctx, projectID, dbID, "Application DB"))
+	require.NoError(t, uc.CreateCollection(ctx, projectID, dbID, collID, "Posts", []databases.Attribute{
+		{ID: "title", Key: "title", Type: "string", Size: 256},
+		{ID: "views", Key: "views", Type: "integer"},
+	}, nil))
+
+	created, err := uc.CreateDocument(ctx, projectID, dbID, collID, "", map[string]any{
+		"title": "Hello Fleet",
+		"views": 1,
+	}, databases.DefaultDocumentPermissions(), roles)
+	require.NoError(t, err)
+	require.NotEmpty(t, created.ID)
+	require.Equal(t, "Hello Fleet", created.Data["title"])
+
+	got, err := uc.GetDocument(ctx, projectID, dbID, collID, created.ID, roles)
+	require.NoError(t, err)
+	require.Equal(t, created.ID, got.ID)
+
+	updated, err := uc.UpdateDocument(ctx, projectID, dbID, collID, created.ID, map[string]any{
+		"views": 99,
+	}, roles)
+	require.NoError(t, err)
+	require.Equal(t, float64(99), updated.Data["views"])
+
+	list, total, _, err := uc.ListDocuments(ctx, projectID, dbID, collID, databases.Query{
+		Queries: []string{`equal("title","Hello Fleet")`, `orderDesc("$createdAt")`},
+	}, roles)
+	require.NoError(t, err)
+	require.Equal(t, int64(1), total)
+	require.Len(t, list, 1)
+
+	count, err := uc.CountDocuments(ctx, projectID, dbID, collID, []string{`equal("title","Hello Fleet")`}, roles)
+	require.NoError(t, err)
+	require.Equal(t, int64(1), count)
+
+	require.NoError(t, uc.DeleteDocument(ctx, projectID, dbID, collID, created.ID, roles))
+	_, err = uc.GetDocument(ctx, projectID, dbID, collID, created.ID, roles)
+	require.Error(t, err)
+}

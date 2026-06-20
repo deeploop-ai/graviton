@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -14,9 +14,15 @@ import {
   deleteCollection,
   createAttribute,
   createIndex,
+  listDocuments,
+  getDocument,
+  createDocument,
+  updateDocument,
+  deleteDocument,
   type Database,
   type Collection,
   type Attribute,
+  type Document,
 } from "@/api/databases";
 import { useAuth } from "@/hooks/useAuth";
 import { ResourceListPage } from "@/components/list/ResourceListPage";
@@ -767,6 +773,7 @@ export function CollectionDetailPage() {
         />
 
         <div className="mt-6 space-y-6">
+          <DocumentListSection dbId={dbId!} collId={collId!} attributes={collection.attributes} />
           <AttributeList
             attributes={collection.attributes}
             onAdd={() => setAttrDialogOpen(true)}
@@ -793,5 +800,314 @@ export function CollectionDetailPage() {
         onSubmit={(input) => addIndex.mutate(input)}
       />
     </>
+  );
+}
+
+const documentColumns: ColumnDef<Document>[] = [
+  {
+    key: "id",
+    header: "ID",
+    className: "font-mono text-xs max-w-[160px] truncate",
+    cell: (d) => d.id,
+  },
+  {
+    key: "updated",
+    header: "更新时间",
+    cell: (d) => new Date(d.updated_at).toLocaleString(),
+  },
+];
+
+function DocumentListSection({
+  dbId,
+  collId,
+  attributes,
+}: {
+  dbId: string;
+  collId: string;
+  attributes: Attribute[];
+}) {
+  const queryClient = useQueryClient();
+  const { data: documents = [], isLoading } = useQuery({
+    queryKey: ["documents", dbId, collId],
+    queryFn: () => listDocuments(dbId, collId),
+  });
+
+  const remove = useMutation({
+    mutationFn: (docId: string) => deleteDocument(dbId, collId, docId),
+    onSuccess: () => {
+      toast.success("Document 已删除");
+      queryClient.invalidateQueries({ queryKey: ["documents", dbId, collId] });
+    },
+  });
+
+  const columns: ColumnDef<Document>[] = [
+    ...documentColumns,
+    ...attributes.slice(0, 3).map((attr) => ({
+      key: attr.key,
+      header: attr.key,
+      cell: (d: Document) => String(d.data?.[attr.key] ?? "—"),
+    })),
+  ];
+
+  return (
+    <ResourceListPage
+      title="Documents"
+      cardTitle="文档列表"
+      searchPlaceholder="搜索 Document ID 或字段..."
+      isLoading={isLoading}
+      items={documents}
+      columns={columns}
+      getSearchText={(d) => `${d.id} ${JSON.stringify(d.data ?? {})}`}
+      toolbarActions={
+        <Button asChild size="sm">
+          <Link to={`/console/databases/${dbId}/collections/${collId}/documents/new`}>
+            <Plus className="mr-2 h-4 w-4" />
+            新建 Document
+          </Link>
+        </Button>
+      }
+      detailPath={(d) =>
+        `/console/databases/${dbId}/collections/${collId}/documents/${d.id}`
+      }
+      rowActions={(d) => (
+        <RowDeleteButton
+          onConfirm={() => remove.mutate(d.id)}
+          loading={remove.isPending}
+        />
+      )}
+      emptyTitle="暂无 Document"
+      emptyDescription="创建第一条文档记录"
+      emptyAction={
+        <Link to={`/console/databases/${dbId}/collections/${collId}/documents/new`}>
+          新建 Document
+        </Link>
+      }
+    />
+  );
+}
+
+function parseFieldValue(type: string, raw: string): unknown {
+  if (raw === "") return null;
+  switch (type) {
+    case "integer":
+      return Number.parseInt(raw, 10);
+    case "float":
+      return Number.parseFloat(raw);
+    case "boolean":
+      return raw === "true";
+    case "json":
+      return JSON.parse(raw);
+    default:
+      return raw;
+  }
+}
+
+function DocumentFormFields({
+  attributes,
+  values,
+  onChange,
+}: {
+  attributes: Attribute[];
+  values: Record<string, string>;
+  onChange: (key: string, value: string) => void;
+}) {
+  if (attributes.length === 0) {
+    return (
+      <FormField
+        id="payload"
+        label="Data (JSON)"
+        value={values.__json ?? "{}"}
+        onChange={(v) => onChange("__json", v)}
+        placeholder='{"title":"Hello"}'
+      />
+    );
+  }
+
+  return (
+    <>
+      {attributes.map((attr) => (
+        <FormField
+          key={attr.key}
+          id={attr.key}
+          label={`${attr.key} (${attr.type})`}
+          value={values[attr.key] ?? ""}
+          onChange={(v) => onChange(attr.key, v)}
+          required={attr.required}
+          type={attr.type === "integer" || attr.type === "float" ? "number" : "text"}
+        />
+      ))}
+    </>
+  );
+}
+
+function buildDocumentData(
+  attributes: Attribute[],
+  values: Record<string, string>
+): Record<string, unknown> {
+  if (attributes.length === 0) {
+    return JSON.parse(values.__json || "{}") as Record<string, unknown>;
+  }
+  const data: Record<string, unknown> = {};
+  for (const attr of attributes) {
+    if (values[attr.key] === undefined || values[attr.key] === "") {
+      if (attr.required) {
+        throw new Error(`${attr.key} is required`);
+      }
+      continue;
+    }
+    data[attr.key] = parseFieldValue(attr.type, values[attr.key]);
+  }
+  return data;
+}
+
+export function DocumentNewPage() {
+  const { dbId, collId } = useParams();
+  const navigate = useNavigate();
+  const [values, setValues] = useState<Record<string, string>>({ __json: "{}" });
+
+  const { data: collection, isLoading } = useQuery({
+    queryKey: ["collections", dbId, collId],
+    queryFn: () => getCollection(dbId!, collId!),
+    enabled: !!dbId && !!collId,
+  });
+
+  const create = useMutation({
+    mutationFn: () =>
+      createDocument(dbId!, collId!, {
+        data: buildDocumentData(collection!.attributes, values),
+      }),
+    onSuccess: (doc) => {
+      toast.success("Document 已创建");
+      navigate(`/console/databases/${dbId}/collections/${collId}/documents/${doc.id}`);
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  if (isLoading) return <DetailSkeleton />;
+  if (!collection) {
+    return <NotFound backTo={`/console/databases/${dbId}/collections/${collId}`} />;
+  }
+
+  return (
+    <FormPageWrapper
+      title="新建 Document"
+      description={`Collection: ${collection.name}`}
+      backTo={`/console/databases/${dbId}/collections/${collId}`}
+      backLabel="返回 Collection"
+      loading={create.isPending}
+      submitLabel="创建"
+      onSubmit={(e) => {
+        e.preventDefault();
+        create.mutate();
+      }}
+    >
+      <DocumentFormFields
+        attributes={collection.attributes}
+        values={values}
+        onChange={(key, value) => setValues((prev) => ({ ...prev, [key]: value }))}
+      />
+    </FormPageWrapper>
+  );
+}
+
+export function DocumentDetailPage() {
+  const { dbId, collId, docId } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [initialized, setInitialized] = useState(false);
+
+  const { data: collection } = useQuery({
+    queryKey: ["collections", dbId, collId],
+    queryFn: () => getCollection(dbId!, collId!),
+    enabled: !!dbId && !!collId,
+  });
+
+  const { data: document, isLoading } = useQuery({
+    queryKey: ["documents", dbId, collId, docId],
+    queryFn: () => getDocument(dbId!, collId!, docId!),
+    enabled: !!dbId && !!collId && !!docId,
+  });
+
+  useEffect(() => {
+    if (!document || initialized) return;
+    const next: Record<string, string> = {};
+    if ((collection?.attributes.length ?? 0) === 0) {
+      next.__json = JSON.stringify(document.data ?? {}, null, 2);
+    } else {
+      for (const attr of collection?.attributes ?? []) {
+        const raw = document.data?.[attr.key];
+        next[attr.key] = raw == null ? "" : String(raw);
+      }
+    }
+    setValues(next);
+    setInitialized(true);
+  }, [collection, document, initialized]);
+
+  const save = useMutation({
+    mutationFn: () =>
+      updateDocument(
+        dbId!,
+        collId!,
+        docId!,
+        buildDocumentData(collection!.attributes, values)
+      ),
+    onSuccess: () => {
+      toast.success("Document 已更新");
+      queryClient.invalidateQueries({ queryKey: ["documents", dbId, collId] });
+      queryClient.invalidateQueries({ queryKey: ["documents", dbId, collId, docId] });
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const remove = useMutation({
+    mutationFn: () => deleteDocument(dbId!, collId!, docId!),
+    onSuccess: () => {
+      toast.success("Document 已删除");
+      navigate(`/console/databases/${dbId}/collections/${collId}`);
+    },
+  });
+
+  if (isLoading) return <DetailSkeleton />;
+  if (!document || !collection) {
+    return <NotFound backTo={`/console/databases/${dbId}/collections/${collId}`} />;
+  }
+
+  return (
+    <DetailPageWrapper
+      title="Document"
+      description={`ID: ${document.id}`}
+      backTo={`/console/databases/${dbId}/collections/${collId}`}
+      backLabel="返回 Collection"
+      actions={<DeleteButton onConfirm={() => remove.mutate()} loading={remove.isPending} />}
+    >
+      <DetailGrid
+        items={[
+          { label: "ID", value: document.id, mono: true },
+          { label: "创建时间", value: new Date(document.created_at).toLocaleString() },
+          { label: "更新时间", value: new Date(document.updated_at).toLocaleString() },
+        ]}
+      />
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              save.mutate();
+            }}
+            className="space-y-4 max-w-lg"
+          >
+            <DocumentFormFields
+              attributes={collection.attributes}
+              values={values}
+              onChange={(key, value) => setValues((prev) => ({ ...prev, [key]: value }))}
+            />
+            <Button type="submit" disabled={save.isPending}>
+              {save.isPending ? "保存中..." : "保存"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </DetailPageWrapper>
   );
 }
