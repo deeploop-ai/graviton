@@ -1,7 +1,7 @@
 # Fleet 已完成任务清单
 
 > 本文档汇总 Fleet P0 底座及已经落地实现的功能。
-> 最新更新：2026-06-18，对应提交 `9e2335f`。
+> 最新更新：2026-06-20，对应提交 `11af6f8`。
 
 ---
 
@@ -80,6 +80,7 @@
 - `buckets`：name、permissions
 - `files`：bucket_id、name、mime_type、size、metadata
 - `teams`：name、permissions、total
+- `memberships`：team_id、user_id、email、name、roles、status、invited_at、joined_at
 
 ### 3.3 查询 DSL 与 CRUD 工具
 
@@ -133,8 +134,14 @@
 | `AccountService` | `SignIn` | `POST /v1/account/sign-in` | 完成 |
 | `AccountService` | `SignOut` | `POST /v1/account/sign-out` | 完成 |
 | `AccountService` | `Me` | `GET /v1/account/me` | 完成 |
+| `AccountService` | `Refresh` | `POST /v1/account/refresh` | 完成 |
+| `AccountService` | `UpdateAccount` | `PATCH /v1/account` | 完成 |
+| `AccountService` | `ListSessions` / `DeleteSession` / `DeleteSessions` | `/v1/account/sessions` | 完成 |
+| `AccountService` | `GetPrefs` / `UpdatePrefs` | `/v1/account/prefs` | 完成 |
+| `DatabasesService` | Document CRUD + List + Count | `/v1/databases/{db}/collections/{coll}/documents` | 完成 |
+| `TeamsService` | Team + Membership CRUD / Status | `/v1/teams`、`/v1/teams/{id}/memberships` | 完成 |
 
-文件：`proto/client/v1/account.proto`。
+文件：`proto/client/v1/account.proto`、`proto/client/v1/databases.proto`、`proto/client/v1/teams.proto`。
 
 ### 5.2 Server API（面向管理后台 / Server SDK）
 
@@ -144,8 +151,10 @@
 | `APIKeysService` | CreateAPIKey / ListAPIKeys / GetAPIKey / DeleteAPIKey | `/v1/server/api-keys` |
 | `UsersService` | ListUsers / GetUser / UpdateUser / DeleteUser | `/v1/server/users` |
 | `TeamsService` | CreateTeam / ListTeams / GetTeam / DeleteTeam | `/v1/server/teams` |
+| `TeamsService` | Membership CRUD / UpdateStatus | `/v1/server/teams/{team_id}/memberships` |
+| `DatabasesService` | Database / Collection / Attribute / Index CRUD | `/v1/server/databases` |
+| `DatabasesService` | Document CRUD / List / Count | `/v1/server/databases/{db}/collections/{coll}/documents` |
 | `StorageService` | CreateBucket / ListBuckets / GetBucket / DeleteBucket / CreateFile / ListFiles / GetFile / DeleteFile | `/v1/server/storage/buckets`、`/v1/server/storage/buckets/{bucket_id}/files` |
-| `DatabasesService` | CreateDatabase / ListDatabases / GetDatabase / DeleteDatabase / CreateCollection / ListCollections / GetCollection / DeleteCollection / CreateAttribute / CreateIndex | `/v1/server/databases` |
 | `HealthService` | Check | `/v1/server/health` |
 
 文件：`proto/server/v1/*.proto`。
@@ -170,7 +179,7 @@
 
 | 任务 | 状态 | 关键文件 |
 |------|------|----------|
-| Client gRPC handler | 完成 | `internal/api/clientgrpc/account.go` |
+| Client gRPC handler | 完成 | `internal/api/clientgrpc/{account,databases,teams}.go` |
 | Server gRPC handlers | 完成 | `internal/api/servergrpc/{projects,apikeys,users,teams,storage,databases,health}.go` |
 | Console gRPC handler | 完成 | `internal/api/consolegrpc/auth.go` |
 | 自定义 Storage HTTP handler | 完成 | `internal/api/serverhttp/file_handler.go` |
@@ -196,6 +205,7 @@ Storage HTTP handler 路由：
 | Project 领域模型与仓库端口 | 完成 | `internal/domain/projects/project.go`、`repository.go` |
 | 动态文档领域模型与端口 | 完成 | `internal/domain/databases/document.go`、`repository.go` |
 | 对象存储端口 | 完成 | `internal/domain/storage/object.go` |
+| Teams 成员常量与校验 | 完成 | `internal/domain/teams/membership.go` |
 | 函数执行器端口 | 完成 | `internal/domain/functions/executor.go` |
 | 领域层 provider 集合 | 完成 | `internal/domain/provides.go` |
 
@@ -216,12 +226,14 @@ EnsureSystemCollections
 
 | 模块 | 已完成能力 | 关键文件 |
 |------|-----------|----------|
-| Client Account | 注册、登录、登出、获取当前用户、签发 access/refresh token、写入 session cookie | `internal/app/client/account.go` |
+| Client Account | 注册、登录、登出、Me、Refresh、更新资料、会话列表/删除、prefs 读写、JWT team roles 注入 | `internal/app/client/account.go` |
+| Client Databases | 终端用户 Document CRUD（默认 `user:{id}` 权限） | `internal/app/client/databases.go` |
+| Client Teams | 创建团队（含 owner）、邀请、接受/拒绝、退出 | `internal/app/client/teams.go` |
 | Server Projects | 创建项目、列表、获取 | `internal/app/server/projects.go` |
 | Server API Keys | 创建（返回一次性 secret）、列表、获取、删除 | `internal/app/server/apikeys.go` |
 | Server Users | 列表、获取、更新、删除、状态更新 | `internal/app/server/users.go` |
-| Server Teams | 创建、列表、获取、删除 | `internal/app/server/teams.go` |
-| Server Databases | Database / Collection / Attribute / Index CRUD | `internal/app/server/databases.go` |
+| Server Teams | 团队 CRUD、成员 CRUD、邀请接受/拒绝、角色、级联删除、`ListAcceptedTeamRoles` | `internal/app/server/teams.go` |
+| Server Databases | Database / Collection / Attribute / Index / Document CRUD | `internal/app/server/databases.go` |
 | Storage | Bucket / File 元数据 CRUD、multipart 上传下载、MinIO 对象存取 | `internal/app/storage/storage.go` |
 | Console Auth | 管理员登录、签发 Console JWT | `internal/app/console/auth.go` |
 | Functions | executor 用例 stub | `internal/app/functions/functions.go` |
@@ -258,8 +270,8 @@ EnsureSystemCollections
 | 路由与鉴权 | 完成 | `console/src/App.tsx`、`console/src/hooks/useAuth.tsx` |
 | 布局组件 | 完成 | `console/src/components/Layout.tsx`、`PageHeader.tsx`、`EmptyState.tsx`、`LoadingTable.tsx` |
 | shadcn/ui 风格基础组件 | 完成 | `console/src/components/ui/{button,card,input,label,select,skeleton,table,badge}.tsx` |
-| 页面 | 完成 | `console/src/routes/{Login,Dashboard,Projects,ApiKeys,Users,Storage,Databases}.tsx` |
-| API 客户端 | 完成 | `console/src/api/{client,auth,projects,apiKeys,users,storage,databases}.ts` |
+| 页面 | 完成 | Dashboard、Projects、API Keys、Users、Storage、Databases（含文档编辑器）、Teams（含成员管理） |
+| API 客户端 | 完成 | `console/src/api/{client,auth,projects,apiKeys,users,storage,databases,teams}.ts` |
 | 错误提示 | 完成 | 全局 axios 拦截器 + `sonner` toast |
 | 嵌入 Go 二进制 | 完成 | `console/embed.go` |
 
@@ -275,7 +287,11 @@ EnsureSystemCollections
 | 集成测试辅助 | 完成 | `internal/testutil/db.go` |
 | 查询 DSL 测试 | 完成 | `pkg/query/query_test.go` |
 | CRUD 工具测试 | 完成 | `pkg/crud/*_test.go` |
-| Account 用例测试 | 完成 | `internal/app/client/account_test.go` |
+| Account 用例测试 | 完成 | `internal/app/client/account_test.go`、`account_sessions_test.go` |
+| Server Document 集成测试 | 完成 | `internal/app/server/documents_integration_test.go` |
+| Client Document 集成测试 | 完成 | `internal/app/client/databases_integration_test.go` |
+| Teams Membership 集成测试 | 完成 | `internal/app/server/teams_memberships_integration_test.go` |
+| P0 自动化验收测试 | 完成 | `tests/acceptance/p0_acceptance_test.go`、`internal/infra/server/observability_acceptance_test.go` |
 | 动态文档 adapter 测试 | 完成 | `internal/infra/documentdb/postgres_test.go` |
 | 构建验证 | 完成 | `go build ./cmd/server` 通过 |
 | 全量测试 | 完成 | `go test ./...` 通过 |
@@ -297,17 +313,17 @@ EnsureSystemCollections
 
 ## 13. 当前已知限制 / 半成品
 
-虽然 P0 底座已可运行，但以下能力仍处在占位或最小实现阶段：
+P1 Sprint 1 已落地 Account 会话扩展、Document CRUD、Teams Memberships；以下能力仍待补齐：
 
-- **Client Account**：缺少 refresh token 端点、密码重置、邮箱验证、匿名登录、Magic URL、OAuth、MFA、账号偏好/日志、更新资料/密码。
+- **Client Account**：缺少密码重置、邮箱验证、匿名登录、Magic URL、OAuth、MFA、账号日志；email 修改无重验证流程。
 - **Server Users**：缺少创建用户、sessions/tokens 管理、labels/prefs 完整字段映射、密码重置、impersonation。
-- **Teams**：缺少 memberships、邀请/接受/拒绝、成员角色、团队权限。
-- **Databases**：缺少 Document CRUD API、批量操作、自增/自减、attribute/index 删除与更新、relationship、transaction、vector/geo。
+- **Teams**：缺少团队 prefs（`GET/PUT /v1/server/teams/{id}/prefs`）；Console 创建「已通过」成员时需传 `user_id`（仅邮箱 + accepted 会失败）。
+- **Databases**：缺少批量操作、自增/自减、attribute/index 删除与更新、relationship、transaction、vector/geo。
 - **Storage**：缺少 preview/缩略图、公开 bucket、file token、分片上传、usage。
 - **Functions**：仅为 stub，未接入真实 Docker build/run/execution。
 - **Realtime / Webhooks / Events / Messaging**：尚未实现。
-- **Project settings**：OAuth _providers、platforms、SMTP、email templates、policies 等均未实现。
-- **安全增强**：未实现 API Key 细粒度 scope 校验、速率限制、审计日志、IP/UA 采集。
+- **Project settings**：OAuth providers、platforms、SMTP、email templates、policies 等均未实现。
+- **安全增强**：速率限制、完整审计查询 API（Console 页面）未实现。
 - **队列/Worker**：未实现，当前为同步调用。
 
-这些限制将在 `docs/roadmap.md` 中按短/中/长期规划逐步补齐。
+详细待办见 `docs/roadmap.md` §2 与 M1 里程碑。

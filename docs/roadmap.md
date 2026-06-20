@@ -1,7 +1,7 @@
 # Fleet 开发路线图
 
 > 本文档基于已完成 P0 底座，规划 Fleet 的短期、中期、长期开发方向。
-> 最新更新：2026-06-18。
+> 最新更新：2026-06-20（P1 Sprint 1 部分落地，见 `docs/completed-tasks.md`）。
 
 ---
 
@@ -10,7 +10,7 @@
 | 阶段 | 目标 | 时间范围 | 状态 |
 |------|------|----------|------|
 | **P0 底座** | 可运行的工程骨架：动态文档层、Admin Console、基础认证、Storage/Functions 端口 | 已完成 | 完成 |
-| **P1 MVP** | Client/Server 核心业务闭环：Account、Users、Teams、Databases Documents、Storage 交付、Functions 真实执行、Health | 短期：1-2 个月 | 规划中 |
+| **P1 MVP** | Client/Server 核心业务闭环：Account、Users、Teams、Databases Documents、Storage 交付、Functions 真实执行、Health | 短期：1-2 个月 | **进行中** |
 | **P2 增强** | Realtime、Webhooks/Events、Messaging、Project settings、Migrations、Tokens、Worker 框架 | 中期：3-6 个月 | 规划中 |
 | **P3 生态** | Sites、Proxy、VCS、GraphQL、Avatars、Locale、Advisor、多区域/水平扩展 | 长期：6-12 个月 | 规划中 |
 
@@ -22,22 +22,22 @@
 
 ### 2.1 Client Account / Auth（最高优先级）
 
-Client API 是终端用户直接使用的能力，当前仅实现了邮箱注册/登录/登出/Me，需要补齐会话与账号管理。
+Client API 是终端用户直接使用的能力。Sprint 1 已补齐会话与 prefs；其余仍待实现。
 
-| 任务 | 说明 | 关键端点 / 文件 |
-|------|------|-----------------|
-| Refresh token | 用 refresh token 换取新的 access token | `POST /v1/account/sessions/token` |
-| 会话列表与删除 | 列出当前用户所有会话，可单独或全部删除 | `GET/DELETE /v1/account/sessions`、`DELETE /v1/account/sessions/{id}` |
-| 更新账号资料 | 修改 name、email、password | `PATCH /v1/account` |
-| 账号偏好 | 读写用户级 `prefs` JSON | `GET/PUT /v1/account/prefs` |
-| 匿名登录 | 创建无密码匿名用户 | `POST /v1/account/sessions/anonymous` |
-| Magic URL | 创建确认链接 + 确认登录 | `POST /v1/account/sessions/magic-url`、`PUT /v1/account/sessions/magic-url` |
-| 邮箱验证 | 发送验证邮件 + 确认 | `POST /v1/account/verification`、`PUT /v1/account/verification` |
-| 密码找回 | 创建找回链接 + 重置密码 | `POST /v1/account/recovery`、`PUT /v1/account/recovery` |
-| JWT 签发 | 用当前会话换取一次性 JWT | `POST /v1/account/jwt` |
-| OAuth2（占位） | Google / GitHub 授权与回调，先返回绑定用户 | `GET /v1/account/sessions/oauth2/{provider}`、`/v1/account/sessions/oauth2/callback/{provider}` |
-| MFA（占位） | factors 列表、TOTP 创建/验证/删除 | `GET/POST/PUT/DELETE /v1/account/mfa/*` |
-| 账号日志 | 列出最近登录/操作记录 | `GET /v1/account/logs` |
+| 任务 | 说明 | 关键端点 / 文件 | 状态 |
+|------|------|-----------------|------|
+| Refresh token | 用 refresh token 换取新的 access token | `POST /v1/account/refresh` | ✅ 完成 |
+| 会话列表与删除 | 列出当前用户所有会话，可单独或全部删除 | `GET/DELETE /v1/account/sessions` | ✅ 完成 |
+| 更新账号资料 | 修改 name | `PATCH /v1/account` | ✅ 完成（email/password 待扩展） |
+| 账号偏好 | 读写用户级 `prefs` JSON | `GET/PATCH /v1/account/prefs` | ✅ 完成 |
+| 匿名登录 | 创建无密码匿名用户 | `POST /v1/account/sessions/anonymous` | 待办 |
+| Magic URL | 创建确认链接 + 确认登录 | `POST/PUT /v1/account/sessions/magic-url` | 待办 |
+| 邮箱验证 | 发送验证邮件 + 确认 | `POST/PUT /v1/account/verification` | 待办 |
+| 密码找回 | 创建找回链接 + 重置密码 | `POST/PUT /v1/account/recovery` | 待办 |
+| JWT 签发 | 用当前会话换取一次性 JWT | `POST /v1/account/jwt` | 待办 |
+| OAuth2（占位） | Google / GitHub 授权与回调 | `/v1/account/sessions/oauth2/*` | 待办 |
+| MFA（占位） | factors 列表、TOTP 创建/验证/删除 | `/v1/account/mfa/*` | 待办 |
+| 账号日志 | 列出最近登录/操作记录 | `GET /v1/account/logs` | 待办 |
 
 **验收标准**：
 
@@ -70,15 +70,16 @@ Server API 当前支持列表/获取/更新/删除，缺少创建用户、会话
 
 ### 2.3 Teams & Memberships
 
-当前仅实现团队 CRUD，需要成员、邀请、角色。
+Sprint 1 已完成成员、邀请、角色与 Client/Console 页面；团队 prefs 仍待实现。
 
-| 任务 | 说明 | 关键端点 |
-|------|------|----------|
-| 成员 CRUD | 列出、创建、获取、更新、删除成员 | `/v1/server/teams/{id}/memberships` |
-| 邀请流程 | 创建邀请 → 被邀请人接受/拒绝 → 写入 `memberships` | `POST /v1/server/teams/{id}/memberships`、`PATCH /v1/server/teams/{id}/memberships/{id}/status` |
-| 角色体系 | owner / admin / member，影响 `team:{id}` 与 `member:{id}` role | `PATCH /v1/server/teams/{id}/memberships/{id}` |
-| 团队偏好 | `GET/PUT /v1/server/teams/{id}/prefs` | 扩展 `teams` 集合 |
-| Client Teams API | 当前用户创建/加入/退出团队 | `/v1/teams/*` |
+| 任务 | 说明 | 关键端点 | 状态 |
+|------|------|----------|------|
+| 成员 CRUD | 列出、创建、获取、更新、删除成员 | `/v1/server/teams/{id}/memberships` | ✅ 完成 |
+| 邀请流程 | 创建邀请 → 被邀请人接受/拒绝 | `POST` + `PATCH .../status` | ✅ 完成 |
+| 角色体系 | owner / admin / member → JWT `team:{id}`、`member:{id}` | `PATCH .../memberships/{id}` | ✅ 完成 |
+| 团队偏好 | `GET/PUT /v1/server/teams/{id}/prefs` | 扩展 `teams` 集合 | 待办 |
+| Client Teams API | 当前用户创建/加入/退出团队 | `/v1/teams/*` | ✅ 完成 |
+| Console Teams | 团队列表、详情、邀请与成员管理 | `/console/teams` | ✅ 完成 |
 
 **验收标准**：
 
@@ -90,19 +91,19 @@ Server API 当前支持列表/获取/更新/删除，缺少创建用户、会话
 
 ### 2.4 Databases Documents（核心）
 
-当前只到 Collection/Attribute/Index，缺少 Document CRUD 和批量操作。
+Sprint 1 已完成 Server/Client Document CRUD；批量操作与 attribute/index 删除仍待实现。
 
-| 任务 | 说明 | 关键端点 |
-|------|------|----------|
-| Document CRUD | 创建、获取、更新、删除文档 | `/v1/server/databases/{db}/collections/{coll}/documents` |
-| Document 列表/计数 | 带 Appwrite DSL 查询、权限过滤 | `GET /v1/server/databases/{db}/collections/{coll}/documents`、`/count` |
-| 批量操作 | 批量更新、删除、upsert | `PATCH/DELETE/POST /v1/server/databases/{db}/collections/{coll}/documents/bulk` |
-| 字段自增/自减 | 对数值字段做原子增减 | `PATCH /v1/server/databases/{db}/collections/{coll}/documents/{id}` |
-| Attribute 删除 | 删除属性并同步 `ALTER TABLE DROP COLUMN` | `DELETE /v1/server/databases/{db}/collections/{coll}/attributes/{key}` |
-| Index 删除 | 删除索引 | `DELETE /v1/server/databases/{db}/collections/{coll}/indexes/{id}` |
-| Collection 更新 | 修改 name / permissions | `PATCH /v1/server/databases/{db}/collections/{coll}` |
-| Client Database API | 终端用户在授权下读写文档 | `/v1/databases/{db}/collections/{coll}/documents/*` |
-| 权限中间件 | Document 级别 `_perms` 校验封装到拦截器或 use-case | `internal/domain/databases/permissions.go` |
+| 任务 | 说明 | 关键端点 | 状态 |
+|------|------|----------|------|
+| Document CRUD | 创建、获取、更新、删除文档 | `/v1/server/databases/{db}/collections/{coll}/documents` | ✅ 完成 |
+| Document 列表/计数 | 带 Appwrite DSL 查询、权限过滤 | `GET` / `count` | ✅ 完成 |
+| Client Database API | 终端用户在授权下读写文档 | `/v1/databases/{db}/collections/{coll}/documents/*` | ✅ 完成 |
+| Console 文档编辑器 | collection 下文档列表、新增/编辑/删除 | `/console/databases/.../documents` | ✅ 完成 |
+| 批量操作 | 批量更新、删除、upsert | `.../documents/bulk` | 待办 |
+| 字段自增/自减 | 对数值字段做原子增减 | `PATCH .../documents/{id}` | 待办 |
+| Attribute 删除 | 删除属性并同步 `ALTER TABLE DROP COLUMN` | `DELETE .../attributes/{key}` | 待办 |
+| Index 删除 | 删除索引 | `DELETE .../indexes/{id}` | 待办 |
+| Collection 更新 | 修改 name / permissions | `PATCH .../collections/{coll}` | 待办 |
 
 **验收标准**：
 
@@ -172,14 +173,14 @@ Server API 当前支持列表/获取/更新/删除，缺少创建用户、会话
 
 ### 2.8 Admin Console UI
 
-| 任务 | 说明 | 页面 |
-|------|------|------|
-| Storage 文件上传 | 在 Storage 页面直接上传文件、展示下载链接 | `console/src/routes/Storage.tsx` |
-| Databases 文档编辑器 | collection 下文档列表、新增/编辑/删除 | `console/src/routes/Databases.tsx` |
-| Attributes / Indexes 管理 | 在 collection 详情中增删属性与索引 | Databases 子页面 |
-| Teams Memberships | 管理团队邀请与成员 | 新增 `Teams.tsx` |
-| Functions 管理 | Functions / Deployments / Executions 页面 | 新增 `Functions.tsx` |
-| Settings 占位 | 项目基本信息、OAuth、SMTP（只读或简单表单） | 新增 `Settings.tsx` |
+| 任务 | 说明 | 页面 | 状态 |
+|------|------|------|------|
+| Storage 文件上传 | 在 Storage 页面直接上传文件、展示下载链接 | `console/src/routes/storage/` | ✅ 完成 |
+| Databases 文档编辑器 | collection 下文档列表、新增/编辑/删除 | `console/src/routes/databases/` | ✅ 完成 |
+| Attributes / Indexes 管理 | 在 collection 详情中增删属性与索引 | Databases 子页面 | 待办 |
+| Teams Memberships | 管理团队邀请与成员 | `console/src/routes/teams/` | ✅ 完成 |
+| Functions 管理 | Functions / Deployments / Executions 页面 | 新增 `Functions.tsx` | 待办 |
+| Settings 占位 | 项目基本信息、OAuth、SMTP（只读或简单表单） | 新增 `Settings.tsx` | 待办 |
 
 **验收标准**：
 
@@ -369,12 +370,16 @@ Server API 当前支持列表/获取/更新/删除，缺少创建用户、会话
 
 ### M1：P1 MVP 可用（短期结束）
 
-- [ ] Client Account 完整会话与账号管理。
-- [ ] Server Users / Teams / Memberships 管理可用。
-- [ ] Databases Documents CRUD、批量操作、Client API 权限可用。
+- [x] Client Account 核心会话与 prefs（Refresh / Sessions / UpdateAccount / Prefs）。
+- [ ] Client Account 完整能力（密码重置、OAuth、MFA 等）。
+- [x] Server Teams / Memberships 管理可用。
+- [ ] Server Users 创建与会话/令牌管理。
+- [x] Databases Documents CRUD、Client API 权限可用。
+- [ ] Databases 批量操作、attribute/index 删除。
 - [ ] Storage preview、公开 bucket、file token 可用。
 - [ ] Functions 可上传代码、构建、同步/异步执行。
-- [ ] Admin Console 覆盖 Project、Database、Storage、Teams、Functions 页面。
+- [x] Admin Console 覆盖 Database 文档编辑、Teams 页面。
+- [ ] Admin Console 覆盖 Functions、Settings 页面。
 - [ ] CI 绿，集成测试覆盖核心流程。
 
 ### M2：P2 生产就绪（中期结束）

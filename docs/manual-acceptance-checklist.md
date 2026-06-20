@@ -1,7 +1,7 @@
 # Fleet P0 人工验收清单
 
-> 基于 `docs/completed-tasks.md` 及近期提交整理（含安全加固与 auth 增强）。
-> 对应提交：`44f43ba`（权限/隔离修复）、`29f605b`（Refresh / 审计 / ACCESS_PERMISSION / Admin 项目归属）。
+> 基于 `docs/completed-tasks.md` 及近期提交整理。
+> 对应提交：`11af6f8`（P1 Sprint 1：Account 会话、Document CRUD、Teams Memberships、Console Teams）。
 >
 > **用法**：逐项执行操作，在 `[ ]` 中打 `x` 标记通过；未通过项在「备注」列记录现象与复现步骤。
 
@@ -71,6 +71,11 @@ Console Admin: admin@fleet.local / Admin@123
 | 2.9 | Refresh Token | `POST /v1/account/refresh`，body：`project_id` + `refresh_token` | 返回新的 access_token 与 refresh_token | [x] |
 | 2.10 | 无效 Refresh | 使用伪造或过期的 refresh_token | `Unauthenticated` | [x] |
 | 2.11 | Access 当 Refresh | 用 access_token 调 refresh 接口 | 失败（token type 不匹配） | [x] |
+| 2.12 | 更新资料 | `PATCH /v1/account`，修改 `name` | 返回更新后的 account | [ ] |
+| 2.13 | 会话列表 | `GET /v1/account/sessions` | 返回当前用户 session 列表 | [ ] |
+| 2.14 | 删除会话 | `DELETE /v1/account/sessions/{id}` | 指定 session 被删除 | [ ] |
+| 2.15 | Prefs 读写 | `GET/PATCH /v1/account/prefs` | prefs JSON 正确读写 | [ ] |
+| 2.16 | Team JWT roles | 用户接受 team 邀请后重新登录，`/v1/account/me` 或解码 access token | roles 含 `team:{teamId}`、`member:{membershipId}` | [ ] |
 
 **示例（注册）：**
 
@@ -102,7 +107,9 @@ curl -s -X POST http://localhost:8088/v1/account/refresh \
 | 3.6 | Users 页 | 导航至 Users（需先选择/绑定项目） | 展示通过 Client 注册的用户 | [x] |
 | 3.7 | Storage 页 | 创建 Bucket、上传文件（若 UI 支持） | Bucket / File 列表有数据 | [x] |
 | 3.8 | Databases 页 | 创建 Database / Collection | 元数据 catalog 可查看 | [x] |
-| 3.9 | 登出 / 会话 | 刷新页面或重新打开 | 未登录时跳转登录；已登录保持状态 | [x] |
+| 3.9 | Databases 文档 | 在 Collection 详情中新建/编辑/删除 Document | 文档列表与编辑器正常 | [ ] |
+| 3.10 | Teams 页 | 导航至 Teams → 新建团队 → 邀请成员 | 成员列表显示 pending；无「接受/拒绝」按钮（管理员视角） | [ ] |
+| 3.11 | 登出 / 会话 | 刷新页面或重新打开 | 未登录时跳转登录；已登录保持状态 | [x] |
 
 **Console API（可选 curl 验证）：**
 
@@ -140,7 +147,13 @@ curl -s -X POST http://localhost:8088/v1/console/auth/sign-in \
 | 4.15 | 创建 Collection | `POST /v1/server/databases/{db}/collections` | 动态表创建 | [x] |
 | 4.16 | 创建 Attribute | `POST .../attributes` | 列追加成功 | [x] |
 | 4.17 | 创建 Index | `POST .../indexes` | 索引创建成功 | [x] |
-| 4.18 | 删除链路 | 按 Database → Collection 逆序删除 | 无残留错误 | [x] |
+| 4.18 | Document CRUD | `POST/GET/PATCH/DELETE .../documents` | 文档增删改查成功 | [ ] |
+| 4.19 | Document 列表/计数 | `GET .../documents`、`.../documents/count` + queries | 过滤与计数正确 | [ ] |
+| 4.20 | 删除链路 | 按 Database → Collection 逆序删除 | 无残留错误 | [x] |
+| 4.21 | 创建成员邀请 | `POST /v1/server/teams/{id}/memberships`，email + pending | 返回 membership，status=pending | [ ] |
+| 4.22 | 成员状态（管理员） | `PATCH .../memberships/{id}/status`，body `{"status":"accepted"}` | 仅当邮箱对应用户已注册时成功 | [ ] |
+| 4.23 | 成员角色 | `PATCH .../memberships/{id}`，body `{"roles":["admin"]}` | roles 更新成功 | [ ] |
+| 4.24 | 删除团队级联 | `DELETE /v1/server/teams/{id}` | team 及 memberships 均被删除 | [ ] |
 
 ---
 
@@ -242,29 +255,55 @@ LIMIT 10;
 
 ---
 
-## 11. 已知不在本次验收范围
+## 11. Client Document API（P1）
+
+**认证**：`Authorization: Bearer <user_access_token>`（Client 用户 JWT，无需 `X-Fleet-Project`）。
+
+| # | 验收项 | 路径 / 方法 | 预期结果 | 通过 |
+|---|--------|-------------|----------|------|
+| 11.1 | 创建文档 | `POST /v1/databases/{db}/collections/{coll}/documents` | 201；默认 `user:{id}` 权限 | [ ] |
+| 11.2 | 列表文档 | `GET .../documents` | 仅返回有 read 权限的文档 | [ ] |
+| 11.3 | 获取/更新/删除 | `GET/PATCH/DELETE .../documents/{id}` | CRUD 符合 `_perms` | [ ] |
+| 11.4 | 跨用户隔离 | 用户 A 的 token 读用户 B 的私有文档 | `PermissionDenied` 或空列表 | [ ] |
+
+---
+
+## 12. Client Teams API（P1）
+
+| # | 验收项 | 路径 / 方法 | 预期结果 | 通过 |
+|---|--------|-------------|----------|------|
+| 12.1 | 创建团队 | `POST /v1/teams`，body `{"name":"..."}` | 返回 team；创建者为 owner 成员 | [ ] |
+| 12.2 | 邀请成员 | `POST /v1/teams/{id}/memberships`，email | pending membership | [ ] |
+| 12.3 | 被邀请人接受 | 被邀请用户 token 调 `PATCH .../memberships/{id}/status` `accepted` | status=accepted；team total +1 | [ ] |
+| 12.4 | 非被邀请人拒绝 | 其他用户调同上接口 | `PermissionDenied` | [ ] |
+| 12.5 | 退出团队 | `DELETE .../memberships/{id}`（成员本人） | 成员移除；total -1 | [ ] |
+| 12.6 | 邀请未注册用户 | 仅邮箱 pending 邀请（用户尚不存在） | 创建成功；接受前需先注册同邮箱账号 | [ ] |
+
+---
+
+## 13. 已知不在本次验收范围
 
 以下能力在 `docs/completed-tasks.md` §13 中标记为**未实现或占位**，验收时**不应**作为通过标准：
 
 - [ ] 密码重置、邮箱验证、OAuth、MFA、匿名登录
 - [ ] Server 侧创建用户、sessions/tokens 管理、impersonation
-- [ ] Teams memberships / 邀请流程
-- [ ] Document CRUD 对外 API、批量写、relationship、transaction
+- [ ] Teams prefs（`GET/PUT /v1/server/teams/{id}/prefs`）
+- [ ] Document 批量写、relationship、transaction
 - [ ] Storage 分片上传、缩略图、file token
 - [ ] Functions 真实 Docker 执行
 - [ ] Realtime / Webhooks / Events / Messaging
-- [ ] 速率限制、完整审计查询 API（仅落库，无 Console 页面）
+- [ ] 速率限制、完整审计查询 API（Console 页面）
 
 ---
 
-## 12. 验收结论
+## 14. 验收结论
 
-> **状态（2026-06-20）**：§0–§10 核心项已通过自动化集成测试覆盖；**§12 人工签字验收暂时挂起**，待 P1 Document CRUD 等功能落地后再做端到端人工走查。
+> **状态（2026-06-20）**：P0 §0–§10 已通过自动化测试；**P1 §2.12–§12.6、§3.9–§3.10、§4.18–§4.24 待人工验收**。
 
 | 结论 | 勾选 |
 |------|------|
-| **通过** — 核心 P0 功能与安全项均满足 | [ ] |
-| **有条件通过** — 存在非阻塞缺陷（见备注） | [x] |
+| **通过** — P0 + P1 Sprint 1 均满足 | [ ] |
+| **有条件通过** — P0 自动验证 + P1 存在非阻塞缺陷 | [ ] |
 | **不通过** — 存在阻塞缺陷 | [ ] |
 
 **阻塞缺陷摘要：**
@@ -276,7 +315,8 @@ LIMIT 10;
 **非阻塞备注：**
 
 ```
-§6.7–§10.3 已由自动化测试验证（见附录 C）；人工签字与 §12 结论待 P1 阶段补做。
+P0：§6.7–§10.3 已由自动化测试覆盖（见附录 C）。
+P1：Document / Teams 有部分集成测试，但仍建议 Console 与 Client API 走查一遍。
 ```
 
 ---
@@ -320,8 +360,18 @@ go test ./internal/infra/server/... -run TestObservability -count=1 -v
 # Storage HTTP（§5.1–§5.5）
 go test ./internal/api/serverhttp/... -run TestFileHandler -count=1 -v
 
-# Databases 元数据链路（§4.14–§4.18）
+# Databases 元数据链路（§4.14–§4.17）
 go test ./internal/app/server/... -run TestDatabases_AcceptanceChain -count=1 -v
+
+# P1 Document CRUD（§4.18–§4.19、§11）
+go test ./internal/app/server/... -run TestDatabases_DocumentCRUD -count=1 -v
+go test ./internal/app/client/... -run TestDatabases_DocumentCRUD -count=1 -v
+
+# P1 Teams Memberships（§4.21–§4.24、§12）
+go test ./internal/app/server/... -run TestTeams_Memberships -count=1 -v
+
+# Client Account 会话 / Prefs（§2.12–§2.15）
+go test ./internal/app/client/... -run TestAccount_SessionsUpdatePrefs -count=1 -v
 ```
 
 测试文件：
@@ -333,3 +383,6 @@ go test ./internal/app/server/... -run TestDatabases_AcceptanceChain -count=1 -v
 | §8.1–§8.3 | `tests/acceptance/p0_acceptance_test.go` → `TestP0_Section8_*` |
 | §9.1–§9.4 | `tests/acceptance/p0_acceptance_test.go` → `TestP0_Section9_*` |
 | §10.1–§10.3 | `internal/infra/server/observability_acceptance_test.go` |
+| §4.18–§4.19、§11 | `internal/app/server/documents_integration_test.go`、`internal/app/client/databases_integration_test.go` |
+| §4.21–§4.24、§12 | `internal/app/server/teams_memberships_integration_test.go` |
+| §2.12–§2.15 | `internal/app/client/account_sessions_test.go` |
