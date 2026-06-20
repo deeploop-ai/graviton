@@ -34,6 +34,23 @@ export interface Collection {
   updated_at: string;
 }
 
+function normalizeIndex(index: Index): Index {
+  return {
+    ...index,
+    attributes: index.attributes ?? [],
+    orders: index.orders ?? [],
+  };
+}
+
+function normalizeCollection(collection: Collection): Collection {
+  return {
+    ...collection,
+    permissions: collection.permissions ?? [],
+    attributes: collection.attributes ?? [],
+    indexes: (collection.indexes ?? []).map(normalizeIndex),
+  };
+}
+
 export async function listDatabases(): Promise<Database[]> {
   const res = await api.get<{ databases: Database[] }>("/server/databases");
   return res.data.databases ?? [];
@@ -60,7 +77,7 @@ export async function listCollections(databaseId: string): Promise<Collection[]>
   const res = await api.get<{ collections: Collection[] }>(
     `/server/databases/${databaseId}/collections`
   );
-  return res.data.collections ?? [];
+  return (res.data.collections ?? []).map(normalizeCollection);
 }
 
 export async function getCollection(
@@ -70,7 +87,7 @@ export async function getCollection(
   const res = await api.get<Collection>(
     `/server/databases/${databaseId}/collections/${collectionId}`
   );
-  return res.data;
+  return normalizeCollection(res.data);
 }
 
 export async function createCollection(
@@ -81,7 +98,7 @@ export async function createCollection(
     `/server/databases/${databaseId}/collections`,
     input
   );
-  return res.data;
+  return normalizeCollection(res.data);
 }
 
 export async function deleteCollection(

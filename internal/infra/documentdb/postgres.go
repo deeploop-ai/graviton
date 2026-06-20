@@ -577,20 +577,19 @@ func (p *postgresDocumentDB) ensurePermsTable(ctx context.Context, schema string
 }
 
 func (p *postgresDocumentDB) createCollectionTable(ctx context.Context, schema, collectionID string, tenant int64, attrs []databases.Attribute) error {
-	var colDefs []string
-	for _, attr := range attrs {
-		colDefs = append(colDefs, attributeColumnSQL(attr))
+	cols := []string{
+		"_id TEXT PRIMARY KEY",
+		fmt.Sprintf("_tenant BIGINT NOT NULL DEFAULT %d", tenant),
+		"_created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()",
+		"_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()",
+		"_created_by TEXT",
+		"_updated_by TEXT",
 	}
-	sql := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
-		_id TEXT PRIMARY KEY,
-		_tenant BIGINT NOT NULL DEFAULT %d,
-		_created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-		_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-		_created_by TEXT,
-		_updated_by TEXT,
-		%s,
-		UNIQUE (_id, _tenant)
-	)`, tableName(schema, collectionID), tenant, strings.Join(colDefs, ", "))
+	for _, attr := range attrs {
+		cols = append(cols, attributeColumnSQL(attr))
+	}
+	cols = append(cols, "UNIQUE (_id, _tenant)")
+	sql := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (\n\t\t%s\n\t)", tableName(schema, collectionID), strings.Join(cols, ",\n\t\t"))
 	_, err := p.conn(ctx).ExecContext(ctx, sql)
 	return err
 }

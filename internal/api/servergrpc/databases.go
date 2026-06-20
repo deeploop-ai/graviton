@@ -95,11 +95,14 @@ func (s *DatabasesService) CreateCollection(ctx context.Context, req *serverv1.C
 	if err := s.databases.CreateCollection(ctx, projectID, req.GetDatabaseId(), req.GetId(), req.GetName(), nil, nil); err != nil {
 		return nil, err
 	}
-	return &serverv1.Collection{
-		Id:         req.GetId(),
-		DatabaseId: req.GetDatabaseId(),
-		Name:       req.GetName(),
-	}, nil
+	col, err := s.databases.GetCollection(ctx, projectID, req.GetDatabaseId(), req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	if col == nil {
+		return nil, status.Error(codes.Internal, "collection not found after create")
+	}
+	return mapCollection(col), nil
 }
 
 func (s *DatabasesService) ListCollections(ctx context.Context, req *serverv1.ListCollectionsRequest) (*serverv1.ListCollectionsResponse, error) {

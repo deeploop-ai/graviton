@@ -27,6 +27,7 @@ func TestPostgresDocumentDatabase_CRUD(t *testing.T) {
 
 	// Create a custom database and collection.
 	require.NoError(t, docDB.CreateDatabase(ctx, projectID, "app", "Application DB"))
+	require.NoError(t, docDB.CreateCollection(ctx, projectID, "app", "notes", "Notes", nil, nil))
 	require.NoError(t, docDB.CreateCollection(ctx, projectID, "app", "posts", "Posts", []databases.Attribute{
 		{ID: "title", Key: "title", Type: "string", Size: 256},
 		{ID: "views", Key: "views", Type: "integer"},
