@@ -12,13 +12,35 @@ import {
   getCollection,
   createCollection,
   deleteCollection,
+  createAttribute,
+  createIndex,
   type Database,
   type Collection,
+  type Attribute,
 } from "@/api/databases";
 import { useAuth } from "@/hooks/useAuth";
 import { ResourceListPage } from "@/components/list/ResourceListPage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ColumnDef } from "@/components/list/DataTable";
 import {
   FormPageWrapper,
@@ -31,6 +53,342 @@ import {
   RowDeleteButton,
   DeleteButton,
 } from "@/components/resource/shared";
+
+const ATTRIBUTE_TYPES = [
+  { value: "string", label: "String" },
+  { value: "integer", label: "Integer" },
+  { value: "float", label: "Float" },
+  { value: "boolean", label: "Boolean" },
+  { value: "datetime", label: "Datetime" },
+  { value: "email", label: "Email" },
+  { value: "url", label: "URL" },
+  { value: "json", label: "JSON" },
+] as const;
+
+const INDEX_TYPES = [
+  { value: "key", label: "Key" },
+  { value: "unique", label: "Unique" },
+  { value: "fulltext", label: "Fulltext" },
+] as const;
+
+const STRING_LIKE_TYPES = new Set(["string", "email", "url"]);
+
+function AttributeList({
+  attributes,
+  onAdd,
+}: {
+  attributes: Attribute[];
+  onAdd: () => void;
+}) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <CardTitle className="text-lg">Attributes</CardTitle>
+        <Button size="sm" onClick={onAdd}>
+          <Plus className="h-4 w-4 mr-2" />
+          添加 Attribute
+        </Button>
+      </CardHeader>
+      <CardContent>
+        {attributes.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-4 text-center">
+            暂无字段定义，点击上方按钮添加第一个 Attribute
+          </p>
+        ) : (
+          <div className="rounded-md border divide-y">
+            {attributes.map((attr) => (
+              <div key={attr.id} className="px-4 py-3 flex items-center justify-between text-sm gap-4">
+                <div className="min-w-0">
+                  <span className="font-mono">{attr.key}</span>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {attr.required && <Badge variant="secondary">required</Badge>}
+                    {attr.array && <Badge variant="secondary">array</Badge>}
+                    {attr.size ? <Badge variant="secondary">size {attr.size}</Badge> : null}
+                  </div>
+                </div>
+                <Badge variant="outline">
+                  {attr.type}
+                  {attr.array ? "[]" : ""}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function IndexList({
+  indexes,
+  onAdd,
+  canAdd,
+}: {
+  indexes: Collection["indexes"];
+  onAdd: () => void;
+  canAdd: boolean;
+}) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <CardTitle className="text-lg">Indexes</CardTitle>
+        <Button size="sm" onClick={onAdd} disabled={!canAdd}>
+          <Plus className="h-4 w-4 mr-2" />
+          添加 Index
+        </Button>
+      </CardHeader>
+      <CardContent>
+        {!canAdd && (
+          <p className="text-sm text-muted-foreground mb-4">
+            请先添加至少一个 Attribute，再创建 Index。
+          </p>
+        )}
+        {indexes.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-4 text-center">
+            {canAdd ? "暂无索引，点击上方按钮添加 Index" : "暂无索引"}
+          </p>
+        ) : (
+          <div className="rounded-md border divide-y">
+            {indexes.map((idx) => (
+              <div key={idx.id} className="px-4 py-3 flex items-center justify-between text-sm gap-4">
+                <div className="min-w-0">
+                  <span className="font-mono text-xs text-muted-foreground">{idx.id}</span>
+                  <p className="font-mono mt-1">{idx.attributes.join(", ")}</p>
+                </div>
+                <Badge variant="outline">{idx.type}</Badge>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function AddAttributeDialog({
+  open,
+  onOpenChange,
+  loading,
+  onSubmit,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  loading: boolean;
+  onSubmit: (input: {
+    key: string;
+    type: string;
+    size?: number;
+    required: boolean;
+    array: boolean;
+  }) => void;
+}) {
+  const [key, setKey] = useState("");
+  const [type, setType] = useState("string");
+  const [size, setSize] = useState("");
+  const [required, setRequired] = useState(false);
+  const [array, setArray] = useState(false);
+
+  const reset = () => {
+    setKey("");
+    setType("string");
+    setSize("");
+    setRequired(false);
+    setArray(false);
+  };
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next) reset();
+    onOpenChange(next);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>添加 Attribute</DialogTitle>
+          <DialogDescription>为 Collection 定义字段类型与约束。</DialogDescription>
+        </DialogHeader>
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSubmit({
+              key: key.trim(),
+              type,
+              size: size ? Number(size) : undefined,
+              required,
+              array,
+            });
+          }}
+        >
+          <div className="space-y-2">
+            <Label htmlFor="attr-key">Key</Label>
+            <Input
+              id="attr-key"
+              value={key}
+              onChange={(e) => setKey(e.target.value)}
+              placeholder="title"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Type</Label>
+            <Select value={type} onValueChange={setType}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ATTRIBUTE_TYPES.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {STRING_LIKE_TYPES.has(type) && (
+            <div className="space-y-2">
+              <Label htmlFor="attr-size">Size（可选）</Label>
+              <Input
+                id="attr-size"
+                type="number"
+                min={1}
+                value={size}
+                onChange={(e) => setSize(e.target.value)}
+                placeholder="256"
+              />
+            </div>
+          )}
+          <div className="flex flex-wrap gap-6">
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox checked={required} onChange={(e) => setRequired(e.target.checked)} />
+              Required
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox checked={array} onChange={(e) => setArray(e.target.checked)} />
+              Array
+            </label>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+              取消
+            </Button>
+            <Button type="submit" disabled={loading || !key.trim()}>
+              {loading ? "添加中..." : "添加"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AddIndexDialog({
+  open,
+  onOpenChange,
+  loading,
+  attributes,
+  onSubmit,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  loading: boolean;
+  attributes: Attribute[];
+  onSubmit: (input: { id: string; type: string; attributes: string[] }) => void;
+}) {
+  const [id, setId] = useState("");
+  const [type, setType] = useState("key");
+  const [selected, setSelected] = useState<string[]>([]);
+
+  const reset = () => {
+    setId("");
+    setType("key");
+    setSelected([]);
+  };
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next) reset();
+    onOpenChange(next);
+  };
+
+  const toggleAttribute = (key: string) => {
+    setSelected((prev) =>
+      prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key]
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>添加 Index</DialogTitle>
+          <DialogDescription>选择索引类型，并指定参与索引的 Attribute。</DialogDescription>
+        </DialogHeader>
+        <form
+          className="space-y-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSubmit({ id: id.trim(), type, attributes: selected });
+          }}
+        >
+          <div className="space-y-2">
+            <Label htmlFor="index-id">ID</Label>
+            <Input
+              id="index-id"
+              value={id}
+              onChange={(e) => setId(e.target.value)}
+              placeholder="title_key"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Type</Label>
+            <Select value={type} onValueChange={setType}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {INDEX_TYPES.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Attributes</Label>
+            <div className="rounded-md border divide-y max-h-48 overflow-y-auto">
+              {attributes.map((attr) => (
+                <label
+                  key={attr.key}
+                  className="flex items-center gap-2 px-3 py-2 text-sm cursor-pointer hover:bg-muted/50"
+                >
+                  <Checkbox
+                    checked={selected.includes(attr.key)}
+                    onChange={() => toggleAttribute(attr.key)}
+                  />
+                  <span className="font-mono">{attr.key}</span>
+                  <Badge variant="outline" className="ml-auto">
+                    {attr.type}
+                  </Badge>
+                </label>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+              取消
+            </Button>
+            <Button type="submit" disabled={loading || !id.trim() || selected.length === 0}>
+              {loading ? "添加中..." : "添加"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 const dbColumns: ColumnDef<Database>[] = [
   {
@@ -335,6 +693,8 @@ export function CollectionDetailPage() {
   const { dbId, collId } = useParams<{ dbId: string; collId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [attrDialogOpen, setAttrDialogOpen] = useState(false);
+  const [indexDialogOpen, setIndexDialogOpen] = useState(false);
 
   const { data: collection, isLoading } = useQuery({
     queryKey: ["collections", dbId, collId],
@@ -351,57 +711,87 @@ export function CollectionDetailPage() {
     },
   });
 
+  const addAttribute = useMutation({
+    mutationFn: (input: {
+      key: string;
+      type: string;
+      size?: number;
+      required: boolean;
+      array: boolean;
+    }) => createAttribute(dbId!, collId!, input),
+    onSuccess: () => {
+      toast.success("Attribute 已添加");
+      queryClient.invalidateQueries({ queryKey: ["collections", dbId, collId] });
+      queryClient.invalidateQueries({ queryKey: ["collections", dbId] });
+      setAttrDialogOpen(false);
+    },
+  });
+
+  const addIndex = useMutation({
+    mutationFn: (input: { id: string; type: string; attributes: string[] }) =>
+      createIndex(dbId!, collId!, {
+        ...input,
+        orders: input.attributes.map(() => "asc"),
+      }),
+    onSuccess: () => {
+      toast.success("Index 已添加");
+      queryClient.invalidateQueries({ queryKey: ["collections", dbId, collId] });
+      queryClient.invalidateQueries({ queryKey: ["collections", dbId] });
+      setIndexDialogOpen(false);
+    },
+  });
+
   if (isLoading) return <DetailSkeleton />;
   if (!collection) return <NotFound backTo={`/console/databases/${dbId}`} />;
 
   return (
-    <DetailPageWrapper
-      title={collection.name}
-      description="Collection 详情"
-      backTo={`/console/databases/${dbId}`}
-      backLabel="返回 Database"
-      actions={
-        <DeleteButton onConfirm={() => remove.mutate()} loading={remove.isPending} />
-      }
-    >
-      <DetailGrid
-        items={[
-          { label: "ID", value: collection.id, mono: true },
-          { label: "名称", value: collection.name },
-          { label: "Database ID", value: collection.database_id, mono: true },
-          { label: "Attributes", value: collection.attributes.length },
-          { label: "Indexes", value: collection.indexes.length },
-          { label: "创建时间", value: new Date(collection.created_at).toLocaleString() },
-        ]}
+    <>
+      <DetailPageWrapper
+        title={collection.name}
+        description="Collection 详情与 Schema 管理"
+        backTo={`/console/databases/${dbId}`}
+        backLabel="返回 Database"
+        actions={
+          <DeleteButton onConfirm={() => remove.mutate()} loading={remove.isPending} />
+        }
+      >
+        <DetailGrid
+          items={[
+            { label: "ID", value: collection.id, mono: true },
+            { label: "名称", value: collection.name },
+            { label: "Database ID", value: collection.database_id, mono: true },
+            { label: "Attributes", value: collection.attributes.length },
+            { label: "Indexes", value: collection.indexes.length },
+            { label: "创建时间", value: new Date(collection.created_at).toLocaleString() },
+          ]}
+        />
+
+        <div className="mt-6 space-y-6">
+          <AttributeList
+            attributes={collection.attributes}
+            onAdd={() => setAttrDialogOpen(true)}
+          />
+          <IndexList
+            indexes={collection.indexes}
+            canAdd={collection.attributes.length > 0}
+            onAdd={() => setIndexDialogOpen(true)}
+          />
+        </div>
+      </DetailPageWrapper>
+
+      <AddAttributeDialog
+        open={attrDialogOpen}
+        onOpenChange={setAttrDialogOpen}
+        loading={addAttribute.isPending}
+        onSubmit={(input) => addAttribute.mutate(input)}
       />
-
-      {collection.attributes.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-3">Attributes</h3>
-          <div className="rounded-md border divide-y">
-            {collection.attributes.map((attr) => (
-              <div key={attr.id} className="px-4 py-3 flex items-center justify-between text-sm">
-                <span className="font-mono">{attr.key}</span>
-                <Badge variant="outline">{attr.type}{attr.array ? "[]" : ""}</Badge>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {collection.indexes.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-3">Indexes</h3>
-          <div className="rounded-md border divide-y">
-            {collection.indexes.map((idx) => (
-              <div key={idx.id} className="px-4 py-3 flex items-center justify-between text-sm">
-                <span className="font-mono">{idx.attributes.join(", ")}</span>
-                <Badge variant="outline">{idx.type}</Badge>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </DetailPageWrapper>
+      <AddIndexDialog
+        open={indexDialogOpen}
+        onOpenChange={setIndexDialogOpen}
+        loading={addIndex.isPending}
+        attributes={collection.attributes}
+        onSubmit={(input) => addIndex.mutate(input)}
+      />
+    </>
   );
 }
