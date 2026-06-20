@@ -174,9 +174,9 @@ curl -s -X POST "http://localhost:8088/v1/storage/buckets/<BUCKET_ID>/files" \
 | 6.4 | 伪造项目 Header（HTTP 文件） | 用户 JWT + `X-Fleet-Project: <其他项目>` 上传/下载 | **不应**访问到其他项目文件 | [x] |
 | 6.5 | 登出吊销 | SignOut 后使用旧 access token 调 Me | 失败 | [x] |
 | 6.6 | Refresh 绑定 Session | SignOut 后使用旧 refresh_token | 失败 | [x] |
-| 6.7 | Console Viewer 权限 | 创建 `role=viewer` 的 admin（无 `console_admin_projects` 记录），带 `X-Fleet-Project` 调 Server API | `PermissionDenied`（无项目归属） | [ ] |
-| 6.8 | Console Owner 放行 | `role=owner` 的 admin 带 `X-Fleet-Project: default` | 可正常访问 Server API | [ ] |
-| 6.9 | Viewer 授权后 | 在 `console_admin_projects` 插入 viewer 与 default 关联后重试 | 可访问该项目 | [ ] |
+| 6.7 | Console Viewer 权限 | 创建 `role=viewer` 的 admin（无 `console_admin_projects` 记录），带 `X-Fleet-Project` 调 Server API | `PermissionDenied`（无项目归属） | [x] |
+| 6.8 | Console Owner 放行 | `role=owner` 的 admin 带 `X-Fleet-Project: default` | 可正常访问 Server API | [x] |
+| 6.9 | Viewer 授权后 | 在 `console_admin_projects` 插入 viewer 与 default 关联后重试 | 可访问该项目 | [x] |
 
 **Viewer 授权 SQL 示例：**
 
@@ -191,10 +191,10 @@ VALUES ('<viewer-admin-uuid>', 'default');
 
 | # | 验收项 | 操作步骤 | 预期结果 | 通过 |
 |---|--------|----------|----------|------|
-| 7.1 | 写入记录 | 调用任意需认证的 gRPC 方法（如 `GET /v1/server/users`） | `audit_logs` 表新增一行 | [ ] |
-| 7.2 | 字段完整性 | 查询最新记录 | 含 `action`（full method）、`status`（success/错误码）、`actor_id`、`actor_kind` | [ ] |
-| 7.3 | 项目关联 | 带 `X-Fleet-Project` 的 Admin 请求 | `project_id` 为 header 中项目 | [ ] |
-| 7.4 | 公开接口 | 调用 `GET /v1/health` | 可不写审计或写匿名记录（按实现）；**不应**导致请求失败 | [ ] |
+| 7.1 | 写入记录 | 调用任意需认证的 gRPC 方法（如 `GET /v1/server/users`） | `audit_logs` 表新增一行 | [x] |
+| 7.2 | 字段完整性 | 查询最新记录 | 含 `action`（full method）、`status`（success/错误码）、`actor_id`、`actor_kind` | [x] |
+| 7.3 | 项目关联 | 带 `X-Fleet-Project` 的 Admin 请求 | `project_id` 为 header 中项目 | [x] |
+| 7.4 | 公开接口 | 调用 `GET /v1/health` | 可不写审计或写匿名记录（按实现）；**不应**导致请求失败 | [x] |
 
 **查询示例：**
 
@@ -211,9 +211,9 @@ LIMIT 10;
 
 | # | 验收项 | 操作步骤 | 预期结果 | 通过 |
 |---|--------|----------|----------|------|
-| 8.1 | Me 需 users 角色 | 有效 end-user token 调 Me | 成功（Principal 含 `users` 角色） | [ ] |
-| 8.2 | SignOut 需 users 角色 | 有效 end-user token 调 SignOut | 成功 | [ ] |
-| 8.3 | 无角色 Token | 若可构造缺 `users` 角色的 token（开发调试）调 Me | `PermissionDenied` | [ ] |
+| 8.1 | Me 需 users 角色 | 有效 end-user token 调 Me | 成功（Principal 含 `users` 角色） | [x] |
+| 8.2 | SignOut 需 users 角色 | 有效 end-user token 调 SignOut | 成功 | [x] |
+| 8.3 | 无角色 Token | 若可构造缺 `users` 角色的 token（开发调试）调 Me | `PermissionDenied` | [x] |
 
 > 说明：`Me`、`SignOut` 在 proto 中标注为 `ACCESS_PERMISSION` + `permissions: ["users"]`。
 
@@ -225,10 +225,10 @@ LIMIT 10;
 
 | # | 验收项 | 操作步骤 | 预期结果 | 通过 |
 |---|--------|----------|----------|------|
-| 9.1 | 系统集合 | Client 注册后查 Users 列表 | `users` 文档存在 | [ ] |
-| 9.2 | 查询过滤 | `GET /v1/server/users?queries=equal("email","qa@fleet.local")`（参数格式以 gateway 为准） | 仅返回匹配用户 | [ ] |
+| 9.1 | 系统集合 | Client 注册后查 Users 列表 | `users` 文档存在 | [x] |
+| 9.2 | 查询过滤 | `GET /v1/server/users?queries=equal("email","qa@fleet.local")`（参数格式以 gateway 为准） | 仅返回匹配用户 | [x] |
 | 9.3 | 自定义库 | 创建 app 库 + posts 集合 + attribute | 元数据与 schema 一致 | [x] |
-| 9.4 | 列表权限 | 非 admin 角色列表用户（若可模拟） | 仅返回有 `_perms` 的文档 | [ ] |
+| 9.4 | 列表权限 | 非 admin 角色列表用户（若可模拟） | 仅返回有 `_perms` 的文档 | [x] |
 
 ---
 
@@ -236,9 +236,9 @@ LIMIT 10;
 
 | # | 验收项 | 操作步骤 | 预期结果 | 通过 |
 |---|--------|----------|----------|------|
-| 10.1 | Metrics 端点 | 访问 `:9100` metrics 路径 | Prometheus 格式指标可抓取 | [ ] |
-| 10.2 | CORS | 浏览器 Console 跨域请求 API | 无 CORS 阻断（同源部署时 N/A） | [ ] |
-| 10.3 | 优雅错误 | 故意发送畸形 JSON | 返回结构化 error JSON，非 500 裸栈 | [ ] |
+| 10.1 | Metrics 端点 | 访问 `:9100` metrics 路径 | Prometheus 格式指标可抓取 | [x] |
+| 10.2 | CORS | 浏览器 Console 跨域请求 API | 无 CORS 阻断（同源部署时 N/A） | [x] |
+| 10.3 | 优雅错误 | 故意发送畸形 JSON | 返回结构化 error JSON，非 500 裸栈 | [x] |
 
 ---
 
@@ -259,10 +259,12 @@ LIMIT 10;
 
 ## 12. 验收结论
 
+> **状态（2026-06-20）**：§0–§10 核心项已通过自动化集成测试覆盖；**§12 人工签字验收暂时挂起**，待 P1 Document CRUD 等功能落地后再做端到端人工走查。
+
 | 结论 | 勾选 |
 |------|------|
 | **通过** — 核心 P0 功能与安全项均满足 | [ ] |
-| **有条件通过** — 存在非阻塞缺陷（见备注） | [ ] |
+| **有条件通过** — 存在非阻塞缺陷（见备注） | [x] |
 | **不通过** — 存在阻塞缺陷 | [ ] |
 
 **阻塞缺陷摘要：**
@@ -274,7 +276,7 @@ LIMIT 10;
 **非阻塞备注：**
 
 ```
-（填写）
+§6.7–§10.3 已由自动化测试验证（见附录 C）；人工签字与 §12 结论待 P1 阶段补做。
 ```
 
 ---
@@ -303,3 +305,31 @@ curl -s "$BASE/v1/server/users" \
 - [P0 底座设计](./p0-foundation-design.md)
 - [路线图](./roadmap.md)
 - [README 快速开始](../README.md)
+
+## 附录 C：自动化验收测试
+
+§6.7–§10.3 可通过集成测试自动验证（需本地 Postgres，`5433` 端口可连）：
+
+```bash
+# P0 验收（§6.7–§9.4）
+go test ./tests/acceptance/... -run TestP0 -count=1 -v
+
+# 可观测性（§10.1–§10.3，无需数据库）
+go test ./internal/infra/server/... -run TestObservability -count=1 -v
+
+# Storage HTTP（§5.1–§5.5）
+go test ./internal/api/serverhttp/... -run TestFileHandler -count=1 -v
+
+# Databases 元数据链路（§4.14–§4.18）
+go test ./internal/app/server/... -run TestDatabases_AcceptanceChain -count=1 -v
+```
+
+测试文件：
+
+| 清单章节 | 测试 |
+|----------|------|
+| §6.7–§6.9 | `tests/acceptance/p0_acceptance_test.go` → `TestP0_Section6_*` |
+| §7.1–§7.4 | `tests/acceptance/p0_acceptance_test.go` → `TestP0_Section7_*` |
+| §8.1–§8.3 | `tests/acceptance/p0_acceptance_test.go` → `TestP0_Section8_*` |
+| §9.1–§9.4 | `tests/acceptance/p0_acceptance_test.go` → `TestP0_Section9_*` |
+| §10.1–§10.3 | `internal/infra/server/observability_acceptance_test.go` |
