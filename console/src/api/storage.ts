@@ -69,8 +69,41 @@ export async function uploadFile(
   return res.data;
 }
 
-export function downloadUrl(bucketId: string, fileId: string): string {
-  return `/v1/storage/buckets/${bucketId}/files/${fileId}/download`;
+function filenameFromDisposition(header: string | undefined): string | undefined {
+  if (!header) return undefined;
+  const encoded = header.match(/filename\*=UTF-8''([^;\n]+)/i);
+  if (encoded?.[1]) {
+    try {
+      return decodeURIComponent(encoded[1]);
+    } catch {
+      // fall through to ASCII filename
+    }
+  }
+  const ascii = header.match(/filename="([^"]+)"/);
+  return ascii?.[1];
+}
+
+export async function downloadFile(
+  bucketId: string,
+  fileId: string,
+  fallbackName?: string
+): Promise<void> {
+  const res = await api.get(
+    `/storage/buckets/${bucketId}/files/${fileId}/download`,
+    { responseType: "blob" }
+  );
+  const blob = res.data as Blob;
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download =
+    fallbackName ??
+    filenameFromDisposition(res.headers["content-disposition"]) ??
+    "download";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 export async function deleteFile(bucketId: string, fileId: string): Promise<void> {

@@ -12,7 +12,7 @@ import {
   getFile,
   uploadFile,
   deleteFile,
-  downloadUrl,
+  downloadFile,
   type Bucket,
   type FileItem,
 } from "@/api/storage";
@@ -288,11 +288,14 @@ export function BucketDetailPage() {
         )}
         rowActions={(f) => (
           <>
-            <a href={downloadUrl(bucketId!, f.id)} target="_blank" rel="noreferrer">
-              <Button variant="ghost" size="icon" title="下载">
-                <Download className="h-4 w-4" />
-              </Button>
-            </a>
+            <Button
+              variant="ghost"
+              size="icon"
+              title="下载"
+              onClick={() => void downloadFile(bucketId!, f.id, f.name)}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
             <RowDeleteButton
               onConfirm={() => deleteMutation.mutate(f.id)}
               loading={deleteMutation.isPending}
@@ -337,11 +340,13 @@ export function FileDetailPage() {
       backLabel="返回 Bucket"
       actions={
         <div className="flex gap-2">
-          <Button asChild variant="outline" size="sm">
-            <a href={downloadUrl(bucketId!, file.id)} target="_blank" rel="noreferrer">
-              <Download className="h-4 w-4 mr-2" />
-              下载
-            </a>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => void downloadFile(bucketId!, file.id, file.name)}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            下载
           </Button>
           <DeleteButton onConfirm={() => remove.mutate()} loading={remove.isPending} />
         </div>

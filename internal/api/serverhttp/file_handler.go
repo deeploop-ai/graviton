@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/deeploop-ai/fleet/internal/app/storage"
@@ -136,12 +137,11 @@ func (h *FileHandler) download(w http.ResponseWriter, r *http.Request, pathParam
 	defer reader.Close()
 
 	w.Header().Set("Content-Type", file.MimeType)
-	safeName := safeFilename(file.Name)
-	if strings.HasSuffix(r.URL.Path, "/download") {
-		w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, safeName))
-	} else {
-		w.Header().Set("Content-Disposition", fmt.Sprintf(`inline; filename="%s"`, safeName))
+	disposition := "attachment"
+	if !strings.HasSuffix(r.URL.Path, "/download") {
+		disposition = "inline"
 	}
+	w.Header().Set("Content-Disposition", contentDispositionHeader(disposition, file.Name))
 	w.WriteHeader(http.StatusOK)
 	_, _ = io.Copy(w, reader)
 }
@@ -190,6 +190,29 @@ func safeFilename(name string) string {
 		return "download"
 	}
 	return name
+}
+
+func contentDispositionHeader(disposition, name string) string {
+	safe := safeFilename(name)
+	ascii := asciiFilenameFallback(safe)
+	encoded := url.PathEscape(safe)
+	return fmt.Sprintf(`%s; filename="%s"; filename*=UTF-8''%s`, disposition, ascii, encoded)
+}
+
+func asciiFilenameFallback(name string) string {
+	var b strings.Builder
+	for _, r := range name {
+		if r >= 32 && r <= 126 && r != '"' && r != '\\' {
+			b.WriteRune(r)
+		} else {
+			b.WriteRune('_')
+		}
+	}
+	out := strings.Trim(b.String(), "._ ")
+	if out == "" {
+		return "download"
+	}
+	return out
 }
 
 func httpError(w http.ResponseWriter, err error) {
