@@ -45,10 +45,16 @@ import {
 
 const MEMBERSHIP_ROLES = ["owner", "admin", "member"] as const;
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: "待处理",
+  accepted: "已通过",
+  rejected: "已拒绝",
+};
+
 function statusBadge(status: string) {
   const variant =
     status === "accepted" ? "default" : status === "rejected" ? "outline" : "secondary";
-  return <Badge variant={variant}>{status}</Badge>;
+  return <Badge variant={variant}>{STATUS_LABELS[status] ?? status}</Badge>;
 }
 
 function formatTime(value?: string) {
@@ -290,12 +296,48 @@ export function TeamDetailPage() {
     {
       key: "roles",
       header: "角色",
-      cell: (m) => (m.roles?.length ? m.roles.join(", ") : "member"),
+      cell: (m) => (
+        <Select
+          value={m.roles?.[0] ?? "member"}
+          onValueChange={(role) => setRole.mutate({ membershipId: m.id, roles: [role] })}
+        >
+          <SelectTrigger className="h-8 w-[108px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {MEMBERSHIP_ROLES.map((role) => (
+              <SelectItem key={role} value={role}>
+                {role}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ),
     },
     {
       key: "status",
       header: "状态",
-      cell: (m) => statusBadge(m.status),
+      cell: (m) =>
+        m.status === "pending" ? (
+          <Select
+            value={m.status}
+            onValueChange={(status) => {
+              if (status === "pending") return;
+              setStatus.mutate({ membershipId: m.id, status });
+            }}
+          >
+            <SelectTrigger className="h-8 w-[108px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pending">{STATUS_LABELS.pending}</SelectItem>
+              <SelectItem value="accepted">{STATUS_LABELS.accepted}</SelectItem>
+              <SelectItem value="rejected">{STATUS_LABELS.rejected}</SelectItem>
+            </SelectContent>
+          </Select>
+        ) : (
+          statusBadge(m.status)
+        ),
     },
     {
       key: "joined",
@@ -354,6 +396,9 @@ export function TeamDetailPage() {
             <UserPlus className="h-4 w-4" />
             邀请成员
           </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            被邀请人需在 Client API 自行接受或拒绝邀请；此处仅用于管理员创建邀请或直接添加成员。
+          </p>
         </CardHeader>
         <CardContent>
           <form
@@ -398,8 +443,8 @@ export function TeamDetailPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pending">pending</SelectItem>
-                  <SelectItem value="accepted">accepted</SelectItem>
+                  <SelectItem value="pending">{STATUS_LABELS.pending}</SelectItem>
+                  <SelectItem value="accepted">{STATUS_LABELS.accepted}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -426,49 +471,10 @@ export function TeamDetailPage() {
           />
         )}
         rowActions={(m) => (
-          <div className="flex flex-wrap items-center justify-end gap-1">
-            {m.status === "pending" && (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={setStatus.isPending}
-                  onClick={() => setStatus.mutate({ membershipId: m.id, status: "accepted" })}
-                >
-                  接受
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  disabled={setStatus.isPending}
-                  onClick={() => setStatus.mutate({ membershipId: m.id, status: "rejected" })}
-                >
-                  拒绝
-                </Button>
-              </>
-            )}
-            <Select
-              value={m.roles?.[0] ?? "member"}
-              onValueChange={(role) => setRole.mutate({ membershipId: m.id, roles: [role] })}
-            >
-              <SelectTrigger className="h-8 w-[100px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {MEMBERSHIP_ROLES.map((role) => (
-                  <SelectItem key={role} value={role}>
-                    {role}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <RowDeleteButton
-              onConfirm={() => removeMembership.mutate(m.id)}
-              loading={removeMembership.isPending}
-            />
-          </div>
+          <RowDeleteButton
+            onConfirm={() => removeMembership.mutate(m.id)}
+            loading={removeMembership.isPending}
+          />
         )}
         emptyTitle="暂无成员"
         emptyDescription="使用上方表单邀请成员加入团队"
