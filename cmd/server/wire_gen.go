@@ -42,7 +42,7 @@ func wireBootstrap(app lynx.Lynx) (*boot.Bootstrap, func(), error) {
 	apiKeyRepository := bunrepo.NewAPIKeyRepository(database)
 	consoleAdminRepository := bunrepo.NewConsoleAdminRepository(database)
 	consoleAdminProjectRepository := bunrepo.NewConsoleAdminProjectRepository(database)
-	documentDB := documentdb.NewPostgresDocumentDatabase(database)
+	documentDB := documentdb.NewPostgresDocumentDB(database)
 	validator := auth.NewValidator(appConfig, apiKeyRepository, consoleAdminRepository, consoleAdminProjectRepository, documentDB)
 	repository := bunrepo.NewAuditRepository(database)
 	projectsRepository := bunrepo.NewProjectRepository(database)

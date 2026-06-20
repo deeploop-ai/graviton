@@ -22,7 +22,7 @@ func TestPostgresDocumentDatabase_CRUD(t *testing.T) {
 	projectID, _, cleanup := testutil.CreateTestProject(ctx, db)
 	defer cleanup()
 
-	docDB := NewPostgresDocumentDatabase(db)
+	docDB := NewPostgresDocumentDB(db)
 	require.NoError(t, docDB.EnsureSystemCollections(ctx, projectID, 0))
 
 	// Create a custom database and collection.
@@ -95,7 +95,7 @@ func TestPostgresDocumentDatabase_Permissions(t *testing.T) {
 	projectID, _, cleanup := testutil.CreateTestProject(ctx, db)
 	defer cleanup()
 
-	docDB := NewPostgresDocumentDatabase(db)
+	docDB := NewPostgresDocumentDB(db)
 	require.NoError(t, docDB.EnsureSystemCollections(ctx, projectID, 0))
 
 	created, err := docDB.CreateDocument(ctx, projectID, "default", "users", databases.Document{
@@ -145,7 +145,7 @@ func TestEnsureSystemCollections_MultipleProjects(t *testing.T) {
 	db := testutil.SetupTestDB(t)
 	defer db.Close()
 
-	docDB := NewPostgresDocumentDatabase(db)
+	docDB := NewPostgresDocumentDB(db)
 
 	projectA, internalA, cleanupA := testutil.CreateTestProject(ctx, db)
 	defer cleanupA()

@@ -33,7 +33,7 @@ type postgresDocumentDB struct {
 	db *clients.Database
 }
 
-func NewPostgresDocumentDatabase(db *clients.Database) databases.DocumentDB {
+func NewPostgresDocumentDB(db *clients.Database) databases.DocumentDB {
 	return &postgresDocumentDB{db: db}
 }
 

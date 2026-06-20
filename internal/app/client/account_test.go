@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/deeploop-ai/fleet/internal/domain/shared"
 	"github.com/deeploop-ai/fleet/internal/infra/bun/bunrepo"
 	"github.com/deeploop-ai/fleet/internal/infra/documentdb"
 	"github.com/deeploop-ai/fleet/internal/pkg/config"
 	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
 	"github.com/deeploop-ai/fleet/internal/testutil"
-	"github.com/deeploop-ai/fleet/internal/domain/shared"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -34,7 +34,7 @@ func TestAccount_SignUpSignInMe(t *testing.T) {
 	cfg = buildTestConfig()
 
 	projectRepo := bunrepo.NewProjectRepository(db)
-	docDB := documentdb.NewPostgresDocumentDatabase(db)
+	docDB := documentdb.NewPostgresDocumentDB(db)
 	account := NewAccount(cfg, projectRepo, docDB)
 
 	// Sign up.

@@ -148,7 +148,7 @@ func repoRoot() (string, error) {
 func CreateTestProject(ctx context.Context, db *clients.Database) (string, int64, func()) {
 	project := &model.Project{
 		ID:        fmt.Sprintf("test-%d", time.Now().UnixNano()),
-		Name:      "Test Project",
+		Name:      fmt.Sprintf("Test Project %d", time.Now().UnixNano()),
 		Status:    "active",
 		Settings:  map[string]any{},
 		CreatedAt: time.Now(),

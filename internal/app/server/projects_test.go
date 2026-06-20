@@ -23,7 +23,7 @@ func TestProjects_CreateProject_Success(t *testing.T) {
 	defer db.Close()
 
 	repo := bunrepo.NewProjectRepository(db)
-	docDB := documentdb.NewPostgresDocumentDatabase(db)
+	docDB := documentdb.NewPostgresDocumentDB(db)
 	projectsUC := NewProjects(repo, docDB, db)
 
 	p, err := projectsUC.CreateProject(ctx, CreateProjectCommand{
@@ -50,7 +50,7 @@ func TestProjects_CreateProject_RollsBackOnFailure(t *testing.T) {
 	defer db.Close()
 
 	repo := bunrepo.NewProjectRepository(db)
-	docDB := documentdb.NewPostgresDocumentDatabase(db)
+	docDB := documentdb.NewPostgresDocumentDB(db)
 
 	projectID := fmt.Sprintf("rollback-%d", time.Now().UnixNano())
 	p := &projects.Project{

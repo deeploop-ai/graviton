@@ -135,7 +135,11 @@ func (s *Storage) CreateFile(ctx context.Context, cmd CreateFileCommand, content
 	}
 
 	// Verify bucket exists.
-	if _, err := s.docDB.GetDocument(ctx, project.ID, "default", "buckets", cmd.BucketID, roles); err != nil {
+	bucketDoc, err := s.docDB.GetDocument(ctx, project.ID, "default", "buckets", cmd.BucketID, roles)
+	if err != nil {
+		return nil, err
+	}
+	if bucketDoc == nil {
 		return nil, status.Error(codes.NotFound, "bucket not found")
 	}
 
