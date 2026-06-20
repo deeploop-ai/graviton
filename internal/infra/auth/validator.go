@@ -10,6 +10,7 @@ import (
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
 	"github.com/deeploop-ai/fleet/internal/domain/projects"
 	"github.com/deeploop-ai/fleet/internal/domain/shared"
+	"github.com/deeploop-ai/fleet/internal/domain/users"
 	"github.com/deeploop-ai/fleet/internal/pkg/config"
 	"github.com/deeploop-ai/fleet/pkg/idgen"
 	"github.com/deeploop-ai/fleet/pkg/jwtparser"
@@ -123,6 +124,9 @@ func (v *Validator) principalFromJWT(ctx context.Context, claims *jwtparser.Clai
 		if claims.TokenType != "" && claims.TokenType != jwtparser.TokenTypeAccess {
 			return nil, status.Error(codes.Unauthenticated, "invalid token type")
 		}
+		if err := v.ensureUserCanAuthenticate(ctx, claims.ProjectID, claims.UserID); err != nil {
+			return nil, err
+		}
 		return &shared.Principal{
 			ActorID:        idgen.ID(claims.UserID),
 			ActorKind:      shared.ActorKindEndUser,
@@ -155,6 +159,9 @@ func (v *Validator) principalFromSession(ctx context.Context, projectID, session
 	if userID == "" {
 		return nil, status.Error(codes.Unauthenticated, "invalid session")
 	}
+	if err := v.ensureUserCanAuthenticate(ctx, projectID, userID); err != nil {
+		return nil, err
+	}
 	return &shared.Principal{
 		ActorID:        idgen.ID(userID),
 		ActorKind:      shared.ActorKindEndUser,
@@ -179,6 +186,24 @@ func (v *Validator) validateEndUserSession(ctx context.Context, projectID, sessi
 		if err == nil && expireAt.Before(time.Now()) {
 			return status.Error(codes.Unauthenticated, "session expired")
 		}
+	}
+	return nil
+}
+
+func (v *Validator) ensureUserCanAuthenticate(ctx context.Context, projectID, userID string) error {
+	if projectID == "" || userID == "" {
+		return nil
+	}
+	doc, err := v.docDB.GetDocument(ctx, projectID, "default", "users", userID, databases.SystemRoles)
+	if err != nil {
+		return status.Error(codes.Unauthenticated, "user lookup failed")
+	}
+	if doc == nil {
+		return status.Error(codes.Unauthenticated, "user not found")
+	}
+	statusVal, _ := doc.Data["status"].(string)
+	if !users.CanAuthenticate(statusVal) {
+		return status.Error(codes.Unauthenticated, "user account is not active")
 	}
 	return nil
 }

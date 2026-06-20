@@ -7,6 +7,7 @@ import (
 
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
 	"github.com/deeploop-ai/fleet/internal/domain/projects"
+	"github.com/deeploop-ai/fleet/internal/domain/users"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -56,6 +57,15 @@ func (u *Users) UpdateUser(ctx context.Context, projectID, userID string, update
 	if _, err := u.resolveProject(ctx, projectID); err != nil {
 		return nil, err
 	}
+	if raw, ok := updates["status"]; ok {
+		s, ok := raw.(string)
+		if !ok {
+			return nil, status.Error(codes.InvalidArgument, "status must be a string")
+		}
+		if err := users.ValidateStatus(s); err != nil {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	}
 	doc := databases.Document{ID: userID, Data: updates}
 	updated, err := u.docDB.UpdateDocument(ctx, projectID, "default", "users", doc, nil, roles)
 	if err != nil {
@@ -71,9 +81,12 @@ func (u *Users) DeleteUser(ctx context.Context, projectID, userID string, roles 
 	return u.docDB.DeleteDocument(ctx, projectID, "default", "users", userID, roles)
 }
 
-func (u *Users) UpdateUserStatus(ctx context.Context, projectID, userID, status string, roles []string) (*databases.Document, error) {
-	if status == "" {
-		status = "active"
+func (u *Users) UpdateUserStatus(ctx context.Context, projectID, userID, userStatus string, roles []string) (*databases.Document, error) {
+	if userStatus == "" {
+		userStatus = users.StatusActive
 	}
-	return u.UpdateUser(ctx, projectID, userID, map[string]any{"status": status, "updated_at": time.Now().Format(time.RFC3339Nano)}, roles)
+	if err := users.ValidateStatus(userStatus); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	return u.UpdateUser(ctx, projectID, userID, map[string]any{"status": userStatus, "updated_at": time.Now().Format(time.RFC3339Nano)}, roles)
 }

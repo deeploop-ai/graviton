@@ -8,6 +8,7 @@ import (
 
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
 	"github.com/deeploop-ai/fleet/internal/domain/projects"
+	"github.com/deeploop-ai/fleet/internal/domain/users"
 	"github.com/deeploop-ai/fleet/internal/infra/auth"
 	"github.com/deeploop-ai/fleet/internal/pkg/config"
 	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
@@ -108,7 +109,7 @@ func (a *Account) SignUp(ctx context.Context, cmd SignUpCommand) (*User, *TokenB
 			"email":          cmd.Email,
 			"password_hash":  hash,
 			"name":           cmd.Name,
-			"status":         "active",
+			"status":         users.StatusActive,
 			"email_verified": false,
 			"labels":         []any{},
 			"prefs":          map[string]any{},
@@ -162,6 +163,9 @@ func (a *Account) SignIn(ctx context.Context, cmd SignInCommand) (*User, *TokenB
 	}
 
 	user := mapUserDoc(&userDoc)
+	if !users.CanAuthenticate(user.Status) {
+		return nil, nil, "", status.Error(codes.Unauthenticated, "user account is not active")
+	}
 	return a.createSessionAndTokens(ctx, project.ID, user.ID, user.Email)
 }
 
@@ -204,6 +208,9 @@ func (a *Account) RefreshToken(ctx context.Context, cmd RefreshTokenCommand) (*T
 		return nil, "", status.Error(codes.Unauthenticated, "invalid refresh token")
 	}
 	if err := a.ensureActiveSession(ctx, projectID, claims.SessionID, claims.UserID); err != nil {
+		return nil, "", err
+	}
+	if err := a.ensureUserCanAuthenticate(ctx, projectID, claims.UserID); err != nil {
 		return nil, "", err
 	}
 	return a.issueTokens(projectID, claims.UserID, claims.Username, claims.SessionID)
@@ -289,6 +296,20 @@ func (a *Account) issueTokens(projectID, userID, email, sessionID string) (*Toke
 		RefreshToken: refreshToken,
 		ExpiresAt:    accessClaims.ExpiresAt,
 	}, cookie, nil
+}
+
+func (a *Account) ensureUserCanAuthenticate(ctx context.Context, projectID, userID string) error {
+	doc, err := a.docDB.GetDocument(ctx, projectID, "default", "users", userID, databases.SystemRoles)
+	if err != nil {
+		return status.Error(codes.Unauthenticated, "user lookup failed")
+	}
+	if doc == nil {
+		return status.Error(codes.Unauthenticated, "user not found")
+	}
+	if !users.CanAuthenticate(stringValue(doc.Data["status"])) {
+		return status.Error(codes.Unauthenticated, "user account is not active")
+	}
+	return nil
 }
 
 func (a *Account) ensureActiveSession(ctx context.Context, projectID, sessionID, userID string) error {
