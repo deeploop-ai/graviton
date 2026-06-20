@@ -100,9 +100,9 @@ curl -s -X POST http://localhost:8088/v1/account/refresh \
 | 3.4 | Projects 页 | 导航至 Projects | 列表展示项目（含 `default`） | [x] |
 | 3.5 | API Keys 页 | 导航至 Api Keys | 可列表；创建后**仅一次**显示 secret | [x] |
 | 3.6 | Users 页 | 导航至 Users（需先选择/绑定项目） | 展示通过 Client 注册的用户 | [x] |
-| 3.7 | Storage 页 | 创建 Bucket、上传文件（若 UI 支持） | Bucket / File 列表有数据 | [ ] |
-| 3.8 | Databases 页 | 创建 Database / Collection | 元数据 catalog 可查看 | [ ] |
-| 3.9 | 登出 / 会话 | 刷新页面或重新打开 | 未登录时跳转登录；已登录保持状态 | [ ] |
+| 3.7 | Storage 页 | 创建 Bucket、上传文件（若 UI 支持） | Bucket / File 列表有数据 | [x] |
+| 3.8 | Databases 页 | 创建 Database / Collection | 元数据 catalog 可查看 | [x] |
+| 3.9 | 登出 / 会话 | 刷新页面或重新打开 | 未登录时跳转登录；已登录保持状态 | [x] |
 
 **Console API（可选 curl 验证）：**
 
@@ -121,26 +121,26 @@ curl -s -X POST http://localhost:8088/v1/console/auth/sign-in \
 - `X-Api-Key: <project_api_key_secret>`
 - Console JWT：`Authorization: Bearer <admin_token>` + `X-Fleet-Project: default`
 
-| # | 验收项 | 路径 / 方法 | 预期结果 | 通过 |
-|---|--------|-------------|----------|------|
-| 4.1 | 无凭证拒绝 | 任意 `/v1/server/*` 无 Header | `Unauthenticated` | [ ] |
-| 4.2 | 列出项目 | `GET /v1/server/projects` | 返回项目列表 | [ ] |
-| 4.3 | 获取项目 | `GET /v1/server/projects/default` | 返回 default 项目详情 | [ ] |
-| 4.4 | 创建 API Key | `POST /v1/server/api-keys` | 返回 key + **一次性** secret | [ ] |
-| 4.5 | 列出 API Keys | `GET /v1/server/api-keys` | 列表不含 secret 明文 | [ ] |
-| 4.6 | 列出用户 | `GET /v1/server/users` | 含 2.1 注册的用户 | [ ] |
-| 4.7 | 获取用户 | `GET /v1/server/users/{id}` | 返回单个用户（无 password_hash） | [ ] |
-| 4.8 | 更新用户 | `PATCH /v1/server/users/{id}`，如 `status` | 更新成功 | [ ] |
-| 4.9 | 创建团队 | `POST /v1/server/teams` | 返回 team | [ ] |
-| 4.10 | 列出 / 删除团队 | `GET` / `DELETE /v1/server/teams/{id}` | 符合 CRUD 预期 | [ ] |
-| 4.11 | 创建 Bucket | `POST /v1/server/storage/buckets` | 返回 bucket id | [ ] |
-| 4.12 | 创建文件（gRPC 小文件） | `POST /v1/server/storage/buckets/{id}/files` | 元数据写入 `files` 集合 | [ ] |
-| 4.13 | 列出 / 获取 / 删除文件 | 对应 GET / DELETE | 符合预期 | [ ] |
-| 4.14 | 创建 Database | `POST /v1/server/databases` | catalog 有记录 | [ ] |
-| 4.15 | 创建 Collection | `POST /v1/server/databases/{db}/collections` | 动态表创建 | [ ] |
-| 4.16 | 创建 Attribute | `POST .../attributes` | 列追加成功 | [ ] |
-| 4.17 | 创建 Index | `POST .../indexes` | 索引创建成功 | [ ] |
-| 4.18 | 删除链路 | 按 Database → Collection 逆序删除 | 无残留错误 | [ ] |
+| # | 验收项 | 路径 / 方法 | 预期结果 | 通过  |
+|---|--------|-------------|----------|-----|
+| 4.1 | 无凭证拒绝 | 任意 `/v1/server/*` 无 Header | `Unauthenticated` | [x] |
+| 4.2 | 列出项目 | `GET /v1/server/projects` | 返回项目列表 | [x] |
+| 4.3 | 获取项目 | `GET /v1/server/projects/default` | 返回 default 项目详情 | [x] |
+| 4.4 | 创建 API Key | `POST /v1/server/api-keys` | 返回 key + **一次性** secret | [x] |
+| 4.5 | 列出 API Keys | `GET /v1/server/api-keys` | 列表不含 secret 明文 | [x] |
+| 4.6 | 列出用户 | `GET /v1/server/users` | 含 2.1 注册的用户 | [x] |
+| 4.7 | 获取用户 | `GET /v1/server/users/{id}` | 返回单个用户（无 password_hash） | [x] |
+| 4.8 | 更新用户 | `PATCH /v1/server/users/{id}`，如 `status` | 更新成功 | [x] |
+| 4.9 | 创建团队 | `POST /v1/server/teams` | 返回 team | [x] |
+| 4.10 | 列出 / 删除团队 | `GET` / `DELETE /v1/server/teams/{id}` | 符合 CRUD 预期 | [x] |
+| 4.11 | 创建 Bucket | `POST /v1/server/storage/buckets` | 返回 bucket id | [x] |
+| 4.12 | 创建文件（gRPC 小文件） | `POST /v1/server/storage/buckets/{id}/files` | 元数据写入 `files` 集合 | [x] |
+| 4.13 | 列出 / 获取 / 删除文件 | 对应 GET / DELETE | 符合预期 | [x] |
+| 4.14 | 创建 Database | `POST /v1/server/databases` | catalog 有记录 | [x] |
+| 4.15 | 创建 Collection | `POST /v1/server/databases/{db}/collections` | 动态表创建 | [x] |
+| 4.16 | 创建 Attribute | `POST .../attributes` | 列追加成功 | [x] |
+| 4.17 | 创建 Index | `POST .../indexes` | 索引创建成功 | [x] |
+| 4.18 | 删除链路 | 按 Database → Collection 逆序删除 | 无残留错误 | [x] |
 
 ---
 
@@ -148,11 +148,11 @@ curl -s -X POST http://localhost:8088/v1/console/auth/sign-in \
 
 | # | 验收项 | 操作步骤 | 预期结果 | 通过 |
 |---|--------|----------|----------|------|
-| 5.1 | Multipart 上传 | `POST /v1/storage/buckets/{bucketId}/files`，`multipart/form-data`，字段 `file` | 201；返回 file id | [ ] |
-| 5.2 | 下载 | `GET .../files/{fileId}/download`，带合法凭证 | 文件内容与上传一致 | [ ] |
-| 5.3 | 内联查看 | `GET .../files/{fileId}/view` | Content-Type 正确，可预览 | [ ] |
-| 5.4 | API Key 上传 | 使用 `X-Api-Key` 认证上传 | 文件归属 API Key 对应项目 | [ ] |
-| 5.5 | JWT 上传 | 使用用户 `Bearer` token（**不带**伪造的 `X-Fleet-Project`） | 仅能操作 token 内嵌 project 的资源 | [ ] |
+| 5.1 | Multipart 上传 | `POST /v1/storage/buckets/{bucketId}/files`，`multipart/form-data`，字段 `file` | 201；返回 file id | [x] |
+| 5.2 | 下载 | `GET .../files/{fileId}/download`，带合法凭证 | 文件内容与上传一致 | [x] |
+| 5.3 | 内联查看 | `GET .../files/{fileId}/view` | Content-Type 正确，可预览 | [x] |
+| 5.4 | API Key 上传 | 使用 `X-Api-Key` 认证上传 | 文件归属 API Key 对应项目 | [x] |
+| 5.5 | JWT 上传 | 使用用户 `Bearer` token（**不带**伪造的 `X-Fleet-Project`） | 仅能操作 token 内嵌 project 的资源 | [x] |
 
 **示例：**
 
@@ -166,14 +166,14 @@ curl -s -X POST "http://localhost:8088/v1/storage/buckets/<BUCKET_ID>/files" \
 
 ## 6. 安全加固验收（近期修复项）
 
-| # | 验收项 | 操作步骤 | 预期结果 | 通过 |
-|---|--------|----------|----------|------|
-| 6.1 | API Key 跨项目 IDOR | 用项目 A 的 API Key 调 `GET /v1/server/api-keys/{项目B的keyId}` | `NotFound` 或拒绝，不能读到 B 的 key | [ ] |
-| 6.2 | API Key Scope | 创建 scopes 仅含 `storage` 的 key，调用 `GET /v1/server/users` | `PermissionDenied` | [ ] |
-| 6.3 | API Key Scope 放行 | scopes 含 `users` 的 key 调 Users 列表 | 成功 | [ ] |
-| 6.4 | 伪造项目 Header（HTTP 文件） | 用户 JWT + `X-Fleet-Project: <其他项目>` 上传/下载 | **不应**访问到其他项目文件 | [ ] |
-| 6.5 | 登出吊销 | SignOut 后使用旧 access token 调 Me | 失败 | [ ] |
-| 6.6 | Refresh 绑定 Session | SignOut 后使用旧 refresh_token | 失败 | [ ] |
+| # | 验收项 | 操作步骤 | 预期结果 | 通过  |
+|---|--------|----------|----------|-----|
+| 6.1 | API Key 跨项目 IDOR | 用项目 A 的 API Key 调 `GET /v1/server/api-keys/{项目B的keyId}` | `NotFound` 或拒绝，不能读到 B 的 key | [x] |
+| 6.2 | API Key Scope | 创建 scopes 仅含 `storage` 的 key，调用 `GET /v1/server/users` | `PermissionDenied` | [x] |
+| 6.3 | API Key Scope 放行 | scopes 含 `users` 的 key 调 Users 列表 | 成功 | [x] |
+| 6.4 | 伪造项目 Header（HTTP 文件） | 用户 JWT + `X-Fleet-Project: <其他项目>` 上传/下载 | **不应**访问到其他项目文件 | [x] |
+| 6.5 | 登出吊销 | SignOut 后使用旧 access token 调 Me | 失败 | [x] |
+| 6.6 | Refresh 绑定 Session | SignOut 后使用旧 refresh_token | 失败 | [x] |
 | 6.7 | Console Viewer 权限 | 创建 `role=viewer` 的 admin（无 `console_admin_projects` 记录），带 `X-Fleet-Project` 调 Server API | `PermissionDenied`（无项目归属） | [ ] |
 | 6.8 | Console Owner 放行 | `role=owner` 的 admin 带 `X-Fleet-Project: default` | 可正常访问 Server API | [ ] |
 | 6.9 | Viewer 授权后 | 在 `console_admin_projects` 插入 viewer 与 default 关联后重试 | 可访问该项目 | [ ] |
@@ -227,7 +227,7 @@ LIMIT 10;
 |---|--------|----------|----------|------|
 | 9.1 | 系统集合 | Client 注册后查 Users 列表 | `users` 文档存在 | [ ] |
 | 9.2 | 查询过滤 | `GET /v1/server/users?queries=equal("email","qa@fleet.local")`（参数格式以 gateway 为准） | 仅返回匹配用户 | [ ] |
-| 9.3 | 自定义库 | 创建 app 库 + posts 集合 + attribute | 元数据与 schema 一致 | [ ] |
+| 9.3 | 自定义库 | 创建 app 库 + posts 集合 + attribute | 元数据与 schema 一致 | [x] |
 | 9.4 | 列表权限 | 非 admin 角色列表用户（若可模拟） | 仅返回有 `_perms` 的文档 | [ ] |
 
 ---
