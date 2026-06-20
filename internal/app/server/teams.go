@@ -94,12 +94,12 @@ func (t *Teams) CreateTeamWithOwner(ctx context.Context, projectID, name, ownerU
 		Email:  ownerEmail,
 		Roles:  []string{teams.RoleOwner},
 		Status: teams.StatusAccepted,
-	}, roles)
+	}, databases.SystemRoles)
 	if err != nil {
 		_ = t.docDB.DeleteDocument(ctx, projectID, "default", "teams", team.ID, databases.SystemRoles)
 		return nil, nil, err
 	}
-	team, err = t.GetTeam(ctx, projectID, team.ID, rolesOrSystem(roles))
+	team, err = t.GetTeam(ctx, projectID, team.ID, databases.SystemRoles)
 	if err != nil {
 		return nil, nil, err
 	}

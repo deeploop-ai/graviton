@@ -73,6 +73,24 @@ tasks:
     cmds:
       - npm run dev
 
+  sdk-install:
+    dir: '{{.USER_WORKING_DIR}}/sdk/typescript'
+    cmds:
+      - npm install
+      - npm --prefix ../demo install
+
+  sdk-build:
+    dir: '{{.USER_WORKING_DIR}}/sdk/typescript'
+    cmds:
+      - npm run build
+
+  sdk-demo:
+    dir: '{{.USER_WORKING_DIR}}/sdk/demo'
+    deps:
+      - sdk-build
+    cmds:
+      - npm run demo
+
   dev-server:
     dir: '{{.USER_WORKING_DIR}}'
     cmds:

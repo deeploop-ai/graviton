@@ -31,15 +31,16 @@ func TestTeams_Memberships(t *testing.T) {
 
 	projectRepo := bunrepo.NewProjectRepository(db)
 	uc := NewTeams(projectRepo, docDB)
-	roles := []string{"keys"}
-
 	ownerID := "owner-user-id"
 	ownerEmail := "owner@fleet.local"
+	roles := []string{"users", "user:" + ownerID}
 	team, ownerMembership, err := uc.CreateTeamWithOwner(ctx, projectID, "Engineering", ownerID, ownerEmail, roles)
 	require.NoError(t, err)
 	require.NotEmpty(t, team.ID)
 	require.Equal(t, teams.StatusAccepted, ownerMembership.Data["status"])
 	require.Equal(t, int64(1), teamTotal(t, team))
+
+	ownerRoles := []string{"users", "user:" + ownerID, "team:" + team.ID}
 
 	memberUserID := "member-user-id"
 	_, err = docDB.CreateDocument(ctx, projectID, "default", "users", databases.Document{
@@ -58,7 +59,7 @@ func TestTeams_Memberships(t *testing.T) {
 		Email:  "member@fleet.local",
 		Name:   "Member User",
 		Roles:  []string{teams.RoleMember},
-	}, roles)
+	}, ownerRoles)
 	require.NoError(t, err)
 	require.Equal(t, teams.StatusPending, invite.Data["status"])
 	require.Equal(t, memberUserID, invite.Data["user_id"])
@@ -76,17 +77,17 @@ func TestTeams_Memberships(t *testing.T) {
 	require.Equal(t, teams.StatusAccepted, accepted.Data["status"])
 	require.Equal(t, memberUserID, accepted.Data["user_id"])
 
-	teamAfter, err := uc.GetTeam(ctx, projectID, team.ID, roles)
+	teamAfter, err := uc.GetTeam(ctx, projectID, team.ID, ownerRoles)
 	require.NoError(t, err)
 	require.Equal(t, int64(2), teamTotal(t, teamAfter))
 
-	list, _, _, err := uc.ListMemberships(ctx, projectID, team.ID, databases.Query{}, roles)
+	list, _, _, err := uc.ListMemberships(ctx, projectID, team.ID, databases.Query{}, ownerRoles)
 	require.NoError(t, err)
 	require.Len(t, list, 2)
 
 	updated, err := uc.UpdateMembership(ctx, projectID, team.ID, accepted.ID, UpdateMembershipCommand{
 		Roles: []string{teams.RoleAdmin},
-	}, roles)
+	}, ownerRoles)
 	require.NoError(t, err)
 	require.Equal(t, []string{teams.RoleAdmin}, stringSliceField(updated.Data["roles"]))
 
@@ -97,12 +98,12 @@ func TestTeams_Memberships(t *testing.T) {
 
 	require.NoError(t, uc.DeleteMembership(authCtx, projectID, team.ID, accepted.ID, memberRoles))
 
-	teamAfterLeave, err := uc.GetTeam(ctx, projectID, team.ID, roles)
+	teamAfterLeave, err := uc.GetTeam(ctx, projectID, team.ID, ownerRoles)
 	require.NoError(t, err)
 	require.Equal(t, int64(1), teamTotal(t, teamAfterLeave))
 
-	require.NoError(t, uc.DeleteTeam(ctx, projectID, team.ID, roles))
-	left, err := uc.GetTeam(ctx, projectID, team.ID, roles)
+	require.NoError(t, uc.DeleteTeam(ctx, projectID, team.ID, ownerRoles))
+	left, err := uc.GetTeam(ctx, projectID, team.ID, ownerRoles)
 	require.NoError(t, err)
 	require.Nil(t, left)
 }

@@ -1,0 +1,17 @@
+{
+  "name": "@fleet/demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "demo": "tsx src/index.ts",
+    "demo:server": "tsx src/server-demo.ts",
+    "demo:client": "tsx src/client-demo.ts"
+  },
+  "dependencies": {
+    "@fleet/sdk": "file:../typescript"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}
