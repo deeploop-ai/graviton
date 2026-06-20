@@ -74,6 +74,15 @@ type TokenBundle struct {
 }
 
 func (a *Account) SignUp(ctx context.Context, cmd SignUpCommand) (*User, *TokenBundle, string, error) {
+	if cmd.ProjectID == "" {
+		return nil, nil, "", status.Error(codes.InvalidArgument, "project_id is required")
+	}
+	if cmd.Email == "" {
+		return nil, nil, "", status.Error(codes.InvalidArgument, "email is required")
+	}
+	if cmd.Password == "" {
+		return nil, nil, "", status.Error(codes.InvalidArgument, "password is required")
+	}
 	project, err := a.projectRepo.GetProject(ctx, cmd.ProjectID)
 	if err != nil {
 		return nil, nil, "", err
@@ -135,6 +144,15 @@ func (a *Account) SignUp(ctx context.Context, cmd SignUpCommand) (*User, *TokenB
 }
 
 func (a *Account) SignIn(ctx context.Context, cmd SignInCommand) (*User, *TokenBundle, string, error) {
+	if cmd.ProjectID == "" {
+		return nil, nil, "", status.Error(codes.InvalidArgument, "project_id is required")
+	}
+	if cmd.Email == "" {
+		return nil, nil, "", status.Error(codes.InvalidArgument, "email is required")
+	}
+	if cmd.Password == "" {
+		return nil, nil, "", status.Error(codes.InvalidArgument, "password is required")
+	}
 	project, err := a.projectRepo.GetProject(ctx, cmd.ProjectID)
 	if err != nil {
 		return nil, nil, "", err
@@ -193,6 +211,9 @@ func (a *Account) SignOut(ctx context.Context) error {
 }
 
 func (a *Account) RefreshToken(ctx context.Context, cmd RefreshTokenCommand) (*TokenBundle, string, error) {
+	if cmd.RefreshToken == "" {
+		return nil, "", status.Error(codes.InvalidArgument, "refresh_token is required")
+	}
 	claims, ok := jwtparser.Parse([]byte(a.cfg.GetSecurity().GetJwt().GetSecret()), cmd.RefreshToken)
 	if !ok {
 		return nil, "", status.Error(codes.Unauthenticated, "invalid refresh token")

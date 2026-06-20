@@ -9,6 +9,8 @@ import (
 
 	"github.com/deeploop-ai/fleet/internal/domain/projects"
 	"github.com/deeploop-ai/fleet/pkg/idgen"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type APIKeys struct {
@@ -27,6 +29,9 @@ type CreateAPIKeyCommand struct {
 }
 
 func (a *APIKeys) Create(ctx context.Context, cmd CreateAPIKeyCommand) (*projects.APIKey, string, error) {
+	if cmd.Name == "" {
+		return nil, "", status.Error(codes.InvalidArgument, "name is required")
+	}
 	id := idgen.UUID().String()
 	secret := idgen.UUID().String() + idgen.UUID().String()
 	hash := sha256.Sum256([]byte(secret))

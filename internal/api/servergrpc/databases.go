@@ -155,7 +155,7 @@ func (s *DatabasesService) CreateAttribute(ctx context.Context, req *serverv1.Cr
 	attr := databases.Attribute{
 		ID:       req.GetKey(),
 		Key:      req.GetKey(),
-		Type:     s.databases.MapAttributeType(req.GetType()),
+		Type:     req.GetType(),
 		Size:     int(req.GetSize()),
 		Required: req.GetRequired(),
 		Array:    req.GetArray(),

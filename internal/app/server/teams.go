@@ -36,6 +36,9 @@ func (t *Teams) resolveProject(ctx context.Context, projectID string) (*projects
 }
 
 func (t *Teams) CreateTeam(ctx context.Context, projectID, name string, perms []string) (*databases.Document, error) {
+	if name == "" {
+		return nil, status.Error(codes.InvalidArgument, "name is required")
+	}
 	if _, err := t.resolveProject(ctx, projectID); err != nil {
 		return nil, err
 	}

@@ -48,6 +48,9 @@ type CreateFileCommand struct {
 }
 
 func (s *Storage) CreateBucket(ctx context.Context, cmd CreateBucketCommand) (*storage.Bucket, error) {
+	if cmd.Name == "" {
+		return nil, status.Error(codes.InvalidArgument, "name is required")
+	}
 	project, err := s.resolveProject(ctx, cmd.ProjectID)
 	if err != nil {
 		return nil, err
@@ -117,6 +120,12 @@ func (s *Storage) DeleteBucket(ctx context.Context, projectID, bucketID string, 
 }
 
 func (s *Storage) CreateFile(ctx context.Context, cmd CreateFileCommand, content io.Reader, size int64, roles []string) (*storage.File, error) {
+	if cmd.BucketID == "" {
+		return nil, status.Error(codes.InvalidArgument, "bucket_id is required")
+	}
+	if cmd.Name == "" {
+		return nil, status.Error(codes.InvalidArgument, "name is required")
+	}
 	project, err := s.resolveProject(ctx, cmd.ProjectID)
 	if err != nil {
 		return nil, err
