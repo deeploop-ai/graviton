@@ -2,7 +2,7 @@ package servergrpc
 
 import (
 	"context"
-	"fmt"
+	"time"
 
 	serverv1 "github.com/deeploop-ai/fleet/genproto/server/v1"
 	sharedv1 "github.com/deeploop-ai/fleet/genproto/shared/v1"
@@ -92,6 +92,100 @@ func (s *TeamsService) DeleteTeam(ctx context.Context, req *serverv1.GetTeamRequ
 	return &sharedv1.Empty{}, nil
 }
 
+func (s *TeamsService) CreateMembership(ctx context.Context, req *serverv1.CreateMembershipRequest) (*serverv1.Membership, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	doc, err := s.teams.CreateMembership(ctx, projectID, appserver.CreateMembershipCommand{
+		TeamID: req.GetTeamId(),
+		UserID: req.GetUserId(),
+		Email:  req.GetEmail(),
+		Name:   req.GetName(),
+		Roles:  req.GetRoles(),
+		Status: req.GetStatus(),
+	}, principalRoles(ctx))
+	if err != nil {
+		return nil, err
+	}
+	return mapMembershipDoc(doc), nil
+}
+
+func (s *TeamsService) ListMemberships(ctx context.Context, req *serverv1.ListMembershipsRequest) (*serverv1.ListMembershipsResponse, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	docs, total, _, err := s.teams.ListMemberships(ctx, projectID, req.GetTeamId(), databases.Query{
+		Queries:   req.GetQueries(),
+		PageSize:  req.GetPageSize(),
+		PageToken: req.GetPageToken(),
+	}, principalRoles(ctx))
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*serverv1.Membership, len(docs))
+	for i := range docs {
+		out[i] = mapMembershipDoc(&docs[i])
+	}
+	return &serverv1.ListMembershipsResponse{
+		Memberships: out,
+		Meta:        &sharedv1.ListResponseMeta{PageSize: req.GetPageSize(), TotalCount: int32(total)},
+	}, nil
+}
+
+func (s *TeamsService) GetMembership(ctx context.Context, req *serverv1.GetMembershipRequest) (*serverv1.Membership, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	doc, err := s.teams.GetMembership(ctx, projectID, req.GetTeamId(), req.GetMembershipId(), principalRoles(ctx))
+	if err != nil {
+		return nil, err
+	}
+	if doc == nil {
+		return nil, status.Error(codes.NotFound, "membership not found")
+	}
+	return mapMembershipDoc(doc), nil
+}
+
+func (s *TeamsService) UpdateMembership(ctx context.Context, req *serverv1.UpdateMembershipRequest) (*serverv1.Membership, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	doc, err := s.teams.UpdateMembership(ctx, projectID, req.GetTeamId(), req.GetMembershipId(), appserver.UpdateMembershipCommand{
+		Roles: req.GetRoles(),
+	}, principalRoles(ctx))
+	if err != nil {
+		return nil, err
+	}
+	return mapMembershipDoc(doc), nil
+}
+
+func (s *TeamsService) UpdateMembershipStatus(ctx context.Context, req *serverv1.UpdateMembershipStatusRequest) (*serverv1.Membership, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	doc, err := s.teams.UpdateMembershipStatus(ctx, projectID, req.GetTeamId(), req.GetMembershipId(), req.GetStatus(), principalRoles(ctx))
+	if err != nil {
+		return nil, err
+	}
+	return mapMembershipDoc(doc), nil
+}
+
+func (s *TeamsService) DeleteMembership(ctx context.Context, req *serverv1.GetMembershipRequest) (*sharedv1.Empty, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	if err := s.teams.DeleteMembership(ctx, projectID, req.GetTeamId(), req.GetMembershipId(), principalRoles(ctx)); err != nil {
+		return nil, err
+	}
+	return &sharedv1.Empty{}, nil
+}
+
 func mapTeamDoc(doc *databases.Document) *serverv1.Team {
 	if doc == nil {
 		return nil
@@ -120,14 +214,50 @@ func mapTeamDoc(doc *databases.Document) *serverv1.Team {
 	return t
 }
 
-// splitPermission is duplicated here to avoid extra package; consider moving to shared util.
-func splitPermission(s string) []string {
-	for i := 0; i < len(s); i++ {
-		if s[i] == ':' {
-			return []string{s[:i], s[i+1:]}
+func mapMembershipDoc(doc *databases.Document) *serverv1.Membership {
+	if doc == nil {
+		return nil
+	}
+	m := &serverv1.Membership{
+		Id:        doc.ID,
+		CreatedAt: timestamppb.New(doc.CreatedAt),
+		UpdatedAt: timestamppb.New(doc.UpdatedAt),
+	}
+	if v, ok := doc.Data["team_id"].(string); ok {
+		m.TeamId = v
+	}
+	if v, ok := doc.Data["user_id"].(string); ok {
+		m.UserId = v
+	}
+	if v, ok := doc.Data["email"].(string); ok {
+		m.Email = v
+	}
+	if v, ok := doc.Data["name"].(string); ok {
+		m.Name = v
+	}
+	if v, ok := doc.Data["status"].(string); ok {
+		m.Status = v
+	}
+	if arr, ok := doc.Data["roles"].([]any); ok {
+		for _, item := range arr {
+			if s, ok := item.(string); ok {
+				m.Roles = append(m.Roles, s)
+			}
 		}
 	}
-	return nil
+	m.InvitedAt = docTimeField(doc.Data, "invited_at")
+	m.JoinedAt = docTimeField(doc.Data, "joined_at")
+	return m
 }
 
-func unusedTeamFmt() string { return fmt.Sprint(1) }
+func docTimeField(data map[string]any, key string) *timestamppb.Timestamp {
+	v, ok := data[key].(string)
+	if !ok || v == "" {
+		return nil
+	}
+	t, err := time.Parse(time.RFC3339Nano, v)
+	if err != nil {
+		return nil
+	}
+	return timestamppb.New(t)
+}

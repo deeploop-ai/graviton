@@ -27,6 +27,11 @@ import {
   FileDetailPage,
 } from "@/routes/storage/pages";
 import {
+  TeamsListPage,
+  TeamNewPage,
+  TeamDetailPage,
+} from "@/routes/teams/pages";
+import {
   DatabasesListPage,
   DatabaseNewPage,
   DatabaseDetailPage,
@@ -78,6 +83,10 @@ function AppRoutes() {
         <Route path="users" element={<UsersListPage />} />
         <Route path="users/:id" element={<UserDetailPage />} />
         <Route path="users/:id/edit" element={<UserEditPage />} />
+
+        <Route path="teams" element={<TeamsListPage />} />
+        <Route path="teams/new" element={<TeamNewPage />} />
+        <Route path="teams/:id" element={<TeamDetailPage />} />
 
         <Route path="storage" element={<StorageListPage />} />
         <Route path="storage/new" element={<BucketNewPage />} />

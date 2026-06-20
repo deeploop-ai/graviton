@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.0
 // - protoc             (unknown)
-// source: server/v1/teams.proto
+// source: client/v1/teams.proto
 
-package serverv1
+package clientv1
 
 import (
 	context "context"
@@ -20,16 +20,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TeamsService_CreateTeam_FullMethodName             = "/fleet.server.v1.TeamsService/CreateTeam"
-	TeamsService_ListTeams_FullMethodName              = "/fleet.server.v1.TeamsService/ListTeams"
-	TeamsService_GetTeam_FullMethodName                = "/fleet.server.v1.TeamsService/GetTeam"
-	TeamsService_DeleteTeam_FullMethodName             = "/fleet.server.v1.TeamsService/DeleteTeam"
-	TeamsService_CreateMembership_FullMethodName       = "/fleet.server.v1.TeamsService/CreateMembership"
-	TeamsService_ListMemberships_FullMethodName        = "/fleet.server.v1.TeamsService/ListMemberships"
-	TeamsService_GetMembership_FullMethodName          = "/fleet.server.v1.TeamsService/GetMembership"
-	TeamsService_UpdateMembership_FullMethodName       = "/fleet.server.v1.TeamsService/UpdateMembership"
-	TeamsService_UpdateMembershipStatus_FullMethodName = "/fleet.server.v1.TeamsService/UpdateMembershipStatus"
-	TeamsService_DeleteMembership_FullMethodName       = "/fleet.server.v1.TeamsService/DeleteMembership"
+	TeamsService_CreateTeam_FullMethodName             = "/fleet.client.v1.TeamsService/CreateTeam"
+	TeamsService_ListTeams_FullMethodName              = "/fleet.client.v1.TeamsService/ListTeams"
+	TeamsService_GetTeam_FullMethodName                = "/fleet.client.v1.TeamsService/GetTeam"
+	TeamsService_DeleteTeam_FullMethodName             = "/fleet.client.v1.TeamsService/DeleteTeam"
+	TeamsService_CreateMembership_FullMethodName       = "/fleet.client.v1.TeamsService/CreateMembership"
+	TeamsService_ListMemberships_FullMethodName        = "/fleet.client.v1.TeamsService/ListMemberships"
+	TeamsService_UpdateMembershipStatus_FullMethodName = "/fleet.client.v1.TeamsService/UpdateMembershipStatus"
+	TeamsService_DeleteMembership_FullMethodName       = "/fleet.client.v1.TeamsService/DeleteMembership"
 )
 
 // TeamsServiceClient is the client API for TeamsService service.
@@ -42,8 +40,6 @@ type TeamsServiceClient interface {
 	DeleteTeam(ctx context.Context, in *GetTeamRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 	CreateMembership(ctx context.Context, in *CreateMembershipRequest, opts ...grpc.CallOption) (*Membership, error)
 	ListMemberships(ctx context.Context, in *ListMembershipsRequest, opts ...grpc.CallOption) (*ListMembershipsResponse, error)
-	GetMembership(ctx context.Context, in *GetMembershipRequest, opts ...grpc.CallOption) (*Membership, error)
-	UpdateMembership(ctx context.Context, in *UpdateMembershipRequest, opts ...grpc.CallOption) (*Membership, error)
 	UpdateMembershipStatus(ctx context.Context, in *UpdateMembershipStatusRequest, opts ...grpc.CallOption) (*Membership, error)
 	DeleteMembership(ctx context.Context, in *GetMembershipRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 }
@@ -116,26 +112,6 @@ func (c *teamsServiceClient) ListMemberships(ctx context.Context, in *ListMember
 	return out, nil
 }
 
-func (c *teamsServiceClient) GetMembership(ctx context.Context, in *GetMembershipRequest, opts ...grpc.CallOption) (*Membership, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Membership)
-	err := c.cc.Invoke(ctx, TeamsService_GetMembership_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *teamsServiceClient) UpdateMembership(ctx context.Context, in *UpdateMembershipRequest, opts ...grpc.CallOption) (*Membership, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Membership)
-	err := c.cc.Invoke(ctx, TeamsService_UpdateMembership_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *teamsServiceClient) UpdateMembershipStatus(ctx context.Context, in *UpdateMembershipStatusRequest, opts ...grpc.CallOption) (*Membership, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Membership)
@@ -166,8 +142,6 @@ type TeamsServiceServer interface {
 	DeleteTeam(context.Context, *GetTeamRequest) (*v1.Empty, error)
 	CreateMembership(context.Context, *CreateMembershipRequest) (*Membership, error)
 	ListMemberships(context.Context, *ListMembershipsRequest) (*ListMembershipsResponse, error)
-	GetMembership(context.Context, *GetMembershipRequest) (*Membership, error)
-	UpdateMembership(context.Context, *UpdateMembershipRequest) (*Membership, error)
 	UpdateMembershipStatus(context.Context, *UpdateMembershipStatusRequest) (*Membership, error)
 	DeleteMembership(context.Context, *GetMembershipRequest) (*v1.Empty, error)
 	mustEmbedUnimplementedTeamsServiceServer()
@@ -197,12 +171,6 @@ func (UnimplementedTeamsServiceServer) CreateMembership(context.Context, *Create
 }
 func (UnimplementedTeamsServiceServer) ListMemberships(context.Context, *ListMembershipsRequest) (*ListMembershipsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListMemberships not implemented")
-}
-func (UnimplementedTeamsServiceServer) GetMembership(context.Context, *GetMembershipRequest) (*Membership, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetMembership not implemented")
-}
-func (UnimplementedTeamsServiceServer) UpdateMembership(context.Context, *UpdateMembershipRequest) (*Membership, error) {
-	return nil, status.Error(codes.Unimplemented, "method UpdateMembership not implemented")
 }
 func (UnimplementedTeamsServiceServer) UpdateMembershipStatus(context.Context, *UpdateMembershipStatusRequest) (*Membership, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateMembershipStatus not implemented")
@@ -339,42 +307,6 @@ func _TeamsService_ListMemberships_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TeamsService_GetMembership_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetMembershipRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TeamsServiceServer).GetMembership(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TeamsService_GetMembership_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TeamsServiceServer).GetMembership(ctx, req.(*GetMembershipRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TeamsService_UpdateMembership_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateMembershipRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TeamsServiceServer).UpdateMembership(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TeamsService_UpdateMembership_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TeamsServiceServer).UpdateMembership(ctx, req.(*UpdateMembershipRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _TeamsService_UpdateMembershipStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateMembershipStatusRequest)
 	if err := dec(in); err != nil {
@@ -415,7 +347,7 @@ func _TeamsService_DeleteMembership_Handler(srv interface{}, ctx context.Context
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TeamsService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "fleet.server.v1.TeamsService",
+	ServiceName: "fleet.client.v1.TeamsService",
 	HandlerType: (*TeamsServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -443,14 +375,6 @@ var TeamsService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TeamsService_ListMemberships_Handler,
 		},
 		{
-			MethodName: "GetMembership",
-			Handler:    _TeamsService_GetMembership_Handler,
-		},
-		{
-			MethodName: "UpdateMembership",
-			Handler:    _TeamsService_UpdateMembership_Handler,
-		},
-		{
 			MethodName: "UpdateMembershipStatus",
 			Handler:    _TeamsService_UpdateMembershipStatus_Handler,
 		},
@@ -460,5 +384,5 @@ var TeamsService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "server/v1/teams.proto",
+	Metadata: "client/v1/teams.proto",
 }

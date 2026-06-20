@@ -9,6 +9,7 @@ import (
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
 	"github.com/deeploop-ai/fleet/internal/domain/projects"
 	"github.com/deeploop-ai/fleet/internal/domain/shared"
+	"github.com/deeploop-ai/fleet/internal/domain/teams"
 	"github.com/deeploop-ai/fleet/internal/domain/users"
 	"github.com/deeploop-ai/fleet/internal/infra/auth"
 	"github.com/deeploop-ai/fleet/internal/pkg/config"
@@ -253,7 +254,31 @@ func (a *Account) RefreshToken(ctx context.Context, cmd RefreshTokenCommand) (*T
 	if err := a.ensureUserCanAuthenticate(ctx, projectID, claims.UserID); err != nil {
 		return nil, "", err
 	}
-	return a.issueTokens(projectID, claims.UserID, claims.Username, claims.SessionID)
+	return a.issueTokens(ctx, projectID, claims.UserID, claims.Username, claims.SessionID)
+}
+
+func (a *Account) loadTeamRoles(ctx context.Context, projectID, userID string) ([]string, error) {
+	if userID == "" {
+		return nil, nil
+	}
+	list, err := a.docDB.ListDocuments(ctx, projectID, "default", "memberships", databases.Query{
+		Queries: []string{
+			fmt.Sprintf(`equal("user_id","%s")`, strings.ReplaceAll(userID, `"`, `""`)),
+			fmt.Sprintf(`equal("status","%s")`, teams.StatusAccepted),
+		},
+	}, databases.SystemRoles)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]string, 0, len(list.Documents)*2)
+	for _, doc := range list.Documents {
+		teamID, _ := doc.Data["team_id"].(string)
+		if teamID == "" {
+			continue
+		}
+		out = append(out, fmt.Sprintf("team:%s", teamID), fmt.Sprintf("member:%s", doc.ID))
+	}
+	return out, nil
 }
 
 func (a *Account) UpdateAccount(ctx context.Context, cmd UpdateAccountCommand) (*User, error) {
@@ -460,7 +485,7 @@ func (a *Account) createSessionAndTokens(ctx context.Context, projectID, userID,
 		return nil, nil, "", err
 	}
 
-	tokens, cookie, err := a.issueTokens(projectID, userID, email, sessionID)
+	tokens, cookie, err := a.issueTokens(ctx, projectID, userID, email, sessionID)
 	if err != nil {
 		return nil, nil, "", err
 	}
@@ -468,7 +493,7 @@ func (a *Account) createSessionAndTokens(ctx context.Context, projectID, userID,
 	return mapUserDoc(user), tokens, cookie, nil
 }
 
-func (a *Account) issueTokens(projectID, userID, email, sessionID string) (*TokenBundle, string, error) {
+func (a *Account) issueTokens(ctx context.Context, projectID, userID, email, sessionID string) (*TokenBundle, string, error) {
 	accessTTL := 15 * time.Minute
 	if d, err := time.ParseDuration(a.cfg.GetSecurity().GetJwt().GetAccessTtl()); err == nil {
 		accessTTL = d
@@ -479,6 +504,10 @@ func (a *Account) issueTokens(projectID, userID, email, sessionID string) (*Toke
 	}
 
 	now := time.Now()
+	baseRoles := []string{"users", fmt.Sprintf("user:%s", userID)}
+	if teamRoles, err := a.loadTeamRoles(ctx, projectID, userID); err == nil {
+		baseRoles = append(baseRoles, teamRoles...)
+	}
 	accessClaims := jwtparser.Claims{
 		TokenID:   idgen.UUID().String(),
 		UserID:    userID,
@@ -487,7 +516,7 @@ func (a *Account) issueTokens(projectID, userID, email, sessionID string) (*Toke
 		ProjectID: projectID,
 		SessionID: sessionID,
 		TokenType: jwtparser.TokenTypeAccess,
-		Roles:     []string{"users", fmt.Sprintf("user:%s", userID)},
+		Roles:     baseRoles,
 		ExpiresAt: now.Add(accessTTL).Unix(),
 		IssuedAt:  now.Unix(),
 	}

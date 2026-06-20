@@ -4,6 +4,7 @@ import { listAPIKeys } from "@/api/apiKeys";
 import { listUsers } from "@/api/users";
 import { listBuckets } from "@/api/storage";
 import { listDatabases } from "@/api/databases";
+import { listTeams } from "@/api/teams";
 import { useAuth } from "@/hooks/useAuth";
 import { PageHeader } from "@/components/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -43,6 +44,12 @@ export function Dashboard() {
     enabled: !!selectedProjectId,
   });
 
+  const { data: teams = [] } = useQuery({
+    queryKey: ["teams", selectedProjectId],
+    queryFn: listTeams,
+    enabled: !!selectedProjectId,
+  });
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -54,6 +61,7 @@ export function Dashboard() {
         <StatCard title="Projects" value={projects.length} isLoading={projectsLoading} />
         <StatCard title="API Keys" value={apiKeys.length} />
         <StatCard title="Users" value={users.length} />
+        <StatCard title="Teams" value={teams.length} />
         <StatCard title="Buckets" value={buckets.length} />
         <StatCard title="Databases" value={databases.length} />
       </div>

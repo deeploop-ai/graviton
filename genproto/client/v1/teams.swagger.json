@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "server/v1/teams.proto",
+    "title": "client/v1/teams.proto",
     "version": "version not set"
   },
   "tags": [
@@ -16,14 +16,14 @@
     "application/json"
   ],
   "paths": {
-    "/v1/server/teams": {
+    "/v1/teams": {
       "get": {
         "operationId": "TeamsService_ListTeams",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1ListTeamsResponse"
+              "$ref": "#/definitions/fleetclientv1ListTeamsResponse"
             }
           },
           "default": {
@@ -80,7 +80,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1Team"
+              "$ref": "#/definitions/fleetclientv1Team"
             }
           },
           "default": {
@@ -96,7 +96,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/fleetserverv1CreateTeamRequest"
+              "$ref": "#/definitions/fleetclientv1CreateTeamRequest"
             }
           }
         ],
@@ -105,14 +105,14 @@
         ]
       }
     },
-    "/v1/server/teams/{id}": {
+    "/v1/teams/{id}": {
       "get": {
         "operationId": "TeamsService_GetTeam",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1Team"
+              "$ref": "#/definitions/fleetclientv1Team"
             }
           },
           "default": {
@@ -163,14 +163,14 @@
         ]
       }
     },
-    "/v1/server/teams/{teamId}/memberships": {
+    "/v1/teams/{teamId}/memberships": {
       "get": {
         "operationId": "TeamsService_ListMemberships",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1ListMembershipsResponse"
+              "$ref": "#/definitions/fleetclientv1ListMembershipsResponse"
             }
           },
           "default": {
@@ -186,29 +186,6 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "queries",
-            "in": "query",
-            "required": false,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "collectionFormat": "multi"
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "pageToken",
-            "in": "query",
-            "required": false,
-            "type": "string"
           }
         ],
         "tags": [
@@ -221,7 +198,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1Membership"
+              "$ref": "#/definitions/fleetclientv1Membership"
             }
           },
           "default": {
@@ -243,7 +220,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/fleetserverv1TeamsServiceCreateMembershipBody"
+              "$ref": "#/definitions/fleetclientv1TeamsServiceCreateMembershipBody"
             }
           }
         ],
@@ -252,41 +229,7 @@
         ]
       }
     },
-    "/v1/server/teams/{teamId}/memberships/{membershipId}": {
-      "get": {
-        "operationId": "TeamsService_GetMembership",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/fleetserverv1Membership"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "teamId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "membershipId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "tags": [
-          "TeamsService"
-        ]
-      },
+    "/v1/teams/{teamId}/memberships/{membershipId}": {
       "delete": {
         "operationId": "TeamsService_DeleteMembership",
         "responses": {
@@ -320,58 +263,16 @@
         "tags": [
           "TeamsService"
         ]
-      },
-      "patch": {
-        "operationId": "TeamsService_UpdateMembership",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/fleetserverv1Membership"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "teamId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "membershipId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/TeamsServiceUpdateMembershipBody"
-            }
-          }
-        ],
-        "tags": [
-          "TeamsService"
-        ]
       }
     },
-    "/v1/server/teams/{teamId}/memberships/{membershipId}/status": {
+    "/v1/teams/{teamId}/memberships/{membershipId}/status": {
       "patch": {
         "operationId": "TeamsService_UpdateMembershipStatus",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1Membership"
+              "$ref": "#/definitions/fleetclientv1Membership"
             }
           },
           "default": {
@@ -399,7 +300,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/fleetserverv1TeamsServiceUpdateMembershipStatusBody"
+              "$ref": "#/definitions/fleetclientv1TeamsServiceUpdateMembershipStatusBody"
             }
           }
         ],
@@ -410,54 +311,34 @@
     }
   },
   "definitions": {
-    "TeamsServiceUpdateMembershipBody": {
-      "type": "object",
-      "properties": {
-        "roles": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "fleetserverv1CreateTeamRequest": {
+    "fleetclientv1CreateTeamRequest": {
       "type": "object",
       "properties": {
         "name": {
           "type": "string"
-        },
-        "permissions": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
       }
     },
-    "fleetserverv1ListMembershipsResponse": {
+    "fleetclientv1ListMembershipsResponse": {
       "type": "object",
       "properties": {
         "memberships": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/fleetserverv1Membership"
+            "$ref": "#/definitions/fleetclientv1Membership"
           }
-        },
-        "meta": {
-          "$ref": "#/definitions/v1ListResponseMeta"
         }
       }
     },
-    "fleetserverv1ListTeamsResponse": {
+    "fleetclientv1ListTeamsResponse": {
       "type": "object",
       "properties": {
         "teams": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/fleetserverv1Team"
+            "$ref": "#/definitions/fleetclientv1Team"
           }
         },
         "meta": {
@@ -465,7 +346,7 @@
         }
       }
     },
-    "fleetserverv1Membership": {
+    "fleetclientv1Membership": {
       "type": "object",
       "properties": {
         "id": {
@@ -510,7 +391,7 @@
         }
       }
     },
-    "fleetserverv1Team": {
+    "fleetclientv1Team": {
       "type": "object",
       "properties": {
         "id": {
@@ -523,12 +404,6 @@
           "type": "integer",
           "format": "int32"
         },
-        "permissions": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
         "createdAt": {
           "type": "string",
           "format": "date-time"
@@ -539,12 +414,9 @@
         }
       }
     },
-    "fleetserverv1TeamsServiceCreateMembershipBody": {
+    "fleetclientv1TeamsServiceCreateMembershipBody": {
       "type": "object",
       "properties": {
-        "userId": {
-          "type": "string"
-        },
         "email": {
           "type": "string"
         },
@@ -556,13 +428,10 @@
           "items": {
             "type": "string"
           }
-        },
-        "status": {
-          "type": "string"
         }
       }
     },
-    "fleetserverv1TeamsServiceUpdateMembershipStatusBody": {
+    "fleetclientv1TeamsServiceUpdateMembershipStatusBody": {
       "type": "object",
       "properties": {
         "status": {

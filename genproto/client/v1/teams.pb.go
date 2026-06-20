@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.10
 // 	protoc        (unknown)
-// source: server/v1/teams.proto
+// source: client/v1/teams.proto
 
-package serverv1
+package clientv1
 
 import (
 	v1 "github.com/deeploop-ai/fleet/genproto/shared/v1"
@@ -27,14 +27,13 @@ const (
 type CreateTeamRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Permissions   []string               `protobuf:"bytes,2,rep,name=permissions,proto3" json:"permissions,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateTeamRequest) Reset() {
 	*x = CreateTeamRequest{}
-	mi := &file_server_v1_teams_proto_msgTypes[0]
+	mi := &file_client_v1_teams_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -46,7 +45,7 @@ func (x *CreateTeamRequest) String() string {
 func (*CreateTeamRequest) ProtoMessage() {}
 
 func (x *CreateTeamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_teams_proto_msgTypes[0]
+	mi := &file_client_v1_teams_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -59,7 +58,7 @@ func (x *CreateTeamRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTeamRequest.ProtoReflect.Descriptor instead.
 func (*CreateTeamRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_teams_proto_rawDescGZIP(), []int{0}
+	return file_client_v1_teams_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *CreateTeamRequest) GetName() string {
@@ -67,13 +66,6 @@ func (x *CreateTeamRequest) GetName() string {
 		return x.Name
 	}
 	return ""
-}
-
-func (x *CreateTeamRequest) GetPermissions() []string {
-	if x != nil {
-		return x.Permissions
-	}
-	return nil
 }
 
 type GetTeamRequest struct {
@@ -85,7 +77,7 @@ type GetTeamRequest struct {
 
 func (x *GetTeamRequest) Reset() {
 	*x = GetTeamRequest{}
-	mi := &file_server_v1_teams_proto_msgTypes[1]
+	mi := &file_client_v1_teams_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -97,7 +89,7 @@ func (x *GetTeamRequest) String() string {
 func (*GetTeamRequest) ProtoMessage() {}
 
 func (x *GetTeamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_teams_proto_msgTypes[1]
+	mi := &file_client_v1_teams_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -110,7 +102,7 @@ func (x *GetTeamRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTeamRequest.ProtoReflect.Descriptor instead.
 func (*GetTeamRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_teams_proto_rawDescGZIP(), []int{1}
+	return file_client_v1_teams_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *GetTeamRequest) GetId() string {
@@ -130,7 +122,7 @@ type ListTeamsResponse struct {
 
 func (x *ListTeamsResponse) Reset() {
 	*x = ListTeamsResponse{}
-	mi := &file_server_v1_teams_proto_msgTypes[2]
+	mi := &file_client_v1_teams_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -142,7 +134,7 @@ func (x *ListTeamsResponse) String() string {
 func (*ListTeamsResponse) ProtoMessage() {}
 
 func (x *ListTeamsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_teams_proto_msgTypes[2]
+	mi := &file_client_v1_teams_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -155,7 +147,7 @@ func (x *ListTeamsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListTeamsResponse.ProtoReflect.Descriptor instead.
 func (*ListTeamsResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_teams_proto_rawDescGZIP(), []int{2}
+	return file_client_v1_teams_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ListTeamsResponse) GetTeams() []*Team {
@@ -177,16 +169,15 @@ type Team struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Total         int32                  `protobuf:"varint,3,opt,name=total,proto3" json:"total,omitempty"`
-	Permissions   []string               `protobuf:"bytes,4,rep,name=permissions,proto3" json:"permissions,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Team) Reset() {
 	*x = Team{}
-	mi := &file_server_v1_teams_proto_msgTypes[3]
+	mi := &file_client_v1_teams_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -198,7 +189,7 @@ func (x *Team) String() string {
 func (*Team) ProtoMessage() {}
 
 func (x *Team) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_teams_proto_msgTypes[3]
+	mi := &file_client_v1_teams_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -211,7 +202,7 @@ func (x *Team) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Team.ProtoReflect.Descriptor instead.
 func (*Team) Descriptor() ([]byte, []int) {
-	return file_server_v1_teams_proto_rawDescGZIP(), []int{3}
+	return file_client_v1_teams_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Team) GetId() string {
@@ -233,13 +224,6 @@ func (x *Team) GetTotal() int32 {
 		return x.Total
 	}
 	return 0
-}
-
-func (x *Team) GetPermissions() []string {
-	if x != nil {
-		return x.Permissions
-	}
-	return nil
 }
 
 func (x *Team) GetCreatedAt() *timestamppb.Timestamp {
@@ -275,7 +259,7 @@ type Membership struct {
 
 func (x *Membership) Reset() {
 	*x = Membership{}
-	mi := &file_server_v1_teams_proto_msgTypes[4]
+	mi := &file_client_v1_teams_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -287,7 +271,7 @@ func (x *Membership) String() string {
 func (*Membership) ProtoMessage() {}
 
 func (x *Membership) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_teams_proto_msgTypes[4]
+	mi := &file_client_v1_teams_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -300,7 +284,7 @@ func (x *Membership) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Membership.ProtoReflect.Descriptor instead.
 func (*Membership) Descriptor() ([]byte, []int) {
-	return file_server_v1_teams_proto_rawDescGZIP(), []int{4}
+	return file_client_v1_teams_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Membership) GetId() string {
@@ -383,18 +367,16 @@ func (x *Membership) GetUpdatedAt() *timestamppb.Timestamp {
 type CreateMembershipRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TeamId        string                 `protobuf:"bytes,1,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
-	Name          string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	Roles         []string               `protobuf:"bytes,5,rep,name=roles,proto3" json:"roles,omitempty"`
-	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Roles         []string               `protobuf:"bytes,4,rep,name=roles,proto3" json:"roles,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateMembershipRequest) Reset() {
 	*x = CreateMembershipRequest{}
-	mi := &file_server_v1_teams_proto_msgTypes[5]
+	mi := &file_client_v1_teams_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -406,7 +388,7 @@ func (x *CreateMembershipRequest) String() string {
 func (*CreateMembershipRequest) ProtoMessage() {}
 
 func (x *CreateMembershipRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_teams_proto_msgTypes[5]
+	mi := &file_client_v1_teams_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -419,19 +401,12 @@ func (x *CreateMembershipRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateMembershipRequest.ProtoReflect.Descriptor instead.
 func (*CreateMembershipRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_teams_proto_rawDescGZIP(), []int{5}
+	return file_client_v1_teams_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *CreateMembershipRequest) GetTeamId() string {
 	if x != nil {
 		return x.TeamId
-	}
-	return ""
-}
-
-func (x *CreateMembershipRequest) GetUserId() string {
-	if x != nil {
-		return x.UserId
 	}
 	return ""
 }
@@ -457,26 +432,16 @@ func (x *CreateMembershipRequest) GetRoles() []string {
 	return nil
 }
 
-func (x *CreateMembershipRequest) GetStatus() string {
-	if x != nil {
-		return x.Status
-	}
-	return ""
-}
-
 type ListMembershipsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TeamId        string                 `protobuf:"bytes,1,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
-	Queries       []string               `protobuf:"bytes,2,rep,name=queries,proto3" json:"queries,omitempty"`
-	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
-	PageToken     string                 `protobuf:"bytes,4,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListMembershipsRequest) Reset() {
 	*x = ListMembershipsRequest{}
-	mi := &file_server_v1_teams_proto_msgTypes[6]
+	mi := &file_client_v1_teams_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -488,7 +453,7 @@ func (x *ListMembershipsRequest) String() string {
 func (*ListMembershipsRequest) ProtoMessage() {}
 
 func (x *ListMembershipsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_teams_proto_msgTypes[6]
+	mi := &file_client_v1_teams_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -501,33 +466,12 @@ func (x *ListMembershipsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMembershipsRequest.ProtoReflect.Descriptor instead.
 func (*ListMembershipsRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_teams_proto_rawDescGZIP(), []int{6}
+	return file_client_v1_teams_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ListMembershipsRequest) GetTeamId() string {
 	if x != nil {
 		return x.TeamId
-	}
-	return ""
-}
-
-func (x *ListMembershipsRequest) GetQueries() []string {
-	if x != nil {
-		return x.Queries
-	}
-	return nil
-}
-
-func (x *ListMembershipsRequest) GetPageSize() int32 {
-	if x != nil {
-		return x.PageSize
-	}
-	return 0
-}
-
-func (x *ListMembershipsRequest) GetPageToken() string {
-	if x != nil {
-		return x.PageToken
 	}
 	return ""
 }
@@ -542,7 +486,7 @@ type GetMembershipRequest struct {
 
 func (x *GetMembershipRequest) Reset() {
 	*x = GetMembershipRequest{}
-	mi := &file_server_v1_teams_proto_msgTypes[7]
+	mi := &file_client_v1_teams_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -554,7 +498,7 @@ func (x *GetMembershipRequest) String() string {
 func (*GetMembershipRequest) ProtoMessage() {}
 
 func (x *GetMembershipRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_teams_proto_msgTypes[7]
+	mi := &file_client_v1_teams_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -567,7 +511,7 @@ func (x *GetMembershipRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMembershipRequest.ProtoReflect.Descriptor instead.
 func (*GetMembershipRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_teams_proto_rawDescGZIP(), []int{7}
+	return file_client_v1_teams_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetMembershipRequest) GetTeamId() string {
@@ -587,14 +531,13 @@ func (x *GetMembershipRequest) GetMembershipId() string {
 type ListMembershipsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Memberships   []*Membership          `protobuf:"bytes,1,rep,name=memberships,proto3" json:"memberships,omitempty"`
-	Meta          *v1.ListResponseMeta   `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListMembershipsResponse) Reset() {
 	*x = ListMembershipsResponse{}
-	mi := &file_server_v1_teams_proto_msgTypes[8]
+	mi := &file_client_v1_teams_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -606,7 +549,7 @@ func (x *ListMembershipsResponse) String() string {
 func (*ListMembershipsResponse) ProtoMessage() {}
 
 func (x *ListMembershipsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_teams_proto_msgTypes[8]
+	mi := &file_client_v1_teams_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -619,79 +562,12 @@ func (x *ListMembershipsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMembershipsResponse.ProtoReflect.Descriptor instead.
 func (*ListMembershipsResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_teams_proto_rawDescGZIP(), []int{8}
+	return file_client_v1_teams_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ListMembershipsResponse) GetMemberships() []*Membership {
 	if x != nil {
 		return x.Memberships
-	}
-	return nil
-}
-
-func (x *ListMembershipsResponse) GetMeta() *v1.ListResponseMeta {
-	if x != nil {
-		return x.Meta
-	}
-	return nil
-}
-
-type UpdateMembershipRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TeamId        string                 `protobuf:"bytes,1,opt,name=team_id,json=teamId,proto3" json:"team_id,omitempty"`
-	MembershipId  string                 `protobuf:"bytes,2,opt,name=membership_id,json=membershipId,proto3" json:"membership_id,omitempty"`
-	Roles         []string               `protobuf:"bytes,3,rep,name=roles,proto3" json:"roles,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateMembershipRequest) Reset() {
-	*x = UpdateMembershipRequest{}
-	mi := &file_server_v1_teams_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateMembershipRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateMembershipRequest) ProtoMessage() {}
-
-func (x *UpdateMembershipRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_teams_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateMembershipRequest.ProtoReflect.Descriptor instead.
-func (*UpdateMembershipRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_teams_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *UpdateMembershipRequest) GetTeamId() string {
-	if x != nil {
-		return x.TeamId
-	}
-	return ""
-}
-
-func (x *UpdateMembershipRequest) GetMembershipId() string {
-	if x != nil {
-		return x.MembershipId
-	}
-	return ""
-}
-
-func (x *UpdateMembershipRequest) GetRoles() []string {
-	if x != nil {
-		return x.Roles
 	}
 	return nil
 }
@@ -707,7 +583,7 @@ type UpdateMembershipStatusRequest struct {
 
 func (x *UpdateMembershipStatusRequest) Reset() {
 	*x = UpdateMembershipStatusRequest{}
-	mi := &file_server_v1_teams_proto_msgTypes[10]
+	mi := &file_client_v1_teams_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -719,7 +595,7 @@ func (x *UpdateMembershipStatusRequest) String() string {
 func (*UpdateMembershipStatusRequest) ProtoMessage() {}
 
 func (x *UpdateMembershipStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_teams_proto_msgTypes[10]
+	mi := &file_client_v1_teams_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -732,7 +608,7 @@ func (x *UpdateMembershipStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateMembershipStatusRequest.ProtoReflect.Descriptor instead.
 func (*UpdateMembershipStatusRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_teams_proto_rawDescGZIP(), []int{10}
+	return file_client_v1_teams_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *UpdateMembershipStatusRequest) GetTeamId() string {
@@ -756,28 +632,26 @@ func (x *UpdateMembershipStatusRequest) GetStatus() string {
 	return ""
 }
 
-var File_server_v1_teams_proto protoreflect.FileDescriptor
+var File_client_v1_teams_proto protoreflect.FileDescriptor
 
-const file_server_v1_teams_proto_rawDesc = "" +
+const file_client_v1_teams_proto_rawDesc = "" +
 	"\n" +
-	"\x15server/v1/teams.proto\x12\x0ffleet.server.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\"I\n" +
+	"\x15client/v1/teams.proto\x12\x0ffleet.client.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\"'\n" +
 	"\x11CreateTeamRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vpermissions\x18\x02 \x03(\tR\vpermissions\" \n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\" \n" +
 	"\x0eGetTeamRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"w\n" +
 	"\x11ListTeamsResponse\x12+\n" +
-	"\x05teams\x18\x01 \x03(\v2\x15.fleet.server.v1.TeamR\x05teams\x125\n" +
-	"\x04meta\x18\x02 \x01(\v2!.fleet.shared.v1.ListResponseMetaR\x04meta\"\xd8\x01\n" +
+	"\x05teams\x18\x01 \x03(\v2\x15.fleet.client.v1.TeamR\x05teams\x125\n" +
+	"\x04meta\x18\x02 \x01(\v2!.fleet.shared.v1.ListResponseMetaR\x04meta\"\xb6\x01\n" +
 	"\x04Team\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
-	"\x05total\x18\x03 \x01(\x05R\x05total\x12 \n" +
-	"\vpermissions\x18\x04 \x03(\tR\vpermissions\x129\n" +
+	"\x05total\x18\x03 \x01(\x05R\x05total\x129\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x90\x03\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x90\x03\n" +
 	"\n" +
 	"Membership\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
@@ -794,137 +668,117 @@ const file_server_v1_teams_proto_rawDesc = "" +
 	"created_at\x18\n" +
 	" \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xa3\x01\n" +
+	"updated_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"r\n" +
 	"\x17CreateMembershipRequest\x12\x17\n" +
-	"\ateam_id\x18\x01 \x01(\tR\x06teamId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x14\n" +
-	"\x05email\x18\x03 \x01(\tR\x05email\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x12\x14\n" +
-	"\x05roles\x18\x05 \x03(\tR\x05roles\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\"\x87\x01\n" +
+	"\ateam_id\x18\x01 \x01(\tR\x06teamId\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x14\n" +
+	"\x05roles\x18\x04 \x03(\tR\x05roles\"1\n" +
 	"\x16ListMembershipsRequest\x12\x17\n" +
-	"\ateam_id\x18\x01 \x01(\tR\x06teamId\x12\x18\n" +
-	"\aqueries\x18\x02 \x03(\tR\aqueries\x12\x1b\n" +
-	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\x12\x1d\n" +
-	"\n" +
-	"page_token\x18\x04 \x01(\tR\tpageToken\"T\n" +
+	"\ateam_id\x18\x01 \x01(\tR\x06teamId\"T\n" +
 	"\x14GetMembershipRequest\x12\x17\n" +
 	"\ateam_id\x18\x01 \x01(\tR\x06teamId\x12#\n" +
-	"\rmembership_id\x18\x02 \x01(\tR\fmembershipId\"\x8f\x01\n" +
+	"\rmembership_id\x18\x02 \x01(\tR\fmembershipId\"X\n" +
 	"\x17ListMembershipsResponse\x12=\n" +
-	"\vmemberships\x18\x01 \x03(\v2\x1b.fleet.server.v1.MembershipR\vmemberships\x125\n" +
-	"\x04meta\x18\x02 \x01(\v2!.fleet.shared.v1.ListResponseMetaR\x04meta\"m\n" +
-	"\x17UpdateMembershipRequest\x12\x17\n" +
-	"\ateam_id\x18\x01 \x01(\tR\x06teamId\x12#\n" +
-	"\rmembership_id\x18\x02 \x01(\tR\fmembershipId\x12\x14\n" +
-	"\x05roles\x18\x03 \x03(\tR\x05roles\"u\n" +
+	"\vmemberships\x18\x01 \x03(\v2\x1b.fleet.client.v1.MembershipR\vmemberships\"u\n" +
 	"\x1dUpdateMembershipStatusRequest\x12\x17\n" +
 	"\ateam_id\x18\x01 \x01(\tR\x06teamId\x12#\n" +
 	"\rmembership_id\x18\x02 \x01(\tR\fmembershipId\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status2\xce\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status2\xe1\a\n" +
+	"\fTeamsService\x12]\n" +
 	"\n" +
-	"\fTeamsService\x12d\n" +
+	"CreateTeam\x12\".fleet.client.v1.CreateTeamRequest\x1a\x15.fleet.client.v1.Team\"\x14\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/teams\x12`\n" +
+	"\tListTeams\x12\x1c.fleet.shared.v1.ListRequest\x1a\".fleet.client.v1.ListTeamsResponse\"\x11\x82\xd3\xe4\x93\x02\v\x12\t/v1/teams\x12Y\n" +
+	"\aGetTeam\x12\x1f.fleet.client.v1.GetTeamRequest\x1a\x15.fleet.client.v1.Team\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/teams/{id}\x12]\n" +
 	"\n" +
-	"CreateTeam\x12\".fleet.server.v1.CreateTeamRequest\x1a\x15.fleet.server.v1.Team\"\x1b\x82\xd3\xe4\x93\x02\x15:\x01*\"\x10/v1/server/teams\x12g\n" +
-	"\tListTeams\x12\x1c.fleet.shared.v1.ListRequest\x1a\".fleet.server.v1.ListTeamsResponse\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/v1/server/teams\x12`\n" +
-	"\aGetTeam\x12\x1f.fleet.server.v1.GetTeamRequest\x1a\x15.fleet.server.v1.Team\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/v1/server/teams/{id}\x12d\n" +
-	"\n" +
-	"DeleteTeam\x12\x1f.fleet.server.v1.GetTeamRequest\x1a\x16.fleet.shared.v1.Empty\"\x1d\x82\xd3\xe4\x93\x02\x17*\x15/v1/server/teams/{id}\x12\x8c\x01\n" +
-	"\x10CreateMembership\x12(.fleet.server.v1.CreateMembershipRequest\x1a\x1b.fleet.server.v1.Membership\"1\x82\xd3\xe4\x93\x02+:\x01*\"&/v1/server/teams/{team_id}/memberships\x12\x94\x01\n" +
-	"\x0fListMemberships\x12'.fleet.server.v1.ListMembershipsRequest\x1a(.fleet.server.v1.ListMembershipsResponse\".\x82\xd3\xe4\x93\x02(\x12&/v1/server/teams/{team_id}/memberships\x12\x93\x01\n" +
-	"\rGetMembership\x12%.fleet.server.v1.GetMembershipRequest\x1a\x1b.fleet.server.v1.Membership\">\x82\xd3\xe4\x93\x028\x126/v1/server/teams/{team_id}/memberships/{membership_id}\x12\x9c\x01\n" +
-	"\x10UpdateMembership\x12(.fleet.server.v1.UpdateMembershipRequest\x1a\x1b.fleet.server.v1.Membership\"A\x82\xd3\xe4\x93\x02;:\x01*26/v1/server/teams/{team_id}/memberships/{membership_id}\x12\xaf\x01\n" +
-	"\x16UpdateMembershipStatus\x12..fleet.server.v1.UpdateMembershipStatusRequest\x1a\x1b.fleet.server.v1.Membership\"H\x82\xd3\xe4\x93\x02B:\x01*2=/v1/server/teams/{team_id}/memberships/{membership_id}/status\x12\x91\x01\n" +
-	"\x10DeleteMembership\x12%.fleet.server.v1.GetMembershipRequest\x1a\x16.fleet.shared.v1.Empty\">\x82\xd3\xe4\x93\x028*6/v1/server/teams/{team_id}/memberships/{membership_id}\x1a\x06\x92\xb2\x19\x02\b\x04B:Z8github.com/deeploop-ai/fleet/genproto/server/v1;serverv1b\x06proto3"
+	"DeleteTeam\x12\x1f.fleet.client.v1.GetTeamRequest\x1a\x16.fleet.shared.v1.Empty\"\x16\x82\xd3\xe4\x93\x02\x10*\x0e/v1/teams/{id}\x12\x85\x01\n" +
+	"\x10CreateMembership\x12(.fleet.client.v1.CreateMembershipRequest\x1a\x1b.fleet.client.v1.Membership\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/v1/teams/{team_id}/memberships\x12\x8d\x01\n" +
+	"\x0fListMemberships\x12'.fleet.client.v1.ListMembershipsRequest\x1a(.fleet.client.v1.ListMembershipsResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/v1/teams/{team_id}/memberships\x12\xa8\x01\n" +
+	"\x16UpdateMembershipStatus\x12..fleet.client.v1.UpdateMembershipStatusRequest\x1a\x1b.fleet.client.v1.Membership\"A\x82\xd3\xe4\x93\x02;:\x01*26/v1/teams/{team_id}/memberships/{membership_id}/status\x12\x8a\x01\n" +
+	"\x10DeleteMembership\x12%.fleet.client.v1.GetMembershipRequest\x1a\x16.fleet.shared.v1.Empty\"7\x82\xd3\xe4\x93\x021*//v1/teams/{team_id}/memberships/{membership_id}\x1a\x06\x92\xb2\x19\x02\b\x02B:Z8github.com/deeploop-ai/fleet/genproto/client/v1;clientv1b\x06proto3"
 
 var (
-	file_server_v1_teams_proto_rawDescOnce sync.Once
-	file_server_v1_teams_proto_rawDescData []byte
+	file_client_v1_teams_proto_rawDescOnce sync.Once
+	file_client_v1_teams_proto_rawDescData []byte
 )
 
-func file_server_v1_teams_proto_rawDescGZIP() []byte {
-	file_server_v1_teams_proto_rawDescOnce.Do(func() {
-		file_server_v1_teams_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_server_v1_teams_proto_rawDesc), len(file_server_v1_teams_proto_rawDesc)))
+func file_client_v1_teams_proto_rawDescGZIP() []byte {
+	file_client_v1_teams_proto_rawDescOnce.Do(func() {
+		file_client_v1_teams_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_client_v1_teams_proto_rawDesc), len(file_client_v1_teams_proto_rawDesc)))
 	})
-	return file_server_v1_teams_proto_rawDescData
+	return file_client_v1_teams_proto_rawDescData
 }
 
-var file_server_v1_teams_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
-var file_server_v1_teams_proto_goTypes = []any{
-	(*CreateTeamRequest)(nil),             // 0: fleet.server.v1.CreateTeamRequest
-	(*GetTeamRequest)(nil),                // 1: fleet.server.v1.GetTeamRequest
-	(*ListTeamsResponse)(nil),             // 2: fleet.server.v1.ListTeamsResponse
-	(*Team)(nil),                          // 3: fleet.server.v1.Team
-	(*Membership)(nil),                    // 4: fleet.server.v1.Membership
-	(*CreateMembershipRequest)(nil),       // 5: fleet.server.v1.CreateMembershipRequest
-	(*ListMembershipsRequest)(nil),        // 6: fleet.server.v1.ListMembershipsRequest
-	(*GetMembershipRequest)(nil),          // 7: fleet.server.v1.GetMembershipRequest
-	(*ListMembershipsResponse)(nil),       // 8: fleet.server.v1.ListMembershipsResponse
-	(*UpdateMembershipRequest)(nil),       // 9: fleet.server.v1.UpdateMembershipRequest
-	(*UpdateMembershipStatusRequest)(nil), // 10: fleet.server.v1.UpdateMembershipStatusRequest
-	(*v1.ListResponseMeta)(nil),           // 11: fleet.shared.v1.ListResponseMeta
-	(*timestamppb.Timestamp)(nil),         // 12: google.protobuf.Timestamp
-	(*v1.ListRequest)(nil),                // 13: fleet.shared.v1.ListRequest
-	(*v1.Empty)(nil),                      // 14: fleet.shared.v1.Empty
+var file_client_v1_teams_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_client_v1_teams_proto_goTypes = []any{
+	(*CreateTeamRequest)(nil),             // 0: fleet.client.v1.CreateTeamRequest
+	(*GetTeamRequest)(nil),                // 1: fleet.client.v1.GetTeamRequest
+	(*ListTeamsResponse)(nil),             // 2: fleet.client.v1.ListTeamsResponse
+	(*Team)(nil),                          // 3: fleet.client.v1.Team
+	(*Membership)(nil),                    // 4: fleet.client.v1.Membership
+	(*CreateMembershipRequest)(nil),       // 5: fleet.client.v1.CreateMembershipRequest
+	(*ListMembershipsRequest)(nil),        // 6: fleet.client.v1.ListMembershipsRequest
+	(*GetMembershipRequest)(nil),          // 7: fleet.client.v1.GetMembershipRequest
+	(*ListMembershipsResponse)(nil),       // 8: fleet.client.v1.ListMembershipsResponse
+	(*UpdateMembershipStatusRequest)(nil), // 9: fleet.client.v1.UpdateMembershipStatusRequest
+	(*v1.ListResponseMeta)(nil),           // 10: fleet.shared.v1.ListResponseMeta
+	(*timestamppb.Timestamp)(nil),         // 11: google.protobuf.Timestamp
+	(*v1.ListRequest)(nil),                // 12: fleet.shared.v1.ListRequest
+	(*v1.Empty)(nil),                      // 13: fleet.shared.v1.Empty
 }
-var file_server_v1_teams_proto_depIdxs = []int32{
-	3,  // 0: fleet.server.v1.ListTeamsResponse.teams:type_name -> fleet.server.v1.Team
-	11, // 1: fleet.server.v1.ListTeamsResponse.meta:type_name -> fleet.shared.v1.ListResponseMeta
-	12, // 2: fleet.server.v1.Team.created_at:type_name -> google.protobuf.Timestamp
-	12, // 3: fleet.server.v1.Team.updated_at:type_name -> google.protobuf.Timestamp
-	12, // 4: fleet.server.v1.Membership.invited_at:type_name -> google.protobuf.Timestamp
-	12, // 5: fleet.server.v1.Membership.joined_at:type_name -> google.protobuf.Timestamp
-	12, // 6: fleet.server.v1.Membership.created_at:type_name -> google.protobuf.Timestamp
-	12, // 7: fleet.server.v1.Membership.updated_at:type_name -> google.protobuf.Timestamp
-	4,  // 8: fleet.server.v1.ListMembershipsResponse.memberships:type_name -> fleet.server.v1.Membership
-	11, // 9: fleet.server.v1.ListMembershipsResponse.meta:type_name -> fleet.shared.v1.ListResponseMeta
-	0,  // 10: fleet.server.v1.TeamsService.CreateTeam:input_type -> fleet.server.v1.CreateTeamRequest
-	13, // 11: fleet.server.v1.TeamsService.ListTeams:input_type -> fleet.shared.v1.ListRequest
-	1,  // 12: fleet.server.v1.TeamsService.GetTeam:input_type -> fleet.server.v1.GetTeamRequest
-	1,  // 13: fleet.server.v1.TeamsService.DeleteTeam:input_type -> fleet.server.v1.GetTeamRequest
-	5,  // 14: fleet.server.v1.TeamsService.CreateMembership:input_type -> fleet.server.v1.CreateMembershipRequest
-	6,  // 15: fleet.server.v1.TeamsService.ListMemberships:input_type -> fleet.server.v1.ListMembershipsRequest
-	7,  // 16: fleet.server.v1.TeamsService.GetMembership:input_type -> fleet.server.v1.GetMembershipRequest
-	9,  // 17: fleet.server.v1.TeamsService.UpdateMembership:input_type -> fleet.server.v1.UpdateMembershipRequest
-	10, // 18: fleet.server.v1.TeamsService.UpdateMembershipStatus:input_type -> fleet.server.v1.UpdateMembershipStatusRequest
-	7,  // 19: fleet.server.v1.TeamsService.DeleteMembership:input_type -> fleet.server.v1.GetMembershipRequest
-	3,  // 20: fleet.server.v1.TeamsService.CreateTeam:output_type -> fleet.server.v1.Team
-	2,  // 21: fleet.server.v1.TeamsService.ListTeams:output_type -> fleet.server.v1.ListTeamsResponse
-	3,  // 22: fleet.server.v1.TeamsService.GetTeam:output_type -> fleet.server.v1.Team
-	14, // 23: fleet.server.v1.TeamsService.DeleteTeam:output_type -> fleet.shared.v1.Empty
-	4,  // 24: fleet.server.v1.TeamsService.CreateMembership:output_type -> fleet.server.v1.Membership
-	8,  // 25: fleet.server.v1.TeamsService.ListMemberships:output_type -> fleet.server.v1.ListMembershipsResponse
-	4,  // 26: fleet.server.v1.TeamsService.GetMembership:output_type -> fleet.server.v1.Membership
-	4,  // 27: fleet.server.v1.TeamsService.UpdateMembership:output_type -> fleet.server.v1.Membership
-	4,  // 28: fleet.server.v1.TeamsService.UpdateMembershipStatus:output_type -> fleet.server.v1.Membership
-	14, // 29: fleet.server.v1.TeamsService.DeleteMembership:output_type -> fleet.shared.v1.Empty
-	20, // [20:30] is the sub-list for method output_type
-	10, // [10:20] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+var file_client_v1_teams_proto_depIdxs = []int32{
+	3,  // 0: fleet.client.v1.ListTeamsResponse.teams:type_name -> fleet.client.v1.Team
+	10, // 1: fleet.client.v1.ListTeamsResponse.meta:type_name -> fleet.shared.v1.ListResponseMeta
+	11, // 2: fleet.client.v1.Team.created_at:type_name -> google.protobuf.Timestamp
+	11, // 3: fleet.client.v1.Team.updated_at:type_name -> google.protobuf.Timestamp
+	11, // 4: fleet.client.v1.Membership.invited_at:type_name -> google.protobuf.Timestamp
+	11, // 5: fleet.client.v1.Membership.joined_at:type_name -> google.protobuf.Timestamp
+	11, // 6: fleet.client.v1.Membership.created_at:type_name -> google.protobuf.Timestamp
+	11, // 7: fleet.client.v1.Membership.updated_at:type_name -> google.protobuf.Timestamp
+	4,  // 8: fleet.client.v1.ListMembershipsResponse.memberships:type_name -> fleet.client.v1.Membership
+	0,  // 9: fleet.client.v1.TeamsService.CreateTeam:input_type -> fleet.client.v1.CreateTeamRequest
+	12, // 10: fleet.client.v1.TeamsService.ListTeams:input_type -> fleet.shared.v1.ListRequest
+	1,  // 11: fleet.client.v1.TeamsService.GetTeam:input_type -> fleet.client.v1.GetTeamRequest
+	1,  // 12: fleet.client.v1.TeamsService.DeleteTeam:input_type -> fleet.client.v1.GetTeamRequest
+	5,  // 13: fleet.client.v1.TeamsService.CreateMembership:input_type -> fleet.client.v1.CreateMembershipRequest
+	6,  // 14: fleet.client.v1.TeamsService.ListMemberships:input_type -> fleet.client.v1.ListMembershipsRequest
+	9,  // 15: fleet.client.v1.TeamsService.UpdateMembershipStatus:input_type -> fleet.client.v1.UpdateMembershipStatusRequest
+	7,  // 16: fleet.client.v1.TeamsService.DeleteMembership:input_type -> fleet.client.v1.GetMembershipRequest
+	3,  // 17: fleet.client.v1.TeamsService.CreateTeam:output_type -> fleet.client.v1.Team
+	2,  // 18: fleet.client.v1.TeamsService.ListTeams:output_type -> fleet.client.v1.ListTeamsResponse
+	3,  // 19: fleet.client.v1.TeamsService.GetTeam:output_type -> fleet.client.v1.Team
+	13, // 20: fleet.client.v1.TeamsService.DeleteTeam:output_type -> fleet.shared.v1.Empty
+	4,  // 21: fleet.client.v1.TeamsService.CreateMembership:output_type -> fleet.client.v1.Membership
+	8,  // 22: fleet.client.v1.TeamsService.ListMemberships:output_type -> fleet.client.v1.ListMembershipsResponse
+	4,  // 23: fleet.client.v1.TeamsService.UpdateMembershipStatus:output_type -> fleet.client.v1.Membership
+	13, // 24: fleet.client.v1.TeamsService.DeleteMembership:output_type -> fleet.shared.v1.Empty
+	17, // [17:25] is the sub-list for method output_type
+	9,  // [9:17] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
-func init() { file_server_v1_teams_proto_init() }
-func file_server_v1_teams_proto_init() {
-	if File_server_v1_teams_proto != nil {
+func init() { file_client_v1_teams_proto_init() }
+func file_client_v1_teams_proto_init() {
+	if File_client_v1_teams_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_server_v1_teams_proto_rawDesc), len(file_server_v1_teams_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_client_v1_teams_proto_rawDesc), len(file_client_v1_teams_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_server_v1_teams_proto_goTypes,
-		DependencyIndexes: file_server_v1_teams_proto_depIdxs,
-		MessageInfos:      file_server_v1_teams_proto_msgTypes,
+		GoTypes:           file_client_v1_teams_proto_goTypes,
+		DependencyIndexes: file_client_v1_teams_proto_depIdxs,
+		MessageInfos:      file_client_v1_teams_proto_msgTypes,
 	}.Build()
-	File_server_v1_teams_proto = out.File
-	file_server_v1_teams_proto_goTypes = nil
-	file_server_v1_teams_proto_depIdxs = nil
+	File_client_v1_teams_proto = out.File
+	file_client_v1_teams_proto_goTypes = nil
+	file_client_v1_teams_proto_depIdxs = nil
 }

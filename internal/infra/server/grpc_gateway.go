@@ -48,6 +48,7 @@ func NewGRPCGatewayServer(
 	register := []func(context.Context, *runtime.ServeMux, string, []grpc.DialOption) error{
 		clientv1.RegisterAccountServiceHandlerFromEndpoint,
 		clientv1.RegisterDatabasesServiceHandlerFromEndpoint,
+		clientv1.RegisterTeamsServiceHandlerFromEndpoint,
 		serverv1.RegisterHealthServiceHandlerFromEndpoint,
 		serverv1.RegisterProjectsServiceHandlerFromEndpoint,
 		serverv1.RegisterStorageServiceHandlerFromEndpoint,

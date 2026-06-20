@@ -4,13 +4,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { ProjectBootstrap } from "@/components/ProjectBootstrap";
 import { ProjectSelector } from "@/components/ProjectSelector";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Key, Users, Database, HardDrive, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, Key, Users, Database, HardDrive, LogOut, Menu, X, UsersRound } from "lucide-react";
 
 const nav = [
   { to: "/console", label: "Dashboard", icon: LayoutDashboard },
   { to: "/console/projects", label: "Projects", icon: Database },
   { to: "/console/api-keys", label: "API Keys", icon: Key },
   { to: "/console/users", label: "Users", icon: Users },
+  { to: "/console/teams", label: "Teams", icon: UsersRound },
   { to: "/console/storage", label: "Storage", icon: HardDrive },
   { to: "/console/databases", label: "Databases", icon: Database },
 ];
