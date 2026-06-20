@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package fleet.client.v1;
+
+option go_package = "github.com/deeploop-ai/fleet/genproto/client/v1;clientv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "shared/v1/authz.proto";
+import "shared/v1/common.proto";
+
+service DatabasesService {
+  option (fleet.shared.v1.service_auth) = { default_access: ACCESS_AUTHENTICATED };
+
+  rpc CreateDocument(CreateDocumentRequest) returns (Document) {
+    option (google.api.http) = { post: "/v1/databases/{database_id}/collections/{collection_id}/documents", body: "*" };
+  }
+
+  rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse) {
+    option (google.api.http) = { get: "/v1/databases/{database_id}/collections/{collection_id}/documents" };
+  }
+
+  rpc GetDocument(GetDocumentRequest) returns (Document) {
+    option (google.api.http) = { get: "/v1/databases/{database_id}/collections/{collection_id}/documents/{document_id}" };
+  }
+
+  rpc UpdateDocument(UpdateDocumentRequest) returns (Document) {
+    option (google.api.http) = { patch: "/v1/databases/{database_id}/collections/{collection_id}/documents/{document_id}", body: "*" };
+  }
+
+  rpc DeleteDocument(GetDocumentRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { delete: "/v1/databases/{database_id}/collections/{collection_id}/documents/{document_id}" };
+  }
+
+  rpc CountDocuments(ListDocumentsRequest) returns (CountDocumentsResponse) {
+    option (google.api.http) = { get: "/v1/databases/{database_id}/collections/{collection_id}/documents/count" };
+  }
+}
+
+message Document {
+  string id = 1;
+  google.protobuf.Struct data = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+message CreateDocumentRequest {
+  string database_id = 1;
+  string collection_id = 2;
+  string document_id = 3;
+  google.protobuf.Struct data = 4;
+  repeated string permissions = 5;
+}
+
+message UpdateDocumentRequest {
+  string database_id = 1;
+  string collection_id = 2;
+  string document_id = 3;
+  google.protobuf.Struct data = 4;
+}
+
+message GetDocumentRequest {
+  string database_id = 1;
+  string collection_id = 2;
+  string document_id = 3;
+}
+
+message ListDocumentsRequest {
+  string database_id = 1;
+  string collection_id = 2;
+  repeated string queries = 3;
+  int32 page_size = 4;
+  string page_token = 5;
+}
+
+message ListDocumentsResponse {
+  repeated Document documents = 1;
+  shared.v1.ListResponseMeta meta = 2;
+}
+
+message CountDocumentsResponse {
+  int64 count = 1;
+}

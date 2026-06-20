@@ -8,6 +8,7 @@ import (
 
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
 	"github.com/deeploop-ai/fleet/internal/domain/projects"
+	"github.com/deeploop-ai/fleet/internal/domain/shared"
 	"github.com/deeploop-ai/fleet/internal/domain/users"
 	"github.com/deeploop-ai/fleet/internal/infra/auth"
 	"github.com/deeploop-ai/fleet/internal/pkg/config"
@@ -71,6 +72,24 @@ type TokenBundle struct {
 	AccessToken  string
 	RefreshToken string
 	ExpiresAt    int64
+}
+
+type Session struct {
+	ID        string
+	UserID    string
+	Provider  string
+	UserAgent string
+	IP        string
+	ExpireAt  time.Time
+	CreatedAt time.Time
+	Current   bool
+}
+
+type UpdateAccountCommand struct {
+	Name        string
+	Email       string
+	Password    string
+	OldPassword string
 }
 
 func (a *Account) SignUp(ctx context.Context, cmd SignUpCommand) (*User, *TokenBundle, string, error) {
@@ -237,6 +256,180 @@ func (a *Account) RefreshToken(ctx context.Context, cmd RefreshTokenCommand) (*T
 	return a.issueTokens(projectID, claims.UserID, claims.Username, claims.SessionID)
 }
 
+func (a *Account) UpdateAccount(ctx context.Context, cmd UpdateAccountCommand) (*User, error) {
+	p, err := a.requireUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	doc, err := a.docDB.GetDocument(ctx, p.ProjectID, "default", "users", p.UserID, p.Roles)
+	if err != nil {
+		return nil, err
+	}
+	if doc == nil {
+		return nil, status.Error(codes.NotFound, "user not found")
+	}
+
+	updates := map[string]any{}
+	if cmd.Name != "" {
+		updates["name"] = cmd.Name
+	}
+	if cmd.Email != "" && cmd.Email != stringValue(doc.Data["email"]) {
+		list, err := a.docDB.ListDocuments(ctx, p.ProjectID, "default", "users", databases.Query{
+			Queries:  []string{fmt.Sprintf(`equal("email","%s")`, strings.ReplaceAll(cmd.Email, `"`, `""`))},
+			PageSize: 1,
+		}, databases.SystemRoles)
+		if err != nil {
+			return nil, err
+		}
+		if len(list.Documents) > 0 && list.Documents[0].ID != p.UserID {
+			return nil, status.Error(codes.AlreadyExists, "email already registered")
+		}
+		updates["email"] = cmd.Email
+		updates["email_verified"] = false
+	}
+	if cmd.Password != "" {
+		if cmd.OldPassword == "" {
+			return nil, status.Error(codes.InvalidArgument, "old_password is required")
+		}
+		hash, _ := doc.Data["password_hash"].(string)
+		if ok, _ := password.Verify(cmd.OldPassword, hash); !ok {
+			return nil, status.Error(codes.Unauthenticated, "invalid old password")
+		}
+		newHash, err := password.Hash(cmd.Password)
+		if err != nil {
+			return nil, err
+		}
+		updates["password_hash"] = newHash
+	}
+	if len(updates) == 0 {
+		return mapUserDoc(doc), nil
+	}
+
+	updated, err := a.docDB.UpdateDocument(ctx, p.ProjectID, "default", "users", databases.Document{
+		ID:   p.UserID,
+		Data: updates,
+	}, nil, p.Roles)
+	if err != nil {
+		return nil, fmt.Errorf("update account: %w", err)
+	}
+	return mapUserDoc(&updated), nil
+}
+
+func (a *Account) ListSessions(ctx context.Context) ([]Session, error) {
+	p, err := a.requireUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	list, err := a.docDB.ListDocuments(ctx, p.ProjectID, "default", "sessions", databases.Query{
+		Queries: []string{fmt.Sprintf(`equal("user_id","%s")`, strings.ReplaceAll(p.UserID, `"`, `""`))},
+	}, p.Roles)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]Session, 0, len(list.Documents))
+	for i := range list.Documents {
+		s := mapSessionDoc(&list.Documents[i])
+		s.Current = s.ID == p.SessionID
+		out = append(out, s)
+	}
+	return out, nil
+}
+
+func (a *Account) DeleteSession(ctx context.Context, sessionID string) error {
+	p, err := a.requireUser(ctx)
+	if err != nil {
+		return err
+	}
+	if sessionID == "" {
+		return status.Error(codes.InvalidArgument, "session_id is required")
+	}
+	if err := a.deleteUserSession(ctx, p, sessionID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *Account) DeleteSessions(ctx context.Context, keepCurrent bool) error {
+	p, err := a.requireUser(ctx)
+	if err != nil {
+		return err
+	}
+	sessions, err := a.ListSessions(ctx)
+	if err != nil {
+		return err
+	}
+	for _, s := range sessions {
+		if keepCurrent && s.ID == p.SessionID {
+			continue
+		}
+		if err := a.deleteUserSession(ctx, p, s.ID); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (a *Account) GetPrefs(ctx context.Context) (map[string]any, error) {
+	p, err := a.requireUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	doc, err := a.docDB.GetDocument(ctx, p.ProjectID, "default", "users", p.UserID, p.Roles)
+	if err != nil {
+		return nil, err
+	}
+	if doc == nil {
+		return nil, status.Error(codes.NotFound, "user not found")
+	}
+	if prefs, ok := doc.Data["prefs"].(map[string]any); ok {
+		return prefs, nil
+	}
+	return map[string]any{}, nil
+}
+
+func (a *Account) UpdatePrefs(ctx context.Context, prefs map[string]any) (map[string]any, error) {
+	p, err := a.requireUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if prefs == nil {
+		return nil, status.Error(codes.InvalidArgument, "prefs is required")
+	}
+	updated, err := a.docDB.UpdateDocument(ctx, p.ProjectID, "default", "users", databases.Document{
+		ID:   p.UserID,
+		Data: map[string]any{"prefs": prefs},
+	}, nil, p.Roles)
+	if err != nil {
+		return nil, fmt.Errorf("update prefs: %w", err)
+	}
+	if out, ok := updated.Data["prefs"].(map[string]any); ok {
+		return out, nil
+	}
+	return map[string]any{}, nil
+}
+
+func (a *Account) deleteUserSession(ctx context.Context, p *shared.Principal, sessionID string) error {
+	doc, err := a.docDB.GetDocument(ctx, p.ProjectID, "default", "sessions", sessionID, p.Roles)
+	if err != nil {
+		return err
+	}
+	if doc == nil {
+		return status.Error(codes.NotFound, "session not found")
+	}
+	if uid, _ := doc.Data["user_id"].(string); uid != p.UserID {
+		return status.Error(codes.PermissionDenied, "cannot delete another user's session")
+	}
+	return a.docDB.DeleteDocument(ctx, p.ProjectID, "default", "sessions", sessionID, p.Roles)
+}
+
+func (a *Account) requireUser(ctx context.Context) (*shared.Principal, error) {
+	p, ok := contexts.Principal(ctx)
+	if !ok || p.UserID == "" {
+		return nil, status.Error(codes.Unauthenticated, "unauthenticated")
+	}
+	return p, nil
+}
+
 func (a *Account) createSessionAndTokens(ctx context.Context, projectID, userID, email string) (*User, *TokenBundle, string, error) {
 	expireAt := time.Now().Add(7 * 24 * time.Hour)
 	sessionID := idgen.UUID().String()
@@ -360,6 +553,26 @@ func parseSessionTime(v any) (time.Time, error) {
 		return time.Parse(time.RFC3339Nano, t)
 	}
 	return time.Time{}, fmt.Errorf("unsupported time type")
+}
+
+func mapSessionDoc(doc *databases.Document) Session {
+	if doc == nil {
+		return Session{}
+	}
+	s := Session{
+		ID:        doc.ID,
+		UserID:    stringValue(doc.Data["user_id"]),
+		Provider:  stringValue(doc.Data["provider"]),
+		UserAgent: stringValue(doc.Data["user_agent"]),
+		IP:        stringValue(doc.Data["ip"]),
+		CreatedAt: doc.CreatedAt,
+	}
+	if expireAtRaw, ok := doc.Data["expire_at"]; ok {
+		if expireAt, err := parseSessionTime(expireAtRaw); err == nil {
+			s.ExpireAt = expireAt
+		}
+	}
+	return s
 }
 
 func mapUserDoc(doc *databases.Document) *User {

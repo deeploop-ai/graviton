@@ -9,6 +9,7 @@ import (
 	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -81,6 +82,72 @@ func (s *AccountService) RefreshToken(ctx context.Context, req *clientv1.Refresh
 	return &clientv1.RefreshTokenResponse{Tokens: mapTokens(tokens)}, nil
 }
 
+func (s *AccountService) UpdateAccount(ctx context.Context, req *clientv1.UpdateAccountRequest) (*clientv1.Account, error) {
+	user, err := s.account.UpdateAccount(ctx, client.UpdateAccountCommand{
+		Name:        req.GetName(),
+		Email:       req.GetEmail(),
+		Password:    req.GetPassword(),
+		OldPassword: req.GetOldPassword(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return mapUser(user), nil
+}
+
+func (s *AccountService) ListSessions(ctx context.Context, _ *clientv1.ListSessionsRequest) (*clientv1.ListSessionsResponse, error) {
+	sessions, err := s.account.ListSessions(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]*clientv1.Session, len(sessions))
+	for i := range sessions {
+		out[i] = mapSession(&sessions[i])
+	}
+	return &clientv1.ListSessionsResponse{Sessions: out}, nil
+}
+
+func (s *AccountService) DeleteSession(ctx context.Context, req *clientv1.DeleteSessionRequest) (*sharedv1.Empty, error) {
+	if err := s.account.DeleteSession(ctx, req.GetSessionId()); err != nil {
+		return nil, err
+	}
+	return &sharedv1.Empty{}, nil
+}
+
+func (s *AccountService) DeleteSessions(ctx context.Context, req *clientv1.DeleteSessionsRequest) (*sharedv1.Empty, error) {
+	if err := s.account.DeleteSessions(ctx, req.GetKeepCurrent()); err != nil {
+		return nil, err
+	}
+	return &sharedv1.Empty{}, nil
+}
+
+func (s *AccountService) GetPrefs(ctx context.Context, _ *clientv1.GetPrefsRequest) (*clientv1.GetPrefsResponse, error) {
+	prefs, err := s.account.GetPrefs(ctx)
+	if err != nil {
+		return nil, err
+	}
+	data, err := structpb.NewStruct(prefs)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "prefs is not serializable")
+	}
+	return &clientv1.GetPrefsResponse{Prefs: data}, nil
+}
+
+func (s *AccountService) UpdatePrefs(ctx context.Context, req *clientv1.UpdatePrefsRequest) (*clientv1.GetPrefsResponse, error) {
+	if req.GetPrefs() == nil {
+		return nil, status.Error(codes.InvalidArgument, "prefs is required")
+	}
+	prefs, err := s.account.UpdatePrefs(ctx, req.GetPrefs().AsMap())
+	if err != nil {
+		return nil, err
+	}
+	data, err := structpb.NewStruct(prefs)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "prefs is not serializable")
+	}
+	return &clientv1.GetPrefsResponse{Prefs: data}, nil
+}
+
 func mapUser(u *client.User) *clientv1.Account {
 	if u == nil {
 		return nil
@@ -94,6 +161,25 @@ func mapUser(u *client.User) *clientv1.Account {
 		CreatedAt:     timestamppb.New(u.CreatedAt),
 		UpdatedAt:     timestamppb.New(u.UpdatedAt),
 	}
+}
+
+func mapSession(s *client.Session) *clientv1.Session {
+	if s == nil {
+		return nil
+	}
+	out := &clientv1.Session{
+		Id:        s.ID,
+		UserId:    s.UserID,
+		Provider:  s.Provider,
+		UserAgent: s.UserAgent,
+		Ip:        s.IP,
+		CreatedAt: timestamppb.New(s.CreatedAt),
+		Current:   s.Current,
+	}
+	if !s.ExpireAt.IsZero() {
+		out.ExpireAt = timestamppb.New(s.ExpireAt)
+	}
+	return out
 }
 
 func mapTokens(t *client.TokenBundle) *clientv1.TokenBundle {

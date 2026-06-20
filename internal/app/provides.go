@@ -11,6 +11,7 @@ import (
 
 var ProviderSet = wire.NewSet(
 	client.NewAccount,
+	client.NewDatabases,
 	server.NewProjects,
 	server.NewUsers,
 	server.NewAPIKeys,

@@ -28,6 +28,7 @@ func NewGRPCServer(
 	validator *auth.Validator,
 	auditRepo audit.Repository,
 	account *clientgrpc.AccountService,
+	clientDatabases *clientgrpc.DatabasesService,
 	health *servergrpc.HealthService,
 	projects *servergrpc.ProjectsService,
 	storage *servergrpc.StorageService,
@@ -42,6 +43,7 @@ func NewGRPCServer(
 
 	publicMethods, apiKeyMethods, permissionMethods, err := collectMethodsByAccess(
 		clientv1.File_client_v1_account_proto,
+		clientv1.File_client_v1_databases_proto,
 		serverv1.File_server_v1_projects_proto,
 		serverv1.File_server_v1_health_proto,
 		serverv1.File_server_v1_storage_proto,
@@ -73,6 +75,7 @@ func NewGRPCServer(
 	grpcSrv := srv.GetServer()
 
 	clientv1.RegisterAccountServiceServer(grpcSrv, account)
+	clientv1.RegisterDatabasesServiceServer(grpcSrv, clientDatabases)
 	serverv1.RegisterHealthServiceServer(grpcSrv, health)
 	serverv1.RegisterProjectsServiceServer(grpcSrv, projects)
 	serverv1.RegisterStorageServiceServer(grpcSrv, storage)

@@ -11,6 +11,7 @@ import (
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
@@ -592,11 +593,471 @@ func (x *RefreshTokenResponse) GetTokens() *TokenBundle {
 	return nil
 }
 
+type UpdateAccountRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Password      string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	OldPassword   string                 `protobuf:"bytes,4,opt,name=old_password,json=oldPassword,proto3" json:"old_password,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateAccountRequest) Reset() {
+	*x = UpdateAccountRequest{}
+	mi := &file_client_v1_account_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateAccountRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateAccountRequest) ProtoMessage() {}
+
+func (x *UpdateAccountRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateAccountRequest.ProtoReflect.Descriptor instead.
+func (*UpdateAccountRequest) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *UpdateAccountRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateAccountRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *UpdateAccountRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *UpdateAccountRequest) GetOldPassword() string {
+	if x != nil {
+		return x.OldPassword
+	}
+	return ""
+}
+
+type Session struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Provider      string                 `protobuf:"bytes,3,opt,name=provider,proto3" json:"provider,omitempty"`
+	UserAgent     string                 `protobuf:"bytes,4,opt,name=user_agent,json=userAgent,proto3" json:"user_agent,omitempty"`
+	Ip            string                 `protobuf:"bytes,5,opt,name=ip,proto3" json:"ip,omitempty"`
+	ExpireAt      *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=expire_at,json=expireAt,proto3" json:"expire_at,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Current       bool                   `protobuf:"varint,8,opt,name=current,proto3" json:"current,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Session) Reset() {
+	*x = Session{}
+	mi := &file_client_v1_account_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Session) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Session) ProtoMessage() {}
+
+func (x *Session) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Session.ProtoReflect.Descriptor instead.
+func (*Session) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *Session) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Session) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *Session) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
+func (x *Session) GetUserAgent() string {
+	if x != nil {
+		return x.UserAgent
+	}
+	return ""
+}
+
+func (x *Session) GetIp() string {
+	if x != nil {
+		return x.Ip
+	}
+	return ""
+}
+
+func (x *Session) GetExpireAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ExpireAt
+	}
+	return nil
+}
+
+func (x *Session) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *Session) GetCurrent() bool {
+	if x != nil {
+		return x.Current
+	}
+	return false
+}
+
+type ListSessionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSessionsRequest) Reset() {
+	*x = ListSessionsRequest{}
+	mi := &file_client_v1_account_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSessionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSessionsRequest) ProtoMessage() {}
+
+func (x *ListSessionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSessionsRequest.ProtoReflect.Descriptor instead.
+func (*ListSessionsRequest) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{12}
+}
+
+type ListSessionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sessions      []*Session             `protobuf:"bytes,1,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSessionsResponse) Reset() {
+	*x = ListSessionsResponse{}
+	mi := &file_client_v1_account_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSessionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSessionsResponse) ProtoMessage() {}
+
+func (x *ListSessionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSessionsResponse.ProtoReflect.Descriptor instead.
+func (*ListSessionsResponse) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ListSessionsResponse) GetSessions() []*Session {
+	if x != nil {
+		return x.Sessions
+	}
+	return nil
+}
+
+type DeleteSessionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteSessionRequest) Reset() {
+	*x = DeleteSessionRequest{}
+	mi := &file_client_v1_account_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteSessionRequest) ProtoMessage() {}
+
+func (x *DeleteSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteSessionRequest.ProtoReflect.Descriptor instead.
+func (*DeleteSessionRequest) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *DeleteSessionRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+type DeleteSessionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	KeepCurrent   bool                   `protobuf:"varint,1,opt,name=keep_current,json=keepCurrent,proto3" json:"keep_current,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteSessionsRequest) Reset() {
+	*x = DeleteSessionsRequest{}
+	mi := &file_client_v1_account_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteSessionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteSessionsRequest) ProtoMessage() {}
+
+func (x *DeleteSessionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteSessionsRequest.ProtoReflect.Descriptor instead.
+func (*DeleteSessionsRequest) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *DeleteSessionsRequest) GetKeepCurrent() bool {
+	if x != nil {
+		return x.KeepCurrent
+	}
+	return false
+}
+
+type GetPrefsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPrefsRequest) Reset() {
+	*x = GetPrefsRequest{}
+	mi := &file_client_v1_account_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPrefsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPrefsRequest) ProtoMessage() {}
+
+func (x *GetPrefsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPrefsRequest.ProtoReflect.Descriptor instead.
+func (*GetPrefsRequest) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{16}
+}
+
+type GetPrefsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Prefs         *structpb.Struct       `protobuf:"bytes,1,opt,name=prefs,proto3" json:"prefs,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPrefsResponse) Reset() {
+	*x = GetPrefsResponse{}
+	mi := &file_client_v1_account_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPrefsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPrefsResponse) ProtoMessage() {}
+
+func (x *GetPrefsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPrefsResponse.ProtoReflect.Descriptor instead.
+func (*GetPrefsResponse) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *GetPrefsResponse) GetPrefs() *structpb.Struct {
+	if x != nil {
+		return x.Prefs
+	}
+	return nil
+}
+
+type UpdatePrefsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Prefs         *structpb.Struct       `protobuf:"bytes,1,opt,name=prefs,proto3" json:"prefs,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdatePrefsRequest) Reset() {
+	*x = UpdatePrefsRequest{}
+	mi := &file_client_v1_account_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdatePrefsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdatePrefsRequest) ProtoMessage() {}
+
+func (x *UpdatePrefsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdatePrefsRequest.ProtoReflect.Descriptor instead.
+func (*UpdatePrefsRequest) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *UpdatePrefsRequest) GetPrefs() *structpb.Struct {
+	if x != nil {
+		return x.Prefs
+	}
+	return nil
+}
+
 var File_client_v1_account_proto protoreflect.FileDescriptor
 
 const file_client_v1_account_proto_rawDesc = "" +
 	"\n" +
-	"\x17client/v1/account.proto\x12\x0ffleet.client.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\"t\n" +
+	"\x17client/v1/account.proto\x12\x0ffleet.client.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\"t\n" +
 	"\rSignUpRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x12\n" +
@@ -640,13 +1101,49 @@ const file_client_v1_account_proto_rawDesc = "" +
 	"project_id\x18\x01 \x01(\tR\tprojectId\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\"L\n" +
 	"\x14RefreshTokenResponse\x124\n" +
-	"\x06tokens\x18\x01 \x01(\v2\x1c.fleet.client.v1.TokenBundleR\x06tokens2\xd1\x04\n" +
+	"\x06tokens\x18\x01 \x01(\v2\x1c.fleet.client.v1.TokenBundleR\x06tokens\"\x7f\n" +
+	"\x14UpdateAccountRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
+	"\bpassword\x18\x03 \x01(\tR\bpassword\x12!\n" +
+	"\fold_password\x18\x04 \x01(\tR\voldPassword\"\x8b\x02\n" +
+	"\aSession\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1a\n" +
+	"\bprovider\x18\x03 \x01(\tR\bprovider\x12\x1d\n" +
+	"\n" +
+	"user_agent\x18\x04 \x01(\tR\tuserAgent\x12\x0e\n" +
+	"\x02ip\x18\x05 \x01(\tR\x02ip\x127\n" +
+	"\texpire_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\bexpireAt\x129\n" +
+	"\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x18\n" +
+	"\acurrent\x18\b \x01(\bR\acurrent\"\x15\n" +
+	"\x13ListSessionsRequest\"L\n" +
+	"\x14ListSessionsResponse\x124\n" +
+	"\bsessions\x18\x01 \x03(\v2\x18.fleet.client.v1.SessionR\bsessions\"5\n" +
+	"\x14DeleteSessionRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\":\n" +
+	"\x15DeleteSessionsRequest\x12!\n" +
+	"\fkeep_current\x18\x01 \x01(\bR\vkeepCurrent\"\x11\n" +
+	"\x0fGetPrefsRequest\"A\n" +
+	"\x10GetPrefsResponse\x12-\n" +
+	"\x05prefs\x18\x01 \x01(\v2\x17.google.protobuf.StructR\x05prefs\"C\n" +
+	"\x12UpdatePrefsRequest\x12-\n" +
+	"\x05prefs\x18\x01 \x01(\v2\x17.google.protobuf.StructR\x05prefs2\xd3\n" +
+	"\n" +
 	"\x0eAccountService\x12o\n" +
 	"\x06SignUp\x12\x1e.fleet.client.v1.SignUpRequest\x1a\x1f.fleet.client.v1.SignUpResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/sign-up\x12o\n" +
 	"\x06SignIn\x12\x1e.fleet.client.v1.SignInRequest\x1a\x1f.fleet.client.v1.SignInResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/sign-in\x12p\n" +
 	"\aSignOut\x12\x1f.fleet.client.v1.SignOutRequest\x1a\x16.fleet.shared.v1.Empty\",\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/v1/account/sign-out\x12\x81\x01\n" +
 	"\fRefreshToken\x12$.fleet.client.v1.RefreshTokenRequest\x1a%.fleet.client.v1.RefreshTokenResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/refresh\x12_\n" +
-	"\x02Me\x12\x1a.fleet.client.v1.MeRequest\x1a\x18.fleet.client.v1.Account\"#\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/account/me\x1a\x06\x92\xb2\x19\x02\b\x02B:Z8github.com/deeploop-ai/fleet/genproto/client/v1;clientv1b\x06proto3"
+	"\x02Me\x12\x1a.fleet.client.v1.MeRequest\x1a\x18.fleet.client.v1.Account\"#\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/account/me\x12u\n" +
+	"\rUpdateAccount\x12%.fleet.client.v1.UpdateAccountRequest\x1a\x18.fleet.client.v1.Account\"#\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x10:\x01*2\v/v1/account\x12\x86\x01\n" +
+	"\fListSessions\x12$.fleet.client.v1.ListSessionsRequest\x1a%.fleet.client.v1.ListSessionsResponse\")\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x16\x12\x14/v1/account/sessions\x12\x86\x01\n" +
+	"\rDeleteSession\x12%.fleet.client.v1.DeleteSessionRequest\x1a\x16.fleet.shared.v1.Empty\"6\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02#*!/v1/account/sessions/{session_id}\x12{\n" +
+	"\x0eDeleteSessions\x12&.fleet.client.v1.DeleteSessionsRequest\x1a\x16.fleet.shared.v1.Empty\")\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x16*\x14/v1/account/sessions\x12w\n" +
+	"\bGetPrefs\x12 .fleet.client.v1.GetPrefsRequest\x1a!.fleet.client.v1.GetPrefsResponse\"&\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x13\x12\x11/v1/account/prefs\x12\x80\x01\n" +
+	"\vUpdatePrefs\x12#.fleet.client.v1.UpdatePrefsRequest\x1a!.fleet.client.v1.GetPrefsResponse\")\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x16:\x01*\x1a\x11/v1/account/prefs\x1a\x06\x92\xb2\x19\x02\b\x02B:Z8github.com/deeploop-ai/fleet/genproto/client/v1;clientv1b\x06proto3"
 
 var (
 	file_client_v1_account_proto_rawDescOnce sync.Once
@@ -660,7 +1157,7 @@ func file_client_v1_account_proto_rawDescGZIP() []byte {
 	return file_client_v1_account_proto_rawDescData
 }
 
-var file_client_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_client_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_client_v1_account_proto_goTypes = []any{
 	(*SignUpRequest)(nil),         // 0: fleet.client.v1.SignUpRequest
 	(*SignInRequest)(nil),         // 1: fleet.client.v1.SignInRequest
@@ -672,32 +1169,59 @@ var file_client_v1_account_proto_goTypes = []any{
 	(*SignInResponse)(nil),        // 7: fleet.client.v1.SignInResponse
 	(*RefreshTokenRequest)(nil),   // 8: fleet.client.v1.RefreshTokenRequest
 	(*RefreshTokenResponse)(nil),  // 9: fleet.client.v1.RefreshTokenResponse
-	(*timestamppb.Timestamp)(nil), // 10: google.protobuf.Timestamp
-	(*v1.Empty)(nil),              // 11: fleet.shared.v1.Empty
+	(*UpdateAccountRequest)(nil),  // 10: fleet.client.v1.UpdateAccountRequest
+	(*Session)(nil),               // 11: fleet.client.v1.Session
+	(*ListSessionsRequest)(nil),   // 12: fleet.client.v1.ListSessionsRequest
+	(*ListSessionsResponse)(nil),  // 13: fleet.client.v1.ListSessionsResponse
+	(*DeleteSessionRequest)(nil),  // 14: fleet.client.v1.DeleteSessionRequest
+	(*DeleteSessionsRequest)(nil), // 15: fleet.client.v1.DeleteSessionsRequest
+	(*GetPrefsRequest)(nil),       // 16: fleet.client.v1.GetPrefsRequest
+	(*GetPrefsResponse)(nil),      // 17: fleet.client.v1.GetPrefsResponse
+	(*UpdatePrefsRequest)(nil),    // 18: fleet.client.v1.UpdatePrefsRequest
+	(*timestamppb.Timestamp)(nil), // 19: google.protobuf.Timestamp
+	(*structpb.Struct)(nil),       // 20: google.protobuf.Struct
+	(*v1.Empty)(nil),              // 21: fleet.shared.v1.Empty
 }
 var file_client_v1_account_proto_depIdxs = []int32{
-	10, // 0: fleet.client.v1.Account.created_at:type_name -> google.protobuf.Timestamp
-	10, // 1: fleet.client.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
+	19, // 0: fleet.client.v1.Account.created_at:type_name -> google.protobuf.Timestamp
+	19, // 1: fleet.client.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
 	4,  // 2: fleet.client.v1.SignUpResponse.account:type_name -> fleet.client.v1.Account
 	5,  // 3: fleet.client.v1.SignUpResponse.tokens:type_name -> fleet.client.v1.TokenBundle
 	4,  // 4: fleet.client.v1.SignInResponse.account:type_name -> fleet.client.v1.Account
 	5,  // 5: fleet.client.v1.SignInResponse.tokens:type_name -> fleet.client.v1.TokenBundle
 	5,  // 6: fleet.client.v1.RefreshTokenResponse.tokens:type_name -> fleet.client.v1.TokenBundle
-	0,  // 7: fleet.client.v1.AccountService.SignUp:input_type -> fleet.client.v1.SignUpRequest
-	1,  // 8: fleet.client.v1.AccountService.SignIn:input_type -> fleet.client.v1.SignInRequest
-	2,  // 9: fleet.client.v1.AccountService.SignOut:input_type -> fleet.client.v1.SignOutRequest
-	8,  // 10: fleet.client.v1.AccountService.RefreshToken:input_type -> fleet.client.v1.RefreshTokenRequest
-	3,  // 11: fleet.client.v1.AccountService.Me:input_type -> fleet.client.v1.MeRequest
-	6,  // 12: fleet.client.v1.AccountService.SignUp:output_type -> fleet.client.v1.SignUpResponse
-	7,  // 13: fleet.client.v1.AccountService.SignIn:output_type -> fleet.client.v1.SignInResponse
-	11, // 14: fleet.client.v1.AccountService.SignOut:output_type -> fleet.shared.v1.Empty
-	9,  // 15: fleet.client.v1.AccountService.RefreshToken:output_type -> fleet.client.v1.RefreshTokenResponse
-	4,  // 16: fleet.client.v1.AccountService.Me:output_type -> fleet.client.v1.Account
-	12, // [12:17] is the sub-list for method output_type
-	7,  // [7:12] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	19, // 7: fleet.client.v1.Session.expire_at:type_name -> google.protobuf.Timestamp
+	19, // 8: fleet.client.v1.Session.created_at:type_name -> google.protobuf.Timestamp
+	11, // 9: fleet.client.v1.ListSessionsResponse.sessions:type_name -> fleet.client.v1.Session
+	20, // 10: fleet.client.v1.GetPrefsResponse.prefs:type_name -> google.protobuf.Struct
+	20, // 11: fleet.client.v1.UpdatePrefsRequest.prefs:type_name -> google.protobuf.Struct
+	0,  // 12: fleet.client.v1.AccountService.SignUp:input_type -> fleet.client.v1.SignUpRequest
+	1,  // 13: fleet.client.v1.AccountService.SignIn:input_type -> fleet.client.v1.SignInRequest
+	2,  // 14: fleet.client.v1.AccountService.SignOut:input_type -> fleet.client.v1.SignOutRequest
+	8,  // 15: fleet.client.v1.AccountService.RefreshToken:input_type -> fleet.client.v1.RefreshTokenRequest
+	3,  // 16: fleet.client.v1.AccountService.Me:input_type -> fleet.client.v1.MeRequest
+	10, // 17: fleet.client.v1.AccountService.UpdateAccount:input_type -> fleet.client.v1.UpdateAccountRequest
+	12, // 18: fleet.client.v1.AccountService.ListSessions:input_type -> fleet.client.v1.ListSessionsRequest
+	14, // 19: fleet.client.v1.AccountService.DeleteSession:input_type -> fleet.client.v1.DeleteSessionRequest
+	15, // 20: fleet.client.v1.AccountService.DeleteSessions:input_type -> fleet.client.v1.DeleteSessionsRequest
+	16, // 21: fleet.client.v1.AccountService.GetPrefs:input_type -> fleet.client.v1.GetPrefsRequest
+	18, // 22: fleet.client.v1.AccountService.UpdatePrefs:input_type -> fleet.client.v1.UpdatePrefsRequest
+	6,  // 23: fleet.client.v1.AccountService.SignUp:output_type -> fleet.client.v1.SignUpResponse
+	7,  // 24: fleet.client.v1.AccountService.SignIn:output_type -> fleet.client.v1.SignInResponse
+	21, // 25: fleet.client.v1.AccountService.SignOut:output_type -> fleet.shared.v1.Empty
+	9,  // 26: fleet.client.v1.AccountService.RefreshToken:output_type -> fleet.client.v1.RefreshTokenResponse
+	4,  // 27: fleet.client.v1.AccountService.Me:output_type -> fleet.client.v1.Account
+	4,  // 28: fleet.client.v1.AccountService.UpdateAccount:output_type -> fleet.client.v1.Account
+	13, // 29: fleet.client.v1.AccountService.ListSessions:output_type -> fleet.client.v1.ListSessionsResponse
+	21, // 30: fleet.client.v1.AccountService.DeleteSession:output_type -> fleet.shared.v1.Empty
+	21, // 31: fleet.client.v1.AccountService.DeleteSessions:output_type -> fleet.shared.v1.Empty
+	17, // 32: fleet.client.v1.AccountService.GetPrefs:output_type -> fleet.client.v1.GetPrefsResponse
+	17, // 33: fleet.client.v1.AccountService.UpdatePrefs:output_type -> fleet.client.v1.GetPrefsResponse
+	23, // [23:34] is the sub-list for method output_type
+	12, // [12:23] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_client_v1_account_proto_init() }
@@ -711,7 +1235,7 @@ func file_client_v1_account_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_client_v1_account_proto_rawDesc), len(file_client_v1_account_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

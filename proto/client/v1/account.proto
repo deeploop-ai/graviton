@@ -6,6 +6,7 @@ option go_package = "github.com/deeploop-ai/fleet/genproto/client/v1;clientv1";
 
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
 import "shared/v1/authz.proto";
 import "shared/v1/common.proto";
 
@@ -34,6 +35,36 @@ service AccountService {
 
   rpc Me(MeRequest) returns (Account) {
     option (google.api.http) = { get: "/v1/account/me" };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+  }
+
+  rpc UpdateAccount(UpdateAccountRequest) returns (Account) {
+    option (google.api.http) = { patch: "/v1/account", body: "*" };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+  }
+
+  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
+    option (google.api.http) = { get: "/v1/account/sessions" };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+  }
+
+  rpc DeleteSession(DeleteSessionRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { delete: "/v1/account/sessions/{session_id}" };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+  }
+
+  rpc DeleteSessions(DeleteSessionsRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { delete: "/v1/account/sessions" };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+  }
+
+  rpc GetPrefs(GetPrefsRequest) returns (GetPrefsResponse) {
+    option (google.api.http) = { get: "/v1/account/prefs" };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+  }
+
+  rpc UpdatePrefs(UpdatePrefsRequest) returns (GetPrefsResponse) {
+    option (google.api.http) = { put: "/v1/account/prefs", body: "*" };
     option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 }
@@ -92,4 +123,46 @@ message RefreshTokenRequest {
 
 message RefreshTokenResponse {
   TokenBundle tokens = 1;
+}
+
+message UpdateAccountRequest {
+  string name = 1;
+  string email = 2;
+  string password = 3;
+  string old_password = 4;
+}
+
+message Session {
+  string id = 1;
+  string user_id = 2;
+  string provider = 3;
+  string user_agent = 4;
+  string ip = 5;
+  google.protobuf.Timestamp expire_at = 6;
+  google.protobuf.Timestamp created_at = 7;
+  bool current = 8;
+}
+
+message ListSessionsRequest {}
+
+message ListSessionsResponse {
+  repeated Session sessions = 1;
+}
+
+message DeleteSessionRequest {
+  string session_id = 1;
+}
+
+message DeleteSessionsRequest {
+  bool keep_current = 1;
+}
+
+message GetPrefsRequest {}
+
+message GetPrefsResponse {
+  google.protobuf.Struct prefs = 1;
+}
+
+message UpdatePrefsRequest {
+  google.protobuf.Struct prefs = 1;
 }

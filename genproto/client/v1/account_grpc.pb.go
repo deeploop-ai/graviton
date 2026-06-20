@@ -20,11 +20,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AccountService_SignUp_FullMethodName       = "/fleet.client.v1.AccountService/SignUp"
-	AccountService_SignIn_FullMethodName       = "/fleet.client.v1.AccountService/SignIn"
-	AccountService_SignOut_FullMethodName      = "/fleet.client.v1.AccountService/SignOut"
-	AccountService_RefreshToken_FullMethodName = "/fleet.client.v1.AccountService/RefreshToken"
-	AccountService_Me_FullMethodName           = "/fleet.client.v1.AccountService/Me"
+	AccountService_SignUp_FullMethodName         = "/fleet.client.v1.AccountService/SignUp"
+	AccountService_SignIn_FullMethodName         = "/fleet.client.v1.AccountService/SignIn"
+	AccountService_SignOut_FullMethodName        = "/fleet.client.v1.AccountService/SignOut"
+	AccountService_RefreshToken_FullMethodName   = "/fleet.client.v1.AccountService/RefreshToken"
+	AccountService_Me_FullMethodName             = "/fleet.client.v1.AccountService/Me"
+	AccountService_UpdateAccount_FullMethodName  = "/fleet.client.v1.AccountService/UpdateAccount"
+	AccountService_ListSessions_FullMethodName   = "/fleet.client.v1.AccountService/ListSessions"
+	AccountService_DeleteSession_FullMethodName  = "/fleet.client.v1.AccountService/DeleteSession"
+	AccountService_DeleteSessions_FullMethodName = "/fleet.client.v1.AccountService/DeleteSessions"
+	AccountService_GetPrefs_FullMethodName       = "/fleet.client.v1.AccountService/GetPrefs"
+	AccountService_UpdatePrefs_FullMethodName    = "/fleet.client.v1.AccountService/UpdatePrefs"
 )
 
 // AccountServiceClient is the client API for AccountService service.
@@ -36,6 +42,12 @@ type AccountServiceClient interface {
 	SignOut(ctx context.Context, in *SignOutRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
 	Me(ctx context.Context, in *MeRequest, opts ...grpc.CallOption) (*Account, error)
+	UpdateAccount(ctx context.Context, in *UpdateAccountRequest, opts ...grpc.CallOption) (*Account, error)
+	ListSessions(ctx context.Context, in *ListSessionsRequest, opts ...grpc.CallOption) (*ListSessionsResponse, error)
+	DeleteSession(ctx context.Context, in *DeleteSessionRequest, opts ...grpc.CallOption) (*v1.Empty, error)
+	DeleteSessions(ctx context.Context, in *DeleteSessionsRequest, opts ...grpc.CallOption) (*v1.Empty, error)
+	GetPrefs(ctx context.Context, in *GetPrefsRequest, opts ...grpc.CallOption) (*GetPrefsResponse, error)
+	UpdatePrefs(ctx context.Context, in *UpdatePrefsRequest, opts ...grpc.CallOption) (*GetPrefsResponse, error)
 }
 
 type accountServiceClient struct {
@@ -96,6 +108,66 @@ func (c *accountServiceClient) Me(ctx context.Context, in *MeRequest, opts ...gr
 	return out, nil
 }
 
+func (c *accountServiceClient) UpdateAccount(ctx context.Context, in *UpdateAccountRequest, opts ...grpc.CallOption) (*Account, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Account)
+	err := c.cc.Invoke(ctx, AccountService_UpdateAccount_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) ListSessions(ctx context.Context, in *ListSessionsRequest, opts ...grpc.CallOption) (*ListSessionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListSessionsResponse)
+	err := c.cc.Invoke(ctx, AccountService_ListSessions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) DeleteSession(ctx context.Context, in *DeleteSessionRequest, opts ...grpc.CallOption) (*v1.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Empty)
+	err := c.cc.Invoke(ctx, AccountService_DeleteSession_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) DeleteSessions(ctx context.Context, in *DeleteSessionsRequest, opts ...grpc.CallOption) (*v1.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Empty)
+	err := c.cc.Invoke(ctx, AccountService_DeleteSessions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) GetPrefs(ctx context.Context, in *GetPrefsRequest, opts ...grpc.CallOption) (*GetPrefsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPrefsResponse)
+	err := c.cc.Invoke(ctx, AccountService_GetPrefs_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) UpdatePrefs(ctx context.Context, in *UpdatePrefsRequest, opts ...grpc.CallOption) (*GetPrefsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetPrefsResponse)
+	err := c.cc.Invoke(ctx, AccountService_UpdatePrefs_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AccountServiceServer is the server API for AccountService service.
 // All implementations must embed UnimplementedAccountServiceServer
 // for forward compatibility.
@@ -105,6 +177,12 @@ type AccountServiceServer interface {
 	SignOut(context.Context, *SignOutRequest) (*v1.Empty, error)
 	RefreshToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
 	Me(context.Context, *MeRequest) (*Account, error)
+	UpdateAccount(context.Context, *UpdateAccountRequest) (*Account, error)
+	ListSessions(context.Context, *ListSessionsRequest) (*ListSessionsResponse, error)
+	DeleteSession(context.Context, *DeleteSessionRequest) (*v1.Empty, error)
+	DeleteSessions(context.Context, *DeleteSessionsRequest) (*v1.Empty, error)
+	GetPrefs(context.Context, *GetPrefsRequest) (*GetPrefsResponse, error)
+	UpdatePrefs(context.Context, *UpdatePrefsRequest) (*GetPrefsResponse, error)
 	mustEmbedUnimplementedAccountServiceServer()
 }
 
@@ -129,6 +207,24 @@ func (UnimplementedAccountServiceServer) RefreshToken(context.Context, *RefreshT
 }
 func (UnimplementedAccountServiceServer) Me(context.Context, *MeRequest) (*Account, error) {
 	return nil, status.Error(codes.Unimplemented, "method Me not implemented")
+}
+func (UnimplementedAccountServiceServer) UpdateAccount(context.Context, *UpdateAccountRequest) (*Account, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateAccount not implemented")
+}
+func (UnimplementedAccountServiceServer) ListSessions(context.Context, *ListSessionsRequest) (*ListSessionsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListSessions not implemented")
+}
+func (UnimplementedAccountServiceServer) DeleteSession(context.Context, *DeleteSessionRequest) (*v1.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteSession not implemented")
+}
+func (UnimplementedAccountServiceServer) DeleteSessions(context.Context, *DeleteSessionsRequest) (*v1.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteSessions not implemented")
+}
+func (UnimplementedAccountServiceServer) GetPrefs(context.Context, *GetPrefsRequest) (*GetPrefsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPrefs not implemented")
+}
+func (UnimplementedAccountServiceServer) UpdatePrefs(context.Context, *UpdatePrefsRequest) (*GetPrefsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdatePrefs not implemented")
 }
 func (UnimplementedAccountServiceServer) mustEmbedUnimplementedAccountServiceServer() {}
 func (UnimplementedAccountServiceServer) testEmbeddedByValue()                        {}
@@ -241,6 +337,114 @@ func _AccountService_Me_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AccountService_UpdateAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).UpdateAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_UpdateAccount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).UpdateAccount(ctx, req.(*UpdateAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_ListSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSessionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).ListSessions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_ListSessions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).ListSessions(ctx, req.(*ListSessionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_DeleteSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteSessionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).DeleteSession(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_DeleteSession_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).DeleteSession(ctx, req.(*DeleteSessionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_DeleteSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteSessionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).DeleteSessions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_DeleteSessions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).DeleteSessions(ctx, req.(*DeleteSessionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_GetPrefs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPrefsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).GetPrefs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_GetPrefs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).GetPrefs(ctx, req.(*GetPrefsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_UpdatePrefs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdatePrefsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).UpdatePrefs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_UpdatePrefs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).UpdatePrefs(ctx, req.(*UpdatePrefsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AccountService_ServiceDesc is the grpc.ServiceDesc for AccountService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -267,6 +471,30 @@ var AccountService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Me",
 			Handler:    _AccountService_Me_Handler,
+		},
+		{
+			MethodName: "UpdateAccount",
+			Handler:    _AccountService_UpdateAccount_Handler,
+		},
+		{
+			MethodName: "ListSessions",
+			Handler:    _AccountService_ListSessions_Handler,
+		},
+		{
+			MethodName: "DeleteSession",
+			Handler:    _AccountService_DeleteSession_Handler,
+		},
+		{
+			MethodName: "DeleteSessions",
+			Handler:    _AccountService_DeleteSessions_Handler,
+		},
+		{
+			MethodName: "GetPrefs",
+			Handler:    _AccountService_GetPrefs_Handler,
+		},
+		{
+			MethodName: "UpdatePrefs",
+			Handler:    _AccountService_UpdatePrefs_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

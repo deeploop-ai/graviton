@@ -33,7 +33,8 @@ func TestP0_Section6_ConsoleAdminProjectAccess(t *testing.T) {
 	defer projectCleanup()
 
 	cfg := &config.AppConfig{}
-	env, err := testutil.NewInterceptorEnv(db, cfg)
+	docDB := documentdb.NewPostgresDocumentDB(db)
+	env, err := testutil.NewInterceptorEnv(db, cfg, docDB)
 	require.NoError(t, err)
 
 	owner, ownerCleanup := testutil.CreateTestConsoleAdmin(ctx, db, "owner")
@@ -86,7 +87,7 @@ func TestP0_Section7_AuditLogs(t *testing.T) {
 	require.NoError(t, docDB.EnsureSystemCollections(ctx, projectID, internalID))
 
 	cfg := &config.AppConfig{}
-	env, err := testutil.NewInterceptorEnv(db, cfg)
+	env, err := testutil.NewInterceptorEnv(db, cfg, docDB)
 	require.NoError(t, err)
 
 	apiSecret, keyCleanup := testutil.CreateTestAPIKey(ctx, db, projectID, []string{"users"})
@@ -146,7 +147,7 @@ func TestP0_Section8_AccessPermission(t *testing.T) {
 	require.NoError(t, docDB.EnsureSystemCollections(ctx, projectID, internalID))
 
 	cfg := &config.AppConfig{}
-	env, err := testutil.NewInterceptorEnv(db, cfg)
+	env, err := testutil.NewInterceptorEnv(db, cfg, docDB)
 	require.NoError(t, err)
 
 	projectRepo := bunrepo.NewProjectRepository(db)

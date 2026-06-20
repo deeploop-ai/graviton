@@ -48,6 +48,8 @@ func wireBootstrap(app lynx.Lynx) (*boot.Bootstrap, func(), error) {
 	projectsRepository := bunrepo.NewProjectRepository(database)
 	account := client.NewAccount(appConfig, projectsRepository, documentDB)
 	accountService := clientgrpc.NewAccountService(account)
+	databases := client.NewDatabases(projectsRepository, documentDB)
+	databasesService := clientgrpc.NewDatabasesService(databases)
 	healthService := servergrpc.NewHealthService()
 	projects := server.NewProjects(projectsRepository, documentDB, database)
 	projectsService := servergrpc.NewProjectsService(projects)
@@ -64,11 +66,11 @@ func wireBootstrap(app lynx.Lynx) (*boot.Bootstrap, func(), error) {
 	apiKeysService := servergrpc.NewAPIKeysService(apiKeys)
 	teams := server.NewTeams(projectsRepository, documentDB)
 	teamsService := servergrpc.NewTeamsService(teams)
-	databases := server.NewDatabases(projectsRepository, documentDB)
-	databasesService := servergrpc.NewDatabasesService(databases)
+	serverDatabases := server.NewDatabases(projectsRepository, documentDB)
+	servergrpcDatabasesService := servergrpc.NewDatabasesService(serverDatabases)
 	consoleAuth := console.NewAuth(appConfig, consoleAdminRepository)
 	authService := consolegrpc.NewAuthService(consoleAuth)
-	grpcServer, err := server2.NewGRPCServer(app, appConfig, validator, repository, accountService, healthService, projectsService, storageService, usersService, apiKeysService, teamsService, databasesService, authService)
+	grpcServer, err := server2.NewGRPCServer(app, appConfig, validator, repository, accountService, databasesService, healthService, projectsService, storageService, usersService, apiKeysService, teamsService, servergrpcDatabasesService, authService)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

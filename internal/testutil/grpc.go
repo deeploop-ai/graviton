@@ -3,11 +3,11 @@ package testutil
 import (
 	"context"
 
+	"github.com/deeploop-ai/fleet/internal/domain/databases"
 	"github.com/deeploop-ai/fleet/internal/infra/auth"
 	"github.com/deeploop-ai/fleet/internal/infra/bun/bunrepo"
 	"github.com/deeploop-ai/fleet/internal/infra/bun/model"
 	"github.com/deeploop-ai/fleet/internal/infra/clients"
-	"github.com/deeploop-ai/fleet/internal/infra/documentdb"
 	"github.com/deeploop-ai/fleet/internal/pkg/config"
 	"github.com/deeploop-ai/fleet/pkg/grpc/interceptor"
 	"google.golang.org/grpc"
@@ -29,8 +29,7 @@ type InterceptorEnv struct {
 	Audit    *interceptor.AuditInterceptor
 }
 
-func NewInterceptorEnv(db *clients.Database, cfg *config.AppConfig) (*InterceptorEnv, error) {
-	docDB := documentdb.NewPostgresDocumentDB(db)
+func NewInterceptorEnv(db *clients.Database, cfg *config.AppConfig, docDB databases.DocumentDB) (*InterceptorEnv, error) {
 	validator := auth.NewValidator(
 		cfg,
 		bunrepo.NewAPIKeyRepository(db),

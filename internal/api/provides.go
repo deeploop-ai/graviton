@@ -10,6 +10,7 @@ import (
 
 var ProviderSet = wire.NewSet(
 	clientgrpc.NewAccountService,
+	clientgrpc.NewDatabasesService,
 	servergrpc.NewHealthService,
 	servergrpc.NewProjectsService,
 	servergrpc.NewStorageService,

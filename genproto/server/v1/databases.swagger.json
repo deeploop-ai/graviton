@@ -315,7 +315,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1ListDocumentsResponse"
+              "$ref": "#/definitions/fleetserverv1ListDocumentsResponse"
             }
           },
           "default": {
@@ -372,7 +372,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1Document"
+              "$ref": "#/definitions/fleetserverv1Document"
             }
           },
           "default": {
@@ -400,7 +400,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/DatabasesServiceCreateDocumentBody"
+              "$ref": "#/definitions/fleetserverv1DatabasesServiceCreateDocumentBody"
             }
           }
         ],
@@ -416,7 +416,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1CountDocumentsResponse"
+              "$ref": "#/definitions/fleetserverv1CountDocumentsResponse"
             }
           },
           "default": {
@@ -475,7 +475,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1Document"
+              "$ref": "#/definitions/fleetserverv1Document"
             }
           },
           "default": {
@@ -555,7 +555,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1Document"
+              "$ref": "#/definitions/fleetserverv1Document"
             }
           },
           "default": {
@@ -589,7 +589,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/DatabasesServiceUpdateDocumentBody"
+              "$ref": "#/definitions/fleetserverv1DatabasesServiceUpdateDocumentBody"
             }
           }
         ],
@@ -743,23 +743,6 @@
         }
       }
     },
-    "DatabasesServiceCreateDocumentBody": {
-      "type": "object",
-      "properties": {
-        "documentId": {
-          "type": "string"
-        },
-        "data": {
-          "type": "object"
-        },
-        "permissions": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
     "DatabasesServiceCreateIndexBody": {
       "type": "object",
       "properties": {
@@ -783,11 +766,71 @@
         }
       }
     },
-    "DatabasesServiceUpdateDocumentBody": {
+    "fleetserverv1CountDocumentsResponse": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "fleetserverv1DatabasesServiceCreateDocumentBody": {
+      "type": "object",
+      "properties": {
+        "documentId": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "fleetserverv1DatabasesServiceUpdateDocumentBody": {
       "type": "object",
       "properties": {
         "data": {
           "type": "object"
+        }
+      }
+    },
+    "fleetserverv1Document": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "fleetserverv1ListDocumentsResponse": {
+      "type": "object",
+      "properties": {
+        "documents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/fleetserverv1Document"
+          }
+        },
+        "meta": {
+          "$ref": "#/definitions/v1ListResponseMeta"
         }
       }
     },
@@ -896,15 +939,6 @@
         }
       }
     },
-    "v1CountDocumentsResponse": {
-      "type": "object",
-      "properties": {
-        "count": {
-          "type": "string",
-          "format": "int64"
-        }
-      }
-    },
     "v1CreateDatabaseRequest": {
       "type": "object",
       "properties": {
@@ -924,25 +958,6 @@
         },
         "name": {
           "type": "string"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "format": "date-time"
-        }
-      }
-    },
-    "v1Document": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "data": {
-          "type": "object"
         },
         "createdAt": {
           "type": "string",
@@ -1003,21 +1018,6 @@
           "items": {
             "type": "object",
             "$ref": "#/definitions/v1Database"
-          }
-        },
-        "meta": {
-          "$ref": "#/definitions/v1ListResponseMeta"
-        }
-      }
-    },
-    "v1ListDocumentsResponse": {
-      "type": "object",
-      "properties": {
-        "documents": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/v1Document"
           }
         },
         "meta": {
