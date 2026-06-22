@@ -1,0 +1,44 @@
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { FleetProvider } from "@/lib/fleet-context";
+import { AppLayout, AuthLayout } from "@/components/Layout";
+import { GuestRoute, ProtectedRoute } from "@/components/RouteGuards";
+import { AccountPage } from "@/pages/AccountPage";
+import { DocumentsPage } from "@/pages/DocumentsPage";
+import { HomePage } from "@/pages/HomePage";
+import { LoginPage } from "@/pages/LoginPage";
+import { RegisterPage } from "@/pages/RegisterPage";
+import { ServerPage } from "@/pages/ServerPage";
+import { SettingsPage } from "@/pages/SettingsPage";
+import { TeamsPage } from "@/pages/TeamsPage";
+
+export default function App() {
+  return (
+    <FleetProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to="/app" replace />} />
+
+          <Route element={<GuestRoute />}>
+            <Route element={<AuthLayout />}>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+            </Route>
+          </Route>
+
+          <Route element={<ProtectedRoute />}>
+            <Route element={<AppLayout />}>
+              <Route path="/app" element={<HomePage />} />
+              <Route path="/app/account" element={<AccountPage />} />
+              <Route path="/app/documents" element={<DocumentsPage />} />
+              <Route path="/app/teams" element={<TeamsPage />} />
+              <Route path="/app/server" element={<ServerPage />} />
+              <Route path="/app/settings" element={<SettingsPage />} />
+            </Route>
+          </Route>
+
+          <Route path="*" element={<Navigate to="/app" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </FleetProvider>
+  );
+}

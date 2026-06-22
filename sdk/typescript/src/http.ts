@@ -28,7 +28,7 @@ export class HttpTransport {
     this.projectId = config.projectId;
     this.apiKey = config.apiKey;
     this.accessToken = config.accessToken;
-    this.fetchImpl = config.fetch ?? globalThis.fetch;
+    this.fetchImpl = config.fetch ?? ((input, init) => globalThis.fetch(input, init));
   }
 
   getProjectId(): string {

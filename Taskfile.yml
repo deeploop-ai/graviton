@@ -89,7 +89,14 @@ tasks:
     deps:
       - sdk-build
     cmds:
-      - npm run demo
+      - npm run dev
+
+  sdk-demo-build:
+    dir: '{{.USER_WORKING_DIR}}/sdk/demo'
+    deps:
+      - sdk-build
+    cmds:
+      - npm run build
 
   dev-server:
     dir: '{{.USER_WORKING_DIR}}'

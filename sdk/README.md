@@ -1,13 +1,13 @@
 # Fleet TypeScript SDK
 
-`@fleet/sdk` 封装 Fleet **Client API**（用户 JWT）与 **Server API**（API Key + `X-Fleet-Project`），便于集成测试与脚本调用。
+`@fleet/sdk` 封装 Fleet **Client API**（用户 JWT）与 **Server API**（API Key + `X-Fleet-Project`），便于集成测试与交互演示。
 
 ## 目录
 
 | 路径 | 说明 |
 |------|------|
 | `typescript/` | SDK 包 `@fleet/sdk` |
-| `demo/` | 端到端演示（Server + Client 流程） |
+| `demo/` | Web 演示站点（注册/登录 + SDK 功能演示） |
 
 ## 快速开始
 
@@ -22,27 +22,26 @@ task migrate
 go run ./cmd/seed   # 记下输出的 api_key
 task dev-server
 
-# 运行演示
-FLEET_API_KEY=<seed 输出的 key> task sdk-demo
+# 启动 Web 演示（默认 http://localhost:5174）
+task sdk-demo
 ```
 
-也可分步运行：
+复制 `sdk/demo/.env.example` 为 `sdk/demo/.env` 可调整默认 Endpoint / Project ID。
 
-```bash
-FLEET_API_KEY=... npm run demo:server --prefix sdk/demo
-FLEET_DEMO_DB_ID=... FLEET_DEMO_COLL_ID=posts npm run demo:client --prefix sdk/demo
-```
+## Web 演示站点
 
-## 环境变量
+演示站点提供完整的前端体验：
 
-| 变量 | 默认值 | 说明 |
-|------|--------|------|
-| `FLEET_ENDPOINT` | `http://localhost:8088` | Fleet HTTP 入口 |
-| `FLEET_PROJECT_ID` | `default` | 项目 ID |
-| `FLEET_API_KEY` | （必填） | Server API 密钥 |
-| `FLEET_DEMO_EMAIL` | `sdk.demo.<随机>@fleet.local` | Client 演示账号 |
-| `FLEET_DEMO_PASSWORD` | `Sdk@123456` | Client 演示密码 |
-| `FLEET_DEMO_INVITE_EMAIL` | `invitee@fleet.local` | 团队邀请邮箱 |
+| 页面 | 说明 |
+|------|------|
+| `/register` `/login` | 用户注册与登录（Client Account SDK） |
+| `/app/account` | me / prefs / sessions / refresh |
+| `/app/documents` | Server 初始化演示库 + Client 文档 CRUD |
+| `/app/teams` | 建队、刷新 Token、邀请成员 |
+| `/app/server` | Health / Projects / Users / Teams / Databases |
+| `/app/settings` | Endpoint、Project ID、API Key 配置 |
+
+Server API 相关功能需在设置页填写 `go run ./cmd/seed` 输出的 API Key。
 
 ## SDK 用法
 
@@ -50,17 +49,16 @@ FLEET_DEMO_DB_ID=... FLEET_DEMO_COLL_ID=posts npm run demo:client --prefix sdk/d
 import { Fleet } from "@fleet/sdk";
 
 // Server API
-const admin = Fleet.withApiKey("http://localhost:8088", "default", process.env.FLEET_API_KEY!);
+const admin = Fleet.withApiKey("http://localhost:9080", "default", apiKey);
 await admin.server.health.check();
-await admin.server.databases.createDatabase({ id: "app", name: "App DB" });
 
 // Client API（注册后自动保存 access token）
-const client = Fleet.create({ endpoint: "http://localhost:8088", projectId: "default" });
+const client = Fleet.create({ endpoint: "http://localhost:9080", projectId: "default" });
 await client.account.signUp({ email: "u@example.com", password: "Pass@123", name: "User" });
 await client.databases.createDocument("app", "notes", { data: { title: "Hi" } });
 ```
 
-## 已实现 API  surface
+## 已实现 API surface
 
 **Client：** Account（注册/登录/会话/偏好）、Databases 文档 CRUD、Teams 与 Memberships。
 

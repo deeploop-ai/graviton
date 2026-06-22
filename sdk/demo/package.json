@@ -1,17 +1,27 @@
 {
   "name": "@fleet/demo",
   "private": true,
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "demo": "tsx src/index.ts",
-    "demo:server": "tsx src/server-demo.ts",
-    "demo:client": "tsx src/client-demo.ts"
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@fleet/sdk": "file:../typescript"
+    "@fleet/sdk": "file:../typescript",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router-dom": "^7.18.0"
   },
   "devDependencies": {
-    "tsx": "^4.20.6",
-    "typescript": "^5.9.3"
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.9.3",
+    "vite": "^8.0.12"
   }
 }

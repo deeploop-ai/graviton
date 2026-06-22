@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply min-h-screen bg-fleet-bg text-slate-100 antialiased;
+    background-image:
+      radial-gradient(circle at 20% 0%, rgba(34, 211, 238, 0.08), transparent 35%),
+      radial-gradient(circle at 80% 10%, rgba(56, 189, 248, 0.06), transparent 30%);
+  }
+
+  input,
+  textarea,
+  select {
+    @apply outline-none;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-xl border border-fleet-border bg-fleet-card shadow-glow;
+  }
+
+  .field {
+    @apply w-full rounded-lg border border-fleet-border bg-fleet-panel px-3 py-2 text-sm text-slate-100 placeholder:text-fleet-muted focus:border-fleet-accent focus:ring-1 focus:ring-fleet-accent;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition;
+  }
+
+  .btn-primary {
+    @apply btn bg-fleet-accent text-slate-950 hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply btn border border-fleet-border bg-fleet-panel text-slate-100 hover:border-fleet-accent hover:text-fleet-accent disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-danger {
+    @apply btn border border-red-500/40 bg-red-500/10 text-red-200 hover:bg-red-500/20;
+  }
+
+  .nav-link {
+    @apply flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-fleet-muted transition hover:bg-fleet-panel hover:text-slate-100;
+  }
+
+  .nav-link-active {
+    @apply nav-link bg-fleet-panel text-fleet-accent;
+  }
+}
