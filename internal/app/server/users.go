@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
@@ -35,25 +36,31 @@ func (u *Users) resolveProject(ctx context.Context, projectID string) (*projects
 	return p, nil
 }
 
-func (u *Users) ListUsers(ctx context.Context, projectID string, q databases.Query, roles []string) ([]databases.Document, int64, string, error) {
+func (u *Users) ListUsers(ctx context.Context, projectID string, q databases.Query, principal databases.Principal) ([]databases.Document, int64, string, error) {
 	if _, err := u.resolveProject(ctx, projectID); err != nil {
 		return nil, 0, "", err
 	}
-	list, err := u.docDB.ListDocuments(ctx, projectID, "default", "users", q, roles)
+	list, err := u.docDB.ListDocuments(ctx, projectID, "default", "users", q, principal)
 	if err != nil {
 		return nil, 0, "", err
 	}
 	return list.Documents, list.TotalCount, list.NextPageToken, nil
 }
 
-func (u *Users) GetUser(ctx context.Context, projectID, userID string, roles []string) (*databases.Document, error) {
+func (u *Users) GetUser(ctx context.Context, projectID, userID string, principal databases.Principal) (*databases.Document, error) {
 	if _, err := u.resolveProject(ctx, projectID); err != nil {
 		return nil, err
 	}
-	return u.docDB.GetDocument(ctx, projectID, "default", "users", userID, roles)
+	return u.docDB.GetDocument(ctx, projectID, "default", "users", userID, principal)
 }
 
-func (u *Users) UpdateUser(ctx context.Context, projectID, userID string, updates map[string]any, roles []string) (*databases.Document, error) {
+var userUpdateProtectedFields = map[string]struct{}{
+	"password_hash":  {},
+	"email_verified": {},
+	"status":         {},
+}
+
+func (u *Users) UpdateUser(ctx context.Context, projectID, userID string, updates map[string]any, principal databases.Principal) (*databases.Document, error) {
 	if _, err := u.resolveProject(ctx, projectID); err != nil {
 		return nil, err
 	}
@@ -66,27 +73,53 @@ func (u *Users) UpdateUser(ctx context.Context, projectID, userID string, update
 			return nil, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-	doc := databases.Document{ID: userID, Data: updates}
-	updated, err := u.docDB.UpdateDocument(ctx, projectID, "default", "users", doc, nil, roles)
+	filtered := make(map[string]any, len(updates))
+	for k, v := range updates {
+		if strings.HasPrefix(k, "_") {
+			continue
+		}
+		if _, blocked := userUpdateProtectedFields[k]; blocked {
+			continue
+		}
+		filtered[k] = v
+	}
+	if v, ok := filtered["email"].(string); ok && v != "" {
+		filtered["email_verified"] = false
+	}
+	if len(filtered) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "no updatable fields supplied (password_hash, email_verified, status are managed via dedicated endpoints)")
+	}
+	doc := databases.Document{ID: userID, Data: filtered}
+	updated, err := u.docDB.UpdateDocument(ctx, projectID, "default", "users", doc, nil, principal)
 	if err != nil {
 		return nil, fmt.Errorf("update user: %w", err)
 	}
 	return &updated, nil
 }
 
-func (u *Users) DeleteUser(ctx context.Context, projectID, userID string, roles []string) error {
+func (u *Users) DeleteUser(ctx context.Context, projectID, userID string, principal databases.Principal) error {
 	if _, err := u.resolveProject(ctx, projectID); err != nil {
 		return err
 	}
-	return u.docDB.DeleteDocument(ctx, projectID, "default", "users", userID, roles)
+	return u.docDB.DeleteDocument(ctx, projectID, "default", "users", userID, principal)
 }
 
-func (u *Users) UpdateUserStatus(ctx context.Context, projectID, userID, userStatus string, roles []string) (*databases.Document, error) {
+func (u *Users) UpdateUserStatus(ctx context.Context, projectID, userID, userStatus string, principal databases.Principal) (*databases.Document, error) {
 	if userStatus == "" {
 		userStatus = users.StatusActive
 	}
 	if err := users.ValidateStatus(userStatus); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	return u.UpdateUser(ctx, projectID, userID, map[string]any{"status": userStatus, "updated_at": time.Now().Format(time.RFC3339Nano)}, roles)
+	if _, err := u.resolveProject(ctx, projectID); err != nil {
+		return nil, err
+	}
+	updated, err := u.docDB.UpdateDocument(ctx, projectID, "default", "users", databases.Document{
+		ID:   userID,
+		Data: map[string]any{"status": userStatus, "updated_at": time.Now().Format(time.RFC3339Nano)},
+	}, nil, principal)
+	if err != nil {
+		return nil, fmt.Errorf("update user status: %w", err)
+	}
+	return &updated, nil
 }

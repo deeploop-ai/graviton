@@ -11,6 +11,7 @@ type Entry struct {
 	ActorID    string
 	ActorKind  string
 	Action     string
+	ResourceID string
 	Status     string
 	IP         string
 	UserAgent  string

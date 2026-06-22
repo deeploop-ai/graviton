@@ -53,7 +53,7 @@ func (c *Claims) GetSubject() (string, error) { return c.UserID, nil }
 func Parse(secret []byte, tokenString string) (*Claims, bool) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return secret, nil
-	}, jwt.WithExpirationRequired(), jwt.WithValidMethods([]string{"HS256"}))
+	}, jwt.WithExpirationRequired(), jwt.WithIssuedAt(), jwt.WithValidMethods([]string{"HS256"}))
 	if err != nil {
 		return nil, false
 	}

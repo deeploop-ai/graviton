@@ -20,37 +20,37 @@ func NewDatabases(projectRepo projects.Repository, docDB databases.DocumentDB) *
 	return &Databases{projectRepo: projectRepo, docDB: docDB}
 }
 
-func (d *Databases) resolveProject(ctx context.Context) (*projects.Project, []string, error) {
+func (d *Databases) resolveProject(ctx context.Context) (*projects.Project, databases.Principal, error) {
 	p, ok := contexts.Principal(ctx)
 	if !ok || p.ProjectID == "" || p.UserID == "" {
-		return nil, nil, status.Error(codes.Unauthenticated, "unauthenticated")
+		return nil, databases.Principal{}, status.Error(codes.Unauthenticated, "unauthenticated")
 	}
 	project, err := d.projectRepo.GetProject(ctx, p.ProjectID)
 	if err != nil {
-		return nil, nil, err
+		return nil, databases.Principal{}, err
 	}
 	if project == nil {
-		return nil, nil, status.Error(codes.NotFound, "project not found")
+		return nil, databases.Principal{}, status.Error(codes.NotFound, "project not found")
 	}
 	if err := d.docDB.EnsureSystemCollections(ctx, project.ID, project.InternalID); err != nil {
-		return nil, nil, fmt.Errorf("ensure system collections: %w", err)
+		return nil, databases.Principal{}, fmt.Errorf("ensure system collections: %w", err)
 	}
-	return project, p.Roles, nil
+	return project, databases.Principal{Roles: p.Roles}, nil
 }
 
-func (d *Databases) ensureCollection(ctx context.Context, databaseID, collectionID string) (string, []string, error) {
-	project, roles, err := d.resolveProject(ctx)
+func (d *Databases) ensureCollection(ctx context.Context, databaseID, collectionID string) (string, databases.Principal, error) {
+	project, principal, err := d.resolveProject(ctx)
 	if err != nil {
-		return "", nil, err
+		return "", databases.Principal{}, err
 	}
 	col, err := d.docDB.GetCollection(ctx, project.ID, databaseID, collectionID)
 	if err != nil {
-		return "", nil, err
+		return "", databases.Principal{}, err
 	}
 	if col == nil {
-		return "", nil, status.Error(codes.NotFound, "collection not found")
+		return "", databases.Principal{}, status.Error(codes.NotFound, "collection not found")
 	}
-	return project.ID, roles, nil
+	return project.ID, principal, nil
 }
 
 func (d *Databases) CreateDocument(
@@ -59,7 +59,7 @@ func (d *Databases) CreateDocument(
 	data map[string]any,
 	perms []databases.Permission,
 ) (*databases.Document, error) {
-	projectID, roles, err := d.ensureCollection(ctx, databaseID, collectionID)
+	projectID, principal, err := d.ensureCollection(ctx, databaseID, collectionID)
 	if err != nil {
 		return nil, err
 	}
@@ -73,11 +73,11 @@ func (d *Databases) CreateDocument(
 	created, err := d.docDB.CreateDocument(ctx, projectID, databaseID, collectionID, databases.Document{
 		ID:   documentID,
 		Data: data,
-	}, perms)
+	}, perms, principal)
 	if err != nil {
 		return nil, fmt.Errorf("create document: %w", err)
 	}
-	got, err := d.docDB.GetDocument(ctx, projectID, databaseID, collectionID, created.ID, roles)
+	got, err := d.docDB.GetDocument(ctx, projectID, databaseID, collectionID, created.ID, principal)
 	if err != nil {
 		return nil, err
 	}
@@ -92,11 +92,11 @@ func (d *Databases) ListDocuments(
 	databaseID, collectionID string,
 	q databases.Query,
 ) ([]databases.Document, int64, string, error) {
-	projectID, roles, err := d.ensureCollection(ctx, databaseID, collectionID)
+	projectID, principal, err := d.ensureCollection(ctx, databaseID, collectionID)
 	if err != nil {
 		return nil, 0, "", err
 	}
-	list, err := d.docDB.ListDocuments(ctx, projectID, databaseID, collectionID, q, roles)
+	list, err := d.docDB.ListDocuments(ctx, projectID, databaseID, collectionID, q, principal)
 	if err != nil {
 		return nil, 0, "", err
 	}
@@ -104,11 +104,11 @@ func (d *Databases) ListDocuments(
 }
 
 func (d *Databases) GetDocument(ctx context.Context, databaseID, collectionID, documentID string) (*databases.Document, error) {
-	projectID, roles, err := d.ensureCollection(ctx, databaseID, collectionID)
+	projectID, principal, err := d.ensureCollection(ctx, databaseID, collectionID)
 	if err != nil {
 		return nil, err
 	}
-	doc, err := d.docDB.GetDocument(ctx, projectID, databaseID, collectionID, documentID, roles)
+	doc, err := d.docDB.GetDocument(ctx, projectID, databaseID, collectionID, documentID, principal)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +123,7 @@ func (d *Databases) UpdateDocument(
 	databaseID, collectionID, documentID string,
 	data map[string]any,
 ) (*databases.Document, error) {
-	projectID, roles, err := d.ensureCollection(ctx, databaseID, collectionID)
+	projectID, principal, err := d.ensureCollection(ctx, databaseID, collectionID)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func (d *Databases) UpdateDocument(
 	updated, err := d.docDB.UpdateDocument(ctx, projectID, databaseID, collectionID, databases.Document{
 		ID:   documentID,
 		Data: data,
-	}, nil, roles)
+	}, nil, principal)
 	if err != nil {
 		return nil, fmt.Errorf("update document: %w", err)
 	}
@@ -141,19 +141,19 @@ func (d *Databases) UpdateDocument(
 }
 
 func (d *Databases) DeleteDocument(ctx context.Context, databaseID, collectionID, documentID string) error {
-	projectID, roles, err := d.ensureCollection(ctx, databaseID, collectionID)
+	projectID, principal, err := d.ensureCollection(ctx, databaseID, collectionID)
 	if err != nil {
 		return err
 	}
-	return d.docDB.DeleteDocument(ctx, projectID, databaseID, collectionID, documentID, roles)
+	return d.docDB.DeleteDocument(ctx, projectID, databaseID, collectionID, documentID, principal)
 }
 
 func (d *Databases) CountDocuments(ctx context.Context, databaseID, collectionID string, queries []string) (int64, error) {
-	projectID, roles, err := d.ensureCollection(ctx, databaseID, collectionID)
+	projectID, principal, err := d.ensureCollection(ctx, databaseID, collectionID)
 	if err != nil {
 		return 0, err
 	}
-	return d.docDB.CountDocuments(ctx, projectID, databaseID, collectionID, queries, roles)
+	return d.docDB.CountDocuments(ctx, projectID, databaseID, collectionID, queries, principal)
 }
 
 func ownerDocumentPermissions(userID string) []databases.Permission {

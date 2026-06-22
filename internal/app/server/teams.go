@@ -3,13 +3,13 @@ package server
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
 	"github.com/deeploop-ai/fleet/internal/domain/projects"
 	"github.com/deeploop-ai/fleet/internal/domain/teams"
 	"github.com/deeploop-ai/fleet/pkg/idgen"
+	"github.com/deeploop-ai/fleet/pkg/query"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -50,8 +50,8 @@ func (t *Teams) resolveProject(ctx context.Context, projectID string) (*projects
 	return p, nil
 }
 
-func (t *Teams) getTeamDoc(ctx context.Context, projectID, teamID string, roles []string) (*databases.Document, error) {
-	doc, err := t.docDB.GetDocument(ctx, projectID, "default", "teams", teamID, roles)
+func (t *Teams) getTeamDoc(ctx context.Context, projectID, teamID string, principal databases.Principal) (*databases.Document, error) {
+	doc, err := t.docDB.GetDocument(ctx, projectID, "default", "teams", teamID, principal)
 	if err != nil {
 		return nil, err
 	}
@@ -77,13 +77,13 @@ func (t *Teams) CreateTeam(ctx context.Context, projectID, name string, perms []
 			"total":       0,
 		},
 	}
-	if _, err := t.docDB.CreateDocument(ctx, projectID, "default", "teams", doc, defaultTeamPermissions(teamID, perms)); err != nil {
+	if _, err := t.docDB.CreateDocument(ctx, projectID, "default", "teams", doc, defaultTeamPermissions(teamID, perms), databases.SystemPrincipal); err != nil {
 		return nil, fmt.Errorf("create team: %w", err)
 	}
-	return t.docDB.GetDocument(ctx, projectID, "default", "teams", teamID, databases.SystemRoles)
+	return t.docDB.GetDocument(ctx, projectID, "default", "teams", teamID, databases.SystemPrincipal)
 }
 
-func (t *Teams) CreateTeamWithOwner(ctx context.Context, projectID, name, ownerUserID, ownerEmail string, roles []string) (*databases.Document, *databases.Document, error) {
+func (t *Teams) CreateTeamWithOwner(ctx context.Context, projectID, name, ownerUserID, ownerEmail string, principal databases.Principal) (*databases.Document, *databases.Document, error) {
 	team, err := t.CreateTeam(ctx, projectID, name, nil)
 	if err != nil {
 		return nil, nil, err
@@ -94,56 +94,56 @@ func (t *Teams) CreateTeamWithOwner(ctx context.Context, projectID, name, ownerU
 		Email:  ownerEmail,
 		Roles:  []string{teams.RoleOwner},
 		Status: teams.StatusAccepted,
-	}, databases.SystemRoles)
+	}, principal)
 	if err != nil {
-		_ = t.docDB.DeleteDocument(ctx, projectID, "default", "teams", team.ID, databases.SystemRoles)
+		_ = t.docDB.DeleteDocument(ctx, projectID, "default", "teams", team.ID, databases.SystemPrincipal)
 		return nil, nil, err
 	}
-	team, err = t.GetTeam(ctx, projectID, team.ID, databases.SystemRoles)
+	team, err = t.GetTeam(ctx, projectID, team.ID, databases.SystemPrincipal)
 	if err != nil {
 		return nil, nil, err
 	}
 	return team, membership, nil
 }
 
-func (t *Teams) ListTeams(ctx context.Context, projectID string, q databases.Query, roles []string) ([]databases.Document, int64, string, error) {
+func (t *Teams) ListTeams(ctx context.Context, projectID string, q databases.Query, principal databases.Principal) ([]databases.Document, int64, string, error) {
 	if _, err := t.resolveProject(ctx, projectID); err != nil {
 		return nil, 0, "", err
 	}
-	list, err := t.docDB.ListDocuments(ctx, projectID, "default", "teams", q, roles)
+	list, err := t.docDB.ListDocuments(ctx, projectID, "default", "teams", q, principal)
 	if err != nil {
 		return nil, 0, "", err
 	}
 	return list.Documents, list.TotalCount, list.NextPageToken, nil
 }
 
-func (t *Teams) GetTeam(ctx context.Context, projectID, teamID string, roles []string) (*databases.Document, error) {
+func (t *Teams) GetTeam(ctx context.Context, projectID, teamID string, principal databases.Principal) (*databases.Document, error) {
 	if _, err := t.resolveProject(ctx, projectID); err != nil {
 		return nil, err
 	}
-	return t.docDB.GetDocument(ctx, projectID, "default", "teams", teamID, roles)
+	return t.docDB.GetDocument(ctx, projectID, "default", "teams", teamID, principal)
 }
 
-func (t *Teams) DeleteTeam(ctx context.Context, projectID, teamID string, roles []string) error {
+func (t *Teams) DeleteTeam(ctx context.Context, projectID, teamID string, principal databases.Principal) error {
 	if _, err := t.resolveProject(ctx, projectID); err != nil {
 		return err
 	}
-	if _, err := t.getTeamDoc(ctx, projectID, teamID, roles); err != nil {
+	if _, err := t.getTeamDoc(ctx, projectID, teamID, principal); err != nil {
 		return err
 	}
-	memberships, err := t.listMembershipDocs(ctx, projectID, teamID, databases.SystemRoles)
+	memberships, err := t.listMembershipDocs(ctx, projectID, teamID, databases.SystemPrincipal)
 	if err != nil {
 		return err
 	}
 	for _, m := range memberships {
-		if err := t.docDB.DeleteDocument(ctx, projectID, "default", "memberships", m.ID, databases.SystemRoles); err != nil {
+		if err := t.docDB.DeleteDocument(ctx, projectID, "default", "memberships", m.ID, databases.SystemPrincipal); err != nil {
 			return err
 		}
 	}
-	return t.docDB.DeleteDocument(ctx, projectID, "default", "teams", teamID, roles)
+	return t.docDB.DeleteDocument(ctx, projectID, "default", "teams", teamID, principal)
 }
 
-func (t *Teams) CreateMembership(ctx context.Context, projectID string, cmd CreateMembershipCommand, roles []string) (*databases.Document, error) {
+func (t *Teams) CreateMembership(ctx context.Context, projectID string, cmd CreateMembershipCommand, principal databases.Principal) (*databases.Document, error) {
 	if cmd.TeamID == "" {
 		return nil, status.Error(codes.InvalidArgument, "team_id is required")
 	}
@@ -153,7 +153,7 @@ func (t *Teams) CreateMembership(ctx context.Context, projectID string, cmd Crea
 	if _, err := t.resolveProject(ctx, projectID); err != nil {
 		return nil, err
 	}
-	if _, err := t.getTeamDoc(ctx, projectID, cmd.TeamID, rolesOrSystem(roles)); err != nil {
+	if _, err := t.getTeamDoc(ctx, projectID, cmd.TeamID, principalOrSystem(principal)); err != nil {
 		return nil, err
 	}
 
@@ -204,42 +204,42 @@ func (t *Teams) CreateMembership(ctx context.Context, projectID string, cmd Crea
 	created, err := t.docDB.CreateDocument(ctx, projectID, "default", "memberships", databases.Document{
 		ID:   membershipID,
 		Data: data,
-	}, membershipPermissions(cmd.TeamID, userID))
+	}, membershipPermissions(cmd.TeamID, userID), principal)
 	if err != nil {
 		return nil, fmt.Errorf("create membership: %w", err)
 	}
 	if statusVal == teams.StatusAccepted {
-		if err := t.adjustTeamTotal(ctx, projectID, cmd.TeamID, 1, rolesOrSystem(roles)); err != nil {
+		if err := t.adjustTeamTotal(ctx, projectID, cmd.TeamID, 1, principalOrSystem(principal)); err != nil {
 			return nil, err
 		}
 	}
-	return t.docDB.GetDocument(ctx, projectID, "default", "memberships", created.ID, databases.SystemRoles)
+	return t.docDB.GetDocument(ctx, projectID, "default", "memberships", created.ID, databases.SystemPrincipal)
 }
 
-func (t *Teams) ListMemberships(ctx context.Context, projectID, teamID string, q databases.Query, roles []string) ([]databases.Document, int64, string, error) {
+func (t *Teams) ListMemberships(ctx context.Context, projectID, teamID string, q databases.Query, principal databases.Principal) ([]databases.Document, int64, string, error) {
 	if _, err := t.resolveProject(ctx, projectID); err != nil {
 		return nil, 0, "", err
 	}
-	if _, err := t.getTeamDoc(ctx, projectID, teamID, rolesOrSystem(roles)); err != nil {
+	if _, err := t.getTeamDoc(ctx, projectID, teamID, principalOrSystem(principal)); err != nil {
 		return nil, 0, "", err
 	}
-	queries := append([]string{fmt.Sprintf(`equal("team_id","%s")`, escapeQuery(teamID))}, q.Queries...)
+	queries := append([]string{query.BuildEqual("team_id", teamID)}, q.Queries...)
 	list, err := t.docDB.ListDocuments(ctx, projectID, "default", "memberships", databases.Query{
 		Queries:   queries,
 		PageSize:  q.PageSize,
 		PageToken: q.PageToken,
-	}, roles)
+	}, principal)
 	if err != nil {
 		return nil, 0, "", err
 	}
 	return list.Documents, list.TotalCount, list.NextPageToken, nil
 }
 
-func (t *Teams) GetMembership(ctx context.Context, projectID, teamID, membershipID string, roles []string) (*databases.Document, error) {
-	return t.getMembershipDoc(ctx, projectID, teamID, membershipID, roles)
+func (t *Teams) GetMembership(ctx context.Context, projectID, teamID, membershipID string, principal databases.Principal) (*databases.Document, error) {
+	return t.getMembershipDoc(ctx, projectID, teamID, membershipID, principal)
 }
 
-func (t *Teams) UpdateMembership(ctx context.Context, projectID, teamID, membershipID string, cmd UpdateMembershipCommand, roles []string) (*databases.Document, error) {
+func (t *Teams) UpdateMembership(ctx context.Context, projectID, teamID, membershipID string, cmd UpdateMembershipCommand, principal databases.Principal) (*databases.Document, error) {
 	if len(cmd.Roles) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "roles is required")
 	}
@@ -248,27 +248,27 @@ func (t *Teams) UpdateMembership(ctx context.Context, projectID, teamID, members
 			return nil, err
 		}
 	}
-	if _, err := t.getMembershipDoc(ctx, projectID, teamID, membershipID, roles); err != nil {
+	if _, err := t.getMembershipDoc(ctx, projectID, teamID, membershipID, principal); err != nil {
 		return nil, err
 	}
 	updated, err := t.docDB.UpdateDocument(ctx, projectID, "default", "memberships", databases.Document{
 		ID:   membershipID,
 		Data: map[string]any{"roles": cmd.Roles},
-	}, nil, roles)
+	}, nil, principal)
 	if err != nil {
 		return nil, fmt.Errorf("update membership: %w", err)
 	}
 	return &updated, nil
 }
 
-func (t *Teams) UpdateMembershipStatus(ctx context.Context, projectID, teamID, membershipID, statusVal string, roles []string) (*databases.Document, error) {
+func (t *Teams) UpdateMembershipStatus(ctx context.Context, projectID, teamID, membershipID, statusVal string, principal databases.Principal) (*databases.Document, error) {
 	if err := teams.ValidateStatus(statusVal); err != nil {
 		return nil, err
 	}
 	if statusVal == teams.StatusPending {
 		return nil, status.Error(codes.InvalidArgument, "cannot set status back to pending")
 	}
-	doc, err := t.getMembershipDoc(ctx, projectID, teamID, membershipID, roles)
+	doc, err := t.getMembershipDoc(ctx, projectID, teamID, membershipID, principal)
 	if err != nil {
 		return nil, err
 	}
@@ -304,29 +304,29 @@ func (t *Teams) UpdateMembershipStatus(ctx context.Context, projectID, teamID, m
 	updated, err := t.docDB.UpdateDocument(ctx, projectID, "default", "memberships", databases.Document{
 		ID:   membershipID,
 		Data: updates,
-	}, perms, roles)
+	}, perms, principal)
 	if err != nil {
 		return nil, fmt.Errorf("update membership status: %w", err)
 	}
 	if statusVal == teams.StatusAccepted {
-		if err := t.adjustTeamTotal(ctx, projectID, teamID, 1, rolesOrSystem(roles)); err != nil {
+		if err := t.adjustTeamTotal(ctx, projectID, teamID, 1, principalOrSystem(principal)); err != nil {
 			return nil, err
 		}
 	}
 	return &updated, nil
 }
 
-func (t *Teams) DeleteMembership(ctx context.Context, projectID, teamID, membershipID string, roles []string) error {
-	doc, err := t.getMembershipDoc(ctx, projectID, teamID, membershipID, roles)
+func (t *Teams) DeleteMembership(ctx context.Context, projectID, teamID, membershipID string, principal databases.Principal) error {
+	doc, err := t.getMembershipDoc(ctx, projectID, teamID, membershipID, principal)
 	if err != nil {
 		return err
 	}
 	if statusVal, _ := doc.Data["status"].(string); statusVal == teams.StatusAccepted {
-		if err := t.adjustTeamTotal(ctx, projectID, teamID, -1, rolesOrSystem(roles)); err != nil {
+		if err := t.adjustTeamTotal(ctx, projectID, teamID, -1, principalOrSystem(principal)); err != nil {
 			return err
 		}
 	}
-	return t.docDB.DeleteDocument(ctx, projectID, "default", "memberships", membershipID, roles)
+	return t.docDB.DeleteDocument(ctx, projectID, "default", "memberships", membershipID, principal)
 }
 
 func (t *Teams) ListAcceptedTeamRoles(ctx context.Context, projectID, userID string) ([]string, error) {
@@ -335,10 +335,10 @@ func (t *Teams) ListAcceptedTeamRoles(ctx context.Context, projectID, userID str
 	}
 	list, err := t.docDB.ListDocuments(ctx, projectID, "default", "memberships", databases.Query{
 		Queries: []string{
-			fmt.Sprintf(`equal("user_id","%s")`, escapeQuery(userID)),
-			fmt.Sprintf(`equal("status","%s")`, teams.StatusAccepted),
+			query.BuildEqual("user_id", userID),
+			query.BuildEqual("status", teams.StatusAccepted),
 		},
-	}, databases.SystemRoles)
+	}, databases.SystemPrincipal)
 	if err != nil {
 		return nil, err
 	}
@@ -353,11 +353,11 @@ func (t *Teams) ListAcceptedTeamRoles(ctx context.Context, projectID, userID str
 	return out, nil
 }
 
-func (t *Teams) getMembershipDoc(ctx context.Context, projectID, teamID, membershipID string, roles []string) (*databases.Document, error) {
+func (t *Teams) getMembershipDoc(ctx context.Context, projectID, teamID, membershipID string, principal databases.Principal) (*databases.Document, error) {
 	if _, err := t.resolveProject(ctx, projectID); err != nil {
 		return nil, err
 	}
-	doc, err := t.docDB.GetDocument(ctx, projectID, "default", "memberships", membershipID, roles)
+	doc, err := t.docDB.GetDocument(ctx, projectID, "default", "memberships", membershipID, principal)
 	if err != nil {
 		return nil, err
 	}
@@ -370,10 +370,10 @@ func (t *Teams) getMembershipDoc(ctx context.Context, projectID, teamID, members
 	return doc, nil
 }
 
-func (t *Teams) listMembershipDocs(ctx context.Context, projectID, teamID string, roles []string) ([]databases.Document, error) {
+func (t *Teams) listMembershipDocs(ctx context.Context, projectID, teamID string, principal databases.Principal) ([]databases.Document, error) {
 	list, err := t.docDB.ListDocuments(ctx, projectID, "default", "memberships", databases.Query{
-		Queries: []string{fmt.Sprintf(`equal("team_id","%s")`, escapeQuery(teamID))},
-	}, roles)
+		Queries: []string{query.BuildEqual("team_id", teamID)},
+	}, principal)
 	if err != nil {
 		return nil, err
 	}
@@ -382,9 +382,9 @@ func (t *Teams) listMembershipDocs(ctx context.Context, projectID, teamID string
 
 func (t *Teams) resolveUserIDByEmail(ctx context.Context, projectID, email string) (string, error) {
 	list, err := t.docDB.ListDocuments(ctx, projectID, "default", "users", databases.Query{
-		Queries:  []string{fmt.Sprintf(`equal("email","%s")`, escapeQuery(email))},
+		Queries:  []string{query.BuildEqual("email", email)},
 		PageSize: 1,
-	}, databases.SystemRoles)
+	}, databases.SystemPrincipal)
 	if err != nil {
 		return "", err
 	}
@@ -394,8 +394,8 @@ func (t *Teams) resolveUserIDByEmail(ctx context.Context, projectID, email strin
 	return list.Documents[0].ID, nil
 }
 
-func (t *Teams) adjustTeamTotal(ctx context.Context, projectID, teamID string, delta int, _ []string) error {
-	doc, err := t.getTeamDoc(ctx, projectID, teamID, databases.SystemRoles)
+func (t *Teams) adjustTeamTotal(ctx context.Context, projectID, teamID string, delta int, _ databases.Principal) error {
+	doc, err := t.getTeamDoc(ctx, projectID, teamID, databases.SystemPrincipal)
 	if err != nil {
 		return err
 	}
@@ -415,7 +415,7 @@ func (t *Teams) adjustTeamTotal(ctx context.Context, projectID, teamID string, d
 	_, err = t.docDB.UpdateDocument(ctx, projectID, "default", "teams", databases.Document{
 		ID:   teamID,
 		Data: map[string]any{"total": total},
-	}, nil, databases.SystemRoles)
+	}, nil, databases.SystemPrincipal)
 	return err
 }
 
@@ -453,6 +453,7 @@ func defaultTeamPermissions(teamID string, explicit []string) []databases.Permis
 		return perms
 	}
 	return []databases.Permission{
+		{Type: "read", Role: "any"},
 		{Type: "read", Role: fmt.Sprintf("team:%s", teamID)},
 		{Type: "update", Role: fmt.Sprintf("team:%s", teamID)},
 		{Type: "delete", Role: fmt.Sprintf("team:%s", teamID)},
@@ -474,13 +475,9 @@ func splitPermission(s string) []string {
 	return nil
 }
 
-func rolesOrSystem(roles []string) []string {
-	if len(roles) == 0 {
-		return databases.SystemRoles
+func principalOrSystem(principal databases.Principal) databases.Principal {
+	if len(principal.Roles) == 0 {
+		return databases.SystemPrincipal
 	}
-	return roles
-}
-
-func escapeQuery(v string) string {
-	return strings.ReplaceAll(v, `"`, `""`)
+	return principal
 }

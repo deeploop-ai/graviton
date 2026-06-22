@@ -44,8 +44,10 @@ func (a *AuditInterceptor) UnaryAuditMiddleware(ctx context.Context, req any, in
 		entry.ActorKind = string(p.ActorKind)
 		entry.ProjectID = p.ProjectID
 	}
+	if resID := contexts.AuditResource(ctx); resID != "" {
+		entry.ResourceID = resID
+	}
 	if logErr := a.repo.Insert(context.Background(), entry); logErr != nil {
-		// Best-effort audit logging; do not fail the request.
 		_ = logErr
 	}
 	return resp, err

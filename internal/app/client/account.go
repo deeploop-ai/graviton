@@ -2,8 +2,8 @@ package client
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
@@ -12,11 +12,13 @@ import (
 	"github.com/deeploop-ai/fleet/internal/domain/teams"
 	"github.com/deeploop-ai/fleet/internal/domain/users"
 	"github.com/deeploop-ai/fleet/internal/infra/auth"
+	"github.com/deeploop-ai/fleet/internal/infra/documentdb"
 	"github.com/deeploop-ai/fleet/internal/pkg/config"
 	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
 	"github.com/deeploop-ai/fleet/pkg/idgen"
 	"github.com/deeploop-ai/fleet/pkg/jwtparser"
 	"github.com/deeploop-ai/fleet/pkg/password"
+	"github.com/deeploop-ai/fleet/pkg/query"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -116,9 +118,9 @@ func (a *Account) SignUp(ctx context.Context, cmd SignUpCommand) (*User, *TokenB
 
 	// Check email unique.
 	list, err := a.docDB.ListDocuments(ctx, project.ID, "default", "users", databases.Query{
-		Queries:  []string{fmt.Sprintf(`equal("email","%s")`, strings.ReplaceAll(cmd.Email, `"`, `""`))},
+		Queries:  []string{query.BuildEqual("email", cmd.Email)},
 		PageSize: 1,
-	}, databases.SystemRoles)
+	}, databases.SystemPrincipal)
 	if err != nil {
 		return nil, nil, "", err
 	}
@@ -155,7 +157,10 @@ func (a *Account) SignUp(ctx context.Context, cmd SignUpCommand) (*User, *TokenB
 		{Type: "delete", Role: "keys"},
 		{Type: "delete", Role: "admin"},
 	}
-	if _, err := a.docDB.CreateDocument(ctx, project.ID, "default", "users", userDoc, userPerms); err != nil {
+	if _, err := a.docDB.CreateDocument(ctx, project.ID, "default", "users", userDoc, userPerms, databases.SystemPrincipal); err != nil {
+		if errors.Is(err, documentdb.ErrDuplicateKey) {
+			return nil, nil, "", status.Error(codes.AlreadyExists, "email already registered")
+		}
 		return nil, nil, "", fmt.Errorf("create user document: %w", err)
 	}
 
@@ -185,9 +190,9 @@ func (a *Account) SignIn(ctx context.Context, cmd SignInCommand) (*User, *TokenB
 	}
 
 	list, err := a.docDB.ListDocuments(ctx, project.ID, "default", "users", databases.Query{
-		Queries:  []string{fmt.Sprintf(`equal("email","%s")`, strings.ReplaceAll(cmd.Email, `"`, `""`))},
+		Queries:  []string{query.BuildEqual("email", cmd.Email)},
 		PageSize: 1,
-	}, databases.SystemRoles)
+	}, databases.SystemPrincipal)
 	if err != nil {
 		return nil, nil, "", err
 	}
@@ -212,7 +217,7 @@ func (a *Account) Me(ctx context.Context) (*User, error) {
 	if !ok || p.UserID == "" {
 		return nil, status.Error(codes.Unauthenticated, "unauthenticated")
 	}
-	doc, err := a.docDB.GetDocument(ctx, p.ProjectID, "default", "users", p.UserID, p.Roles)
+	doc, err := a.docDB.GetDocument(ctx, p.ProjectID, "default", "users", p.UserID, databases.Principal{Roles: p.Roles})
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +232,7 @@ func (a *Account) SignOut(ctx context.Context) error {
 	if !ok || p.SessionID == "" {
 		return nil
 	}
-	return a.docDB.DeleteDocument(ctx, p.ProjectID, "default", "sessions", p.SessionID, p.Roles)
+	return a.docDB.DeleteDocument(ctx, p.ProjectID, "default", "sessions", p.SessionID, databases.Principal{Roles: p.Roles})
 }
 
 func (a *Account) RefreshToken(ctx context.Context, cmd RefreshTokenCommand) (*TokenBundle, string, error) {
@@ -263,10 +268,10 @@ func (a *Account) loadTeamRoles(ctx context.Context, projectID, userID string) (
 	}
 	list, err := a.docDB.ListDocuments(ctx, projectID, "default", "memberships", databases.Query{
 		Queries: []string{
-			fmt.Sprintf(`equal("user_id","%s")`, strings.ReplaceAll(userID, `"`, `""`)),
-			fmt.Sprintf(`equal("status","%s")`, teams.StatusAccepted),
+			query.BuildEqual("user_id", userID),
+			query.BuildEqual("status", teams.StatusAccepted),
 		},
-	}, databases.SystemRoles)
+	}, databases.SystemPrincipal)
 	if err != nil {
 		return nil, err
 	}
@@ -286,7 +291,7 @@ func (a *Account) UpdateAccount(ctx context.Context, cmd UpdateAccountCommand) (
 	if err != nil {
 		return nil, err
 	}
-	doc, err := a.docDB.GetDocument(ctx, p.ProjectID, "default", "users", p.UserID, p.Roles)
+	doc, err := a.docDB.GetDocument(ctx, p.ProjectID, "default", "users", p.UserID, databases.Principal{Roles: p.Roles})
 	if err != nil {
 		return nil, err
 	}
@@ -300,9 +305,9 @@ func (a *Account) UpdateAccount(ctx context.Context, cmd UpdateAccountCommand) (
 	}
 	if cmd.Email != "" && cmd.Email != stringValue(doc.Data["email"]) {
 		list, err := a.docDB.ListDocuments(ctx, p.ProjectID, "default", "users", databases.Query{
-			Queries:  []string{fmt.Sprintf(`equal("email","%s")`, strings.ReplaceAll(cmd.Email, `"`, `""`))},
+			Queries:  []string{query.BuildEqual("email", cmd.Email)},
 			PageSize: 1,
-		}, databases.SystemRoles)
+		}, databases.SystemPrincipal)
 		if err != nil {
 			return nil, err
 		}
@@ -333,8 +338,11 @@ func (a *Account) UpdateAccount(ctx context.Context, cmd UpdateAccountCommand) (
 	updated, err := a.docDB.UpdateDocument(ctx, p.ProjectID, "default", "users", databases.Document{
 		ID:   p.UserID,
 		Data: updates,
-	}, nil, p.Roles)
+	}, nil, databases.Principal{Roles: p.Roles})
 	if err != nil {
+		if errors.Is(err, documentdb.ErrDuplicateKey) {
+			return nil, status.Error(codes.AlreadyExists, "email already registered")
+		}
 		return nil, fmt.Errorf("update account: %w", err)
 	}
 	return mapUserDoc(&updated), nil
@@ -346,8 +354,8 @@ func (a *Account) ListSessions(ctx context.Context) ([]Session, error) {
 		return nil, err
 	}
 	list, err := a.docDB.ListDocuments(ctx, p.ProjectID, "default", "sessions", databases.Query{
-		Queries: []string{fmt.Sprintf(`equal("user_id","%s")`, strings.ReplaceAll(p.UserID, `"`, `""`))},
-	}, p.Roles)
+		Queries: []string{query.BuildEqual("user_id", p.UserID)},
+	}, databases.Principal{Roles: p.Roles})
 	if err != nil {
 		return nil, err
 	}
@@ -399,7 +407,7 @@ func (a *Account) GetPrefs(ctx context.Context) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
-	doc, err := a.docDB.GetDocument(ctx, p.ProjectID, "default", "users", p.UserID, p.Roles)
+	doc, err := a.docDB.GetDocument(ctx, p.ProjectID, "default", "users", p.UserID, databases.Principal{Roles: p.Roles})
 	if err != nil {
 		return nil, err
 	}
@@ -423,7 +431,7 @@ func (a *Account) UpdatePrefs(ctx context.Context, prefs map[string]any) (map[st
 	updated, err := a.docDB.UpdateDocument(ctx, p.ProjectID, "default", "users", databases.Document{
 		ID:   p.UserID,
 		Data: map[string]any{"prefs": prefs},
-	}, nil, p.Roles)
+	}, nil, databases.Principal{Roles: p.Roles})
 	if err != nil {
 		return nil, fmt.Errorf("update prefs: %w", err)
 	}
@@ -434,7 +442,7 @@ func (a *Account) UpdatePrefs(ctx context.Context, prefs map[string]any) (map[st
 }
 
 func (a *Account) deleteUserSession(ctx context.Context, p *shared.Principal, sessionID string) error {
-	doc, err := a.docDB.GetDocument(ctx, p.ProjectID, "default", "sessions", sessionID, p.Roles)
+	doc, err := a.docDB.GetDocument(ctx, p.ProjectID, "default", "sessions", sessionID, databases.Principal{Roles: p.Roles})
 	if err != nil {
 		return err
 	}
@@ -444,7 +452,7 @@ func (a *Account) deleteUserSession(ctx context.Context, p *shared.Principal, se
 	if uid, _ := doc.Data["user_id"].(string); uid != p.UserID {
 		return status.Error(codes.PermissionDenied, "cannot delete another user's session")
 	}
-	return a.docDB.DeleteDocument(ctx, p.ProjectID, "default", "sessions", sessionID, p.Roles)
+	return a.docDB.DeleteDocument(ctx, p.ProjectID, "default", "sessions", sessionID, databases.Principal{Roles: p.Roles})
 }
 
 func (a *Account) requireUser(ctx context.Context) (*shared.Principal, error) {
@@ -481,7 +489,7 @@ func (a *Account) createSessionAndTokens(ctx context.Context, projectID, userID,
 		{Type: "delete", Role: "keys"},
 		{Type: "delete", Role: "admin"},
 	}
-	if _, err := a.docDB.CreateDocument(ctx, projectID, "default", "sessions", sessionDoc, sessionPerms); err != nil {
+	if _, err := a.docDB.CreateDocument(ctx, projectID, "default", "sessions", sessionDoc, sessionPerms, databases.SystemPrincipal); err != nil {
 		return nil, nil, "", err
 	}
 
@@ -489,7 +497,7 @@ func (a *Account) createSessionAndTokens(ctx context.Context, projectID, userID,
 	if err != nil {
 		return nil, nil, "", err
 	}
-	user, _ := a.docDB.GetDocument(ctx, projectID, "default", "users", userID, databases.SystemRoles)
+	user, _ := a.docDB.GetDocument(ctx, projectID, "default", "users", userID, databases.SystemPrincipal)
 	return mapUserDoc(user), tokens, cookie, nil
 }
 
@@ -542,7 +550,7 @@ func (a *Account) issueTokens(ctx context.Context, projectID, userID, email, ses
 }
 
 func (a *Account) ensureUserCanAuthenticate(ctx context.Context, projectID, userID string) error {
-	doc, err := a.docDB.GetDocument(ctx, projectID, "default", "users", userID, databases.SystemRoles)
+	doc, err := a.docDB.GetDocument(ctx, projectID, "default", "users", userID, databases.SystemPrincipal)
 	if err != nil {
 		return status.Error(codes.Unauthenticated, "user lookup failed")
 	}
@@ -556,7 +564,7 @@ func (a *Account) ensureUserCanAuthenticate(ctx context.Context, projectID, user
 }
 
 func (a *Account) ensureActiveSession(ctx context.Context, projectID, sessionID, userID string) error {
-	sessionDoc, err := a.docDB.GetDocument(ctx, projectID, "default", "sessions", sessionID, databases.SystemRoles)
+	sessionDoc, err := a.docDB.GetDocument(ctx, projectID, "default", "sessions", sessionID, databases.SystemPrincipal)
 	if err != nil {
 		return status.Error(codes.Unauthenticated, "session lookup failed")
 	}

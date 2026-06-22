@@ -40,6 +40,7 @@ type CreateBucketCommand struct {
 
 type CreateFileCommand struct {
 	ProjectID   string
+	OwnerUserID string
 	BucketID    string
 	Name        string
 	MimeType    string
@@ -69,7 +70,7 @@ func (s *Storage) CreateBucket(ctx context.Context, cmd CreateBucketCommand) (*s
 		},
 	}
 	perms := bucketPermissions(bucketID, cmd.Permissions)
-	if _, err := s.docDB.CreateDocument(ctx, project.ID, "default", "buckets", bucketDoc, perms); err != nil {
+	if _, err := s.docDB.CreateDocument(ctx, project.ID, "default", "buckets", bucketDoc, perms, databases.SystemPrincipal); err != nil {
 		return nil, fmt.Errorf("create bucket document: %w", err)
 	}
 
@@ -83,7 +84,7 @@ func (s *Storage) CreateBucket(ctx context.Context, cmd CreateBucketCommand) (*s
 	}, nil
 }
 
-func (s *Storage) ListBuckets(ctx context.Context, projectID string, q databases.Query, roles []string) ([]storage.Bucket, int64, error) {
+func (s *Storage) ListBuckets(ctx context.Context, projectID string, q databases.Query, principal databases.Principal) ([]storage.Bucket, int64, error) {
 	project, err := s.resolveProject(ctx, projectID)
 	if err != nil {
 		return nil, 0, err
@@ -92,7 +93,7 @@ func (s *Storage) ListBuckets(ctx context.Context, projectID string, q databases
 		return nil, 0, err
 	}
 
-	list, err := s.docDB.ListDocuments(ctx, project.ID, "default", "buckets", q, roles)
+	list, err := s.docDB.ListDocuments(ctx, project.ID, "default", "buckets", q, principal)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -103,23 +104,31 @@ func (s *Storage) ListBuckets(ctx context.Context, projectID string, q databases
 	return buckets, list.TotalCount, nil
 }
 
-func (s *Storage) DeleteBucket(ctx context.Context, projectID, bucketID string, roles []string) error {
+func (s *Storage) DeleteBucket(ctx context.Context, projectID, bucketID string, principal databases.Principal) error {
 	project, err := s.resolveProject(ctx, projectID)
 	if err != nil {
 		return err
 	}
-	// Delete all file objects in this bucket.
-	files, _, _, err := s.ListFiles(ctx, projectID, bucketID, databases.Query{PageSize: 1000}, roles)
-	if err != nil {
-		return err
+	// Delete all file objects in this bucket by paginating through every file.
+	var pageToken string
+	for {
+		files, total, next, err := s.ListFiles(ctx, projectID, bucketID, databases.Query{PageSize: 1000, PageToken: pageToken}, principal)
+		if err != nil {
+			return err
+		}
+		for _, f := range files {
+			_ = s.store.Delete(ctx, defaultBucketName(s.cfg), objectKey(project.ID, bucketID, f.ID))
+		}
+		if next == "" || len(files) == 0 {
+			break
+		}
+		pageToken = next
+		_ = total
 	}
-	for _, f := range files {
-		_ = s.store.Delete(ctx, defaultBucketName(s.cfg), objectKey(projectID, bucketID, f.ID))
-	}
-	return s.docDB.DeleteDocument(ctx, project.ID, "default", "buckets", bucketID, roles)
+	return s.docDB.DeleteDocument(ctx, project.ID, "default", "buckets", bucketID, principal)
 }
 
-func (s *Storage) CreateFile(ctx context.Context, cmd CreateFileCommand, content io.Reader, size int64, roles []string) (*storage.File, error) {
+func (s *Storage) CreateFile(ctx context.Context, cmd CreateFileCommand, content io.Reader, size int64, principal databases.Principal) (*storage.File, error) {
 	if cmd.BucketID == "" {
 		return nil, status.Error(codes.InvalidArgument, "bucket_id is required")
 	}
@@ -135,7 +144,7 @@ func (s *Storage) CreateFile(ctx context.Context, cmd CreateFileCommand, content
 	}
 
 	// Verify bucket exists.
-	bucketDoc, err := s.docDB.GetDocument(ctx, project.ID, "default", "buckets", cmd.BucketID, roles)
+	bucketDoc, err := s.docDB.GetDocument(ctx, project.ID, "default", "buckets", cmd.BucketID, principal)
 	if err != nil {
 		return nil, err
 	}
@@ -155,8 +164,8 @@ func (s *Storage) CreateFile(ctx context.Context, cmd CreateFileCommand, content
 			"metadata":  cmd.Metadata,
 		},
 	}
-	perms := filePermissions(fileID, cmd.Permissions)
-	if _, err := s.docDB.CreateDocument(ctx, project.ID, "default", "files", fileDoc, perms); err != nil {
+	perms := filePermissions(fileID, cmd.OwnerUserID, cmd.Permissions)
+	if _, err := s.docDB.CreateDocument(ctx, project.ID, "default", "files", fileDoc, perms, principal); err != nil {
 		return nil, fmt.Errorf("create file document: %w", err)
 	}
 
@@ -165,7 +174,7 @@ func (s *Storage) CreateFile(ctx context.Context, cmd CreateFileCommand, content
 	}
 	if err := s.store.Put(ctx, defaultBucketName(s.cfg), objectKey(project.ID, cmd.BucketID, fileID), content, size, cmd.MimeType); err != nil {
 		// Attempt rollback metadata.
-		_ = s.docDB.DeleteDocument(ctx, project.ID, "default", "files", fileID, databases.SystemRoles)
+		_ = s.docDB.DeleteDocument(ctx, project.ID, "default", "files", fileID, databases.SystemPrincipal)
 		return nil, fmt.Errorf("upload file: %w", err)
 	}
 
@@ -182,12 +191,12 @@ func (s *Storage) CreateFile(ctx context.Context, cmd CreateFileCommand, content
 	}, nil
 }
 
-func (s *Storage) GetFile(ctx context.Context, projectID, bucketID, fileID string, roles []string) (*storage.File, io.ReadCloser, error) {
+func (s *Storage) GetFile(ctx context.Context, projectID, bucketID, fileID string, principal databases.Principal) (*storage.File, io.ReadCloser, error) {
 	project, err := s.resolveProject(ctx, projectID)
 	if err != nil {
 		return nil, nil, err
 	}
-	doc, err := s.docDB.GetDocument(ctx, project.ID, "default", "files", fileID, roles)
+	doc, err := s.docDB.GetDocument(ctx, project.ID, "default", "files", fileID, principal)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -205,7 +214,7 @@ func (s *Storage) GetFile(ctx context.Context, projectID, bucketID, fileID strin
 	return file, reader, nil
 }
 
-func (s *Storage) DeleteFile(ctx context.Context, projectID, bucketID, fileID string, roles []string) error {
+func (s *Storage) DeleteFile(ctx context.Context, projectID, bucketID, fileID string, principal databases.Principal) error {
 	project, err := s.resolveProject(ctx, projectID)
 	if err != nil {
 		return err
@@ -213,10 +222,10 @@ func (s *Storage) DeleteFile(ctx context.Context, projectID, bucketID, fileID st
 	if err := s.store.Delete(ctx, defaultBucketName(s.cfg), objectKey(project.ID, bucketID, fileID)); err != nil {
 		// Continue to delete metadata even if object missing.
 	}
-	return s.docDB.DeleteDocument(ctx, project.ID, "default", "files", fileID, roles)
+	return s.docDB.DeleteDocument(ctx, project.ID, "default", "files", fileID, principal)
 }
 
-func (s *Storage) ListFiles(ctx context.Context, projectID, bucketID string, q databases.Query, roles []string) ([]storage.File, int64, string, error) {
+func (s *Storage) ListFiles(ctx context.Context, projectID, bucketID string, q databases.Query, principal databases.Principal) ([]storage.File, int64, string, error) {
 	project, err := s.resolveProject(ctx, projectID)
 	if err != nil {
 		return nil, 0, "", err
@@ -225,7 +234,7 @@ func (s *Storage) ListFiles(ctx context.Context, projectID, bucketID string, q d
 		return nil, 0, "", err
 	}
 
-	list, err := s.docDB.ListDocuments(ctx, project.ID, "default", "files", q, roles)
+	list, err := s.docDB.ListDocuments(ctx, project.ID, "default", "files", q, principal)
 	if err != nil {
 		return nil, 0, "", err
 	}
@@ -271,15 +280,26 @@ func bucketPermissions(bucketID string, explicit []string) []databases.Permissio
 	}
 }
 
-func filePermissions(fileID string, explicit []string) []databases.Permission {
+func filePermissions(fileID, ownerUserID string, explicit []string) []databases.Permission {
 	if len(explicit) > 0 {
 		return parseRawPermissions(explicit)
 	}
-	return []databases.Permission{
+	perms := []databases.Permission{
 		{Type: "read", Role: "any"},
-		{Type: "update", Role: fmt.Sprintf("user:%s", fileID)},
-		{Type: "delete", Role: fmt.Sprintf("user:%s", fileID)},
+		{Type: "read", Role: "keys"},
+		{Type: "read", Role: "admin"},
+		{Type: "update", Role: "keys"},
+		{Type: "update", Role: "admin"},
+		{Type: "delete", Role: "keys"},
+		{Type: "delete", Role: "admin"},
 	}
+	if ownerUserID != "" {
+		perms = append(perms,
+			databases.Permission{Type: "update", Role: fmt.Sprintf("user:%s", ownerUserID)},
+			databases.Permission{Type: "delete", Role: fmt.Sprintf("user:%s", ownerUserID)},
+		)
+	}
+	return perms
 }
 
 func parseRawPermissions(raw []string) []databases.Permission {

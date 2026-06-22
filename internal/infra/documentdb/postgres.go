@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
@@ -19,7 +20,13 @@ import (
 	"github.com/deeploop-ai/fleet/pkg/query"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
+	"github.com/uptrace/bun/driver/pgdriver"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
+
+// ErrDuplicateKey is returned when a unique constraint violation occurs.
+var ErrDuplicateKey = errors.New("duplicate key")
 
 var safeNameRe = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
 var docIDRe = regexp.MustCompile(`^[a-zA-Z0-9_.:-]{1,64}$`)
@@ -31,6 +38,10 @@ var ErrPermissionDenied = errors.New("permission denied")
 
 type postgresDocumentDB struct {
 	db *clients.Database
+
+	// in-process caches keyed by projectID; safe for concurrent use.
+	internalIDCache sync.Map // projectID -> int64
+	bootstrapCache  sync.Map // projectID -> struct{} (system collections ensured)
 }
 
 func NewPostgresDocumentDB(db *clients.Database) databases.DocumentDB {
@@ -114,7 +125,7 @@ func (p *postgresDocumentDB) DeleteDatabase(ctx context.Context, projectID, id s
 	return err
 }
 
-func (p *postgresDocumentDB) CreateCollection(ctx context.Context, projectID, databaseID, collectionID, name string, attrs []databases.Attribute, idxs []databases.Index) error {
+func (p *postgresDocumentDB) CreateCollection(ctx context.Context, projectID, databaseID, collectionID, name string, attrs []databases.Attribute, idxs []databases.Index, perms []databases.Permission) error {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return err
@@ -133,7 +144,7 @@ func (p *postgresDocumentDB) CreateCollection(ctx context.Context, projectID, da
 		}
 	}
 
-	return p.createCollectionMetadata(ctx, projectID, databaseID, collectionID, name, attrs, idxs)
+	return p.createCollectionMetadata(ctx, projectID, databaseID, collectionID, name, attrs, idxs, perms)
 }
 
 func (p *postgresDocumentDB) GetCollection(ctx context.Context, projectID, databaseID, collectionID string) (*databases.Collection, error) {
@@ -157,9 +168,42 @@ func (p *postgresDocumentDB) ListCollections(ctx context.Context, projectID, dat
 	if err != nil {
 		return nil, err
 	}
+	if len(ms) == 0 {
+		return []databases.Collection{}, nil
+	}
+
+	collectionIDs := make([]string, 0, len(ms))
+	for i := range ms {
+		collectionIDs = append(collectionIDs, ms[i].ID)
+	}
+
+	var allAttrs []model.DocumentAttribute
+	if err := p.conn(ctx).NewSelect().Model(&allAttrs).
+		Where("project_id = ? AND database_id = ?", projectID, databaseID).
+		Where("collection_id IN (?)", bun.In(collectionIDs)).
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+	attrsByColl := make(map[string][]model.DocumentAttribute, len(ms))
+	for i := range allAttrs {
+		attrsByColl[allAttrs[i].CollectionID] = append(attrsByColl[allAttrs[i].CollectionID], allAttrs[i])
+	}
+
+	var allIdxs []model.DocumentIndex
+	if err := p.conn(ctx).NewSelect().Model(&allIdxs).
+		Where("project_id = ? AND database_id = ?", projectID, databaseID).
+		Where("collection_id IN (?)", bun.In(collectionIDs)).
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+	idxsByColl := make(map[string][]model.DocumentIndex, len(ms))
+	for i := range allIdxs {
+		idxsByColl[allIdxs[i].CollectionID] = append(idxsByColl[allIdxs[i].CollectionID], allIdxs[i])
+	}
+
 	out := make([]databases.Collection, len(ms))
 	for i := range ms {
-		c, err := p.mapCollection(ctx, &ms[i])
+		c, err := mapCollectionRow(&ms[i], attrsByColl[ms[i].ID], idxsByColl[ms[i].ID])
 		if err != nil {
 			return nil, err
 		}
@@ -188,7 +232,10 @@ func (p *postgresDocumentDB) CreateAttribute(ctx context.Context, projectID, dat
 		return err
 	}
 	schema := schemaName(internalID, databaseID)
-	colSQL := attributeColumnSQL(attr)
+	colSQL, err := attributeColumnSQL(attr)
+	if err != nil {
+		return err
+	}
 	if _, err := p.db.DB.ExecContext(ctx, fmt.Sprintf(`ALTER TABLE %s ADD COLUMN IF NOT EXISTS %s`, tableName(schema, collectionID), colSQL)); err != nil {
 		return err
 	}
@@ -233,7 +280,7 @@ func (p *postgresDocumentDB) CreateIndex(ctx context.Context, projectID, databas
 	return err
 }
 
-func (p *postgresDocumentDB) CreateDocument(ctx context.Context, projectID, databaseID, collectionID string, doc databases.Document, perms []databases.Permission) (databases.Document, error) {
+func (p *postgresDocumentDB) CreateDocument(ctx context.Context, projectID, databaseID, collectionID string, doc databases.Document, perms []databases.Permission, principal databases.Principal) (databases.Document, error) {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return doc, err
@@ -243,6 +290,18 @@ func (p *postgresDocumentDB) CreateDocument(ctx context.Context, projectID, data
 	}
 	schema := schemaName(internalID, databaseID)
 	tbl := tableName(schema, collectionID)
+
+	// Check collection-level "create" permission before inserting.
+	if !principal.IsSystem() {
+		coll, err := p.GetCollection(ctx, projectID, databaseID, collectionID)
+		if err != nil {
+			return doc, err
+		}
+		if coll != nil && !databases.CollectionAllows(coll.Permissions, "create", expandPermissionRoles(principal.Roles)) {
+			return doc, ErrPermissionDenied
+		}
+	}
+
 	columns, placeholders, args := buildInsertParts(doc)
 	args = append([]any{doc.ID}, args...)
 	allPlaceholders := "?"
@@ -252,12 +311,15 @@ func (p *postgresDocumentDB) CreateDocument(ctx context.Context, projectID, data
 	}
 	sql := fmt.Sprintf(`INSERT INTO %s (_id%s) VALUES (%s)`, tbl, columns, allPlaceholders)
 	if _, err := p.db.DB.ExecContext(ctx, sql, args...); err != nil {
+		if isUniqueViolation(err) {
+			return doc, fmt.Errorf("%w: %s", ErrDuplicateKey, err.Error())
+		}
 		return doc, fmt.Errorf("insert document: %w", err)
 	}
 	if err := p.setPermissions(ctx, schema, collectionID, doc.ID, internalID, perms); err != nil {
 		return doc, err
 	}
-	created, err := p.GetDocument(ctx, projectID, databaseID, collectionID, doc.ID, databases.SystemRoles)
+	created, err := p.GetDocument(ctx, projectID, databaseID, collectionID, doc.ID, databases.SystemPrincipal)
 	if err != nil {
 		return doc, err
 	}
@@ -267,7 +329,7 @@ func (p *postgresDocumentDB) CreateDocument(ctx context.Context, projectID, data
 	return *created, nil
 }
 
-func (p *postgresDocumentDB) GetDocument(ctx context.Context, projectID, databaseID, collectionID, docID string, roles []string) (*databases.Document, error) {
+func (p *postgresDocumentDB) GetDocument(ctx context.Context, projectID, databaseID, collectionID, docID string, principal databases.Principal) (*databases.Document, error) {
 	if err := validateDocID(docID); err != nil {
 		return nil, err
 	}
@@ -284,13 +346,13 @@ func (p *postgresDocumentDB) GetDocument(ctx context.Context, projectID, databas
 	if doc == nil {
 		return nil, nil
 	}
-	if err := p.checkDocumentPermission(ctx, schema, collectionID, docID, internalID, "read", roles); err != nil {
+	if err := p.checkDocumentPermission(ctx, projectID, schema, collectionID, docID, internalID, "read", principal); err != nil {
 		return nil, err
 	}
 	return doc, nil
 }
 
-func (p *postgresDocumentDB) UpdateDocument(ctx context.Context, projectID, databaseID, collectionID string, doc databases.Document, perms []databases.Permission, roles []string) (databases.Document, error) {
+func (p *postgresDocumentDB) UpdateDocument(ctx context.Context, projectID, databaseID, collectionID string, doc databases.Document, perms []databases.Permission, principal databases.Principal) (databases.Document, error) {
 	if err := validateDocID(doc.ID); err != nil {
 		return doc, err
 	}
@@ -299,7 +361,7 @@ func (p *postgresDocumentDB) UpdateDocument(ctx context.Context, projectID, data
 		return doc, err
 	}
 	schema := schemaName(internalID, databaseID)
-	if err := p.checkDocumentPermission(ctx, schema, collectionID, doc.ID, internalID, "update", roles); err != nil {
+	if err := p.checkDocumentPermission(ctx, projectID, schema, collectionID, doc.ID, internalID, "update", principal); err != nil {
 		return doc, err
 	}
 	tbl := tableName(schema, collectionID)
@@ -310,6 +372,9 @@ func (p *postgresDocumentDB) UpdateDocument(ctx context.Context, projectID, data
 	args = append(args, doc.ID, internalID)
 	sql := fmt.Sprintf(`UPDATE %s SET %s WHERE _id = ? AND _tenant = ?`, tbl, strings.Join(setParts, ", "))
 	if _, err := p.db.DB.ExecContext(ctx, sql, args...); err != nil {
+		if isUniqueViolation(err) {
+			return doc, fmt.Errorf("%w: %s", ErrDuplicateKey, err.Error())
+		}
 		return doc, fmt.Errorf("update document: %w", err)
 	}
 	if len(perms) > 0 {
@@ -320,7 +385,7 @@ func (p *postgresDocumentDB) UpdateDocument(ctx context.Context, projectID, data
 			return doc, err
 		}
 	}
-	updated, err := p.GetDocument(ctx, projectID, databaseID, collectionID, doc.ID, roles)
+	updated, err := p.GetDocument(ctx, projectID, databaseID, collectionID, doc.ID, principal)
 	if err != nil {
 		return doc, err
 	}
@@ -330,7 +395,7 @@ func (p *postgresDocumentDB) UpdateDocument(ctx context.Context, projectID, data
 	return *updated, nil
 }
 
-func (p *postgresDocumentDB) DeleteDocument(ctx context.Context, projectID, databaseID, collectionID, docID string, roles []string) error {
+func (p *postgresDocumentDB) DeleteDocument(ctx context.Context, projectID, databaseID, collectionID, docID string, principal databases.Principal) error {
 	if err := validateDocID(docID); err != nil {
 		return err
 	}
@@ -339,7 +404,7 @@ func (p *postgresDocumentDB) DeleteDocument(ctx context.Context, projectID, data
 		return err
 	}
 	schema := schemaName(internalID, databaseID)
-	if err := p.checkDocumentPermission(ctx, schema, collectionID, docID, internalID, "delete", roles); err != nil {
+	if err := p.checkDocumentPermission(ctx, projectID, schema, collectionID, docID, internalID, "delete", principal); err != nil {
 		return err
 	}
 	if err := p.clearPermissions(ctx, schema, collectionID, docID, internalID); err != nil {
@@ -349,7 +414,7 @@ func (p *postgresDocumentDB) DeleteDocument(ctx context.Context, projectID, data
 	return err
 }
 
-func (p *postgresDocumentDB) ListDocuments(ctx context.Context, projectID, databaseID, collectionID string, q databases.Query, roles []string) (*databases.DocumentList, error) {
+func (p *postgresDocumentDB) ListDocuments(ctx context.Context, projectID, databaseID, collectionID string, q databases.Query, principal databases.Principal) (*databases.DocumentList, error) {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return nil, err
@@ -365,9 +430,20 @@ func (p *postgresDocumentDB) ListDocuments(ctx context.Context, projectID, datab
 
 	whereParts := []string{"d._tenant = ?"}
 	args := []any{internalID}
-	if !bypassDocumentPermissions(roles) {
-		whereParts = append(whereParts, fmt.Sprintf(`EXISTS (SELECT 1 FROM %s p WHERE p._collection = ? AND p._document = d._id AND p._type = 'read' AND p._permission = ANY(?::text[]))`, permsTable))
-		args = append(args, collectionID, pgTextArray(expandPermissionRoles(roles)))
+	if !principal.IsSystem() {
+		expanded := expandPermissionRoles(principal.Roles)
+		// Pre-compute collection-level read permission for fallback.
+		var collAllowsRead bool
+		if coll, err := p.GetCollection(ctx, projectID, databaseID, collectionID); err == nil && coll != nil {
+			collAllowsRead = databases.CollectionAllows(coll.Permissions, "read", expanded)
+		}
+		// Document has explicit _perms → match them; otherwise fall back to
+		// collection-level permission.
+		whereParts = append(whereParts, fmt.Sprintf(
+			`(EXISTS (SELECT 1 FROM %s p WHERE p._collection = ? AND p._document = d._id AND p._type = 'read' AND p._permission = ANY(?::text[]))) OR (NOT EXISTS (SELECT 1 FROM %s p2 WHERE p2._collection = ? AND p2._document = d._id) AND ?)`,
+			permsTable, permsTable,
+		))
+		args = append(args, collectionID, pgTextArray(expanded), collectionID, collAllowsRead)
 	}
 
 	filterWhere, filterArgs, orderSQL, err := buildAppwriteQuery(parsed)
@@ -434,7 +510,7 @@ func (p *postgresDocumentDB) ListDocuments(ctx context.Context, projectID, datab
 	}, nil
 }
 
-func (p *postgresDocumentDB) CountDocuments(ctx context.Context, projectID, databaseID, collectionID string, queries []string, roles []string) (int64, error) {
+func (p *postgresDocumentDB) CountDocuments(ctx context.Context, projectID, databaseID, collectionID string, queries []string, principal databases.Principal) (int64, error) {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {
 		return 0, err
@@ -449,9 +525,17 @@ func (p *postgresDocumentDB) CountDocuments(ctx context.Context, projectID, data
 
 	whereParts := []string{"d._tenant = ?"}
 	args := []any{internalID}
-	if !bypassDocumentPermissions(roles) {
-		whereParts = append(whereParts, fmt.Sprintf(`EXISTS (SELECT 1 FROM %s p WHERE p._collection = ? AND p._document = d._id AND p._type = 'read' AND p._permission = ANY(?::text[]))`, permsTable))
-		args = append(args, collectionID, pgTextArray(expandPermissionRoles(roles)))
+	if !principal.IsSystem() {
+		expanded := expandPermissionRoles(principal.Roles)
+		var collAllowsRead bool
+		if coll, err := p.GetCollection(ctx, projectID, databaseID, collectionID); err == nil && coll != nil {
+			collAllowsRead = databases.CollectionAllows(coll.Permissions, "read", expanded)
+		}
+		whereParts = append(whereParts, fmt.Sprintf(
+			`(EXISTS (SELECT 1 FROM %s p WHERE p._collection = ? AND p._document = d._id AND p._type = 'read' AND p._permission = ANY(?::text[]))) OR (NOT EXISTS (SELECT 1 FROM %s p2 WHERE p2._collection = ? AND p2._document = d._id) AND ?)`,
+			permsTable, permsTable,
+		))
+		args = append(args, collectionID, pgTextArray(expanded), collectionID, collAllowsRead)
 	}
 	filterWhere, filterArgs, _, err := buildAppwriteQuery(parsed)
 	if err != nil {
@@ -469,6 +553,16 @@ func (p *postgresDocumentDB) CountDocuments(ctx context.Context, projectID, data
 }
 
 func (p *postgresDocumentDB) EnsureSystemCollections(ctx context.Context, projectID string, internalID int64) error {
+	if internalID == 0 {
+		var err error
+		internalID, err = p.resolveInternalID(ctx, projectID)
+		if err != nil {
+			return err
+		}
+	}
+	if _, ok := p.bootstrapCache.Load(projectID); ok {
+		return nil
+	}
 	dbID := "default"
 	schema := schemaName(internalID, dbID)
 	if err := p.ensureSchemaAndPerms(ctx, schema); err != nil {
@@ -496,13 +590,11 @@ func (p *postgresDocumentDB) EnsureSystemCollections(ctx context.Context, projec
 		if coll != nil {
 			continue
 		}
-		if err := p.CreateCollection(ctx, projectID, dbID, spec.id, spec.name, spec.attrs, spec.indexes); err != nil {
+		if err := p.CreateCollection(ctx, projectID, dbID, spec.id, spec.name, spec.attrs, spec.indexes, spec.permissions); err != nil {
 			return fmt.Errorf("create system collection %s: %w", spec.id, err)
 		}
-		if err := p.setCollectionPermissions(ctx, projectID, dbID, spec.id, spec.permissions); err != nil {
-			return err
-		}
 	}
+	p.bootstrapCache.Store(projectID, struct{}{})
 	return nil
 }
 
@@ -535,6 +627,9 @@ func pgTextArray(items []string) string {
 }
 
 func (p *postgresDocumentDB) resolveInternalID(ctx context.Context, projectID string) (int64, error) {
+	if cached, ok := p.internalIDCache.Load(projectID); ok {
+		return cached.(int64), nil
+	}
 	var internalID int64
 	err := p.conn(ctx).NewSelect().Model((*model.Project)(nil)).Column("internal_id").Where("id = ?", projectID).Scan(ctx, &internalID)
 	if err != nil {
@@ -543,6 +638,7 @@ func (p *postgresDocumentDB) resolveInternalID(ctx context.Context, projectID st
 		}
 		return 0, err
 	}
+	p.internalIDCache.Store(projectID, internalID)
 	return internalID, nil
 }
 
@@ -578,7 +674,7 @@ func (p *postgresDocumentDB) ensurePermsTable(ctx context.Context, schema string
 
 func (p *postgresDocumentDB) createCollectionTable(ctx context.Context, schema, collectionID string, tenant int64, attrs []databases.Attribute) error {
 	cols := []string{
-		"_id TEXT PRIMARY KEY",
+		"_id TEXT NOT NULL",
 		fmt.Sprintf("_tenant BIGINT NOT NULL DEFAULT %d", tenant),
 		"_created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()",
 		"_updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()",
@@ -586,9 +682,13 @@ func (p *postgresDocumentDB) createCollectionTable(ctx context.Context, schema, 
 		"_updated_by TEXT",
 	}
 	for _, attr := range attrs {
-		cols = append(cols, attributeColumnSQL(attr))
+		colSQL, err := attributeColumnSQL(attr)
+		if err != nil {
+			return err
+		}
+		cols = append(cols, colSQL)
 	}
-	cols = append(cols, "UNIQUE (_id, _tenant)")
+	cols = append(cols, "PRIMARY KEY (_tenant, _id)")
 	sql := fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (\n\t\t%s\n\t)", tableName(schema, collectionID), strings.Join(cols, ",\n\t\t"))
 	_, err := p.conn(ctx).ExecContext(ctx, sql)
 	return err
@@ -620,20 +720,24 @@ func (p *postgresDocumentDB) createCollectionIndex(ctx context.Context, schema, 
 	return err
 }
 
-func attributeColumnSQL(attr databases.Attribute) string {
-	name := quoteIdent(attr.Key)
+func attributeColumnSQL(attr databases.Attribute) (string, error) {
 	if !safeNameRe.MatchString(attr.Key) {
-		panic(fmt.Sprintf("invalid attribute key: %s", attr.Key))
+		return "", fmt.Errorf("invalid attribute key: %s", attr.Key)
 	}
+	name := quoteIdent(attr.Key)
 	dataType := pgTypeFor(attr.Type, attr.Size)
 	parts := []string{name, dataType}
 	if attr.Required {
 		parts = append(parts, "NOT NULL")
 	}
 	if attr.Default != nil && !attr.Array {
-		parts = append(parts, fmt.Sprintf("DEFAULT %s", formatDefault(attr.Default, attr.Type)))
+		def, err := formatDefault(attr.Default, attr.Type)
+		if err != nil {
+			return "", fmt.Errorf("invalid default for attribute %s: %w", attr.Key, err)
+		}
+		parts = append(parts, fmt.Sprintf("DEFAULT %s", def))
 	}
-	return strings.Join(parts, " ")
+	return strings.Join(parts, " "), nil
 }
 
 func pgTypeFor(t string, size int) string {
@@ -658,27 +762,31 @@ func pgTypeFor(t string, size int) string {
 	}
 }
 
-func formatDefault(v any, t string) string {
+func formatDefault(v any, t string) (string, error) {
 	switch strings.ToLower(t) {
 	case "boolean":
-		if b, _ := strconv.ParseBool(fmt.Sprint(v)); b {
-			return "TRUE"
+		b, err := strconv.ParseBool(fmt.Sprint(v))
+		if err != nil {
+			return "", fmt.Errorf("boolean default: %w", err)
 		}
-		return "FALSE"
+		if b {
+			return "TRUE", nil
+		}
+		return "FALSE", nil
 	case "integer":
 		n, err := strconv.ParseInt(fmt.Sprint(v), 10, 64)
 		if err != nil {
-			return "0"
+			return "", fmt.Errorf("integer default: %w", err)
 		}
-		return strconv.FormatInt(n, 10)
+		return strconv.FormatInt(n, 10), nil
 	case "float":
 		f, err := strconv.ParseFloat(fmt.Sprint(v), 64)
 		if err != nil {
-			return "0"
+			return "", fmt.Errorf("float default: %w", err)
 		}
-		return strconv.FormatFloat(f, 'f', -1, 64)
+		return strconv.FormatFloat(f, 'f', -1, 64), nil
 	default:
-		return quoteLiteral(fmt.Sprint(v))
+		return quoteLiteral(fmt.Sprint(v)), nil
 	}
 }
 
@@ -686,14 +794,18 @@ func quoteLiteral(s string) string {
 	return `'` + strings.ReplaceAll(s, `'`, `''`) + `'`
 }
 
-func (p *postgresDocumentDB) createCollectionMetadata(ctx context.Context, projectID, databaseID, collectionID, name string, attrs []databases.Attribute, idxs []databases.Index) error {
+func (p *postgresDocumentDB) createCollectionMetadata(ctx context.Context, projectID, databaseID, collectionID, name string, attrs []databases.Attribute, idxs []databases.Index, perms []databases.Permission) error {
+	permStrings := make([]string, 0, len(perms))
+	for _, perm := range perms {
+		permStrings = append(permStrings, fmt.Sprintf("%s:%s", perm.Type, perm.Role))
+	}
 	coll := &model.DocumentCollection{
 		ID:               collectionID,
 		DatabaseID:       databaseID,
 		ProjectID:        projectID,
 		Name:             name,
 		DocumentSecurity: true,
-		Permissions:      []string{},
+		Permissions:      permStrings,
 		CreatedAt:        time.Now(),
 		UpdatedAt:        time.Now(),
 	}
@@ -750,6 +862,10 @@ func (p *postgresDocumentDB) mapCollection(ctx context.Context, m *model.Documen
 		Scan(ctx); err != nil {
 		return nil, err
 	}
+	return mapCollectionRow(m, attrs, idxs)
+}
+
+func mapCollectionRow(m *model.DocumentCollection, attrs []model.DocumentAttribute, idxs []model.DocumentIndex) (*databases.Collection, error) {
 	c := &databases.Collection{
 		ID:               m.ID,
 		DatabaseID:       m.DatabaseID,
@@ -890,14 +1006,67 @@ func scanDocumentJSON(scanner interface{ Scan(dest ...any) error }) (*databases.
 	return doc, nil
 }
 
-func bypassDocumentPermissions(roles []string) bool {
-	for _, r := range roles {
-		switch r {
-		case "__system__", "keys", "owner", "admin":
-			return true
-		}
+func isUniqueViolation(err error) bool {
+	var pgErr pgdriver.Error
+	if errors.As(err, &pgErr) {
+		return pgErr.Field('C') == "23505"
 	}
-	return false
+	return strings.Contains(err.Error(), "SQLSTATE 23505") || strings.Contains(err.Error(), "unique constraint")
+}
+
+func (p *postgresDocumentDB) checkDocumentPermission(ctx context.Context, projectID, schema, collectionID, docID string, tenant int64, permType string, principal databases.Principal) error {
+	if principal.IsSystem() {
+		return nil
+	}
+	permsTable := permsTableName(schema)
+
+	// Check whether the document has any explicit _perms records.
+	var docHasPerms bool
+	if err := p.db.DB.QueryRowContext(ctx,
+		fmt.Sprintf(`SELECT EXISTS(SELECT 1 FROM %s p WHERE p._tenant = ? AND p._collection = ? AND p._document = ?)`, permsTable),
+		tenant, collectionID, docID,
+	).Scan(&docHasPerms); err != nil {
+		return err
+	}
+
+	expanded := expandPermissionRoles(principal.Roles)
+
+	if docHasPerms {
+		// Document has explicit permissions → exact match required.
+		sql := fmt.Sprintf(`SELECT EXISTS(SELECT 1 FROM %s p WHERE p._tenant = ? AND p._collection = ? AND p._document = ? AND p._type = ? AND p._permission = ANY(?::text[]))`, permsTable)
+		var ok bool
+		if err := p.db.DB.QueryRowContext(ctx, sql, tenant, collectionID, docID, permType, pgTextArray(expanded)).Scan(&ok); err != nil {
+			return err
+		}
+		if !ok {
+			return ErrPermissionDenied
+		}
+		return nil
+	}
+
+	// No document-level perms → fall back to collection-level permissions.
+	coll, err := p.GetCollection(ctx, projectID, schemaDatabaseID(schema), collectionID)
+	if err != nil {
+		return err
+	}
+	if coll == nil || !databases.CollectionAllows(coll.Permissions, permType, expanded) {
+		return ErrPermissionDenied
+	}
+	return nil
+}
+
+// schemaDatabaseID extracts the database id portion from a schema name
+// "fleet_<internalID>_<databaseID>". Since databaseID may contain underscores,
+// we split from the right but only on the first underscore after the prefix.
+func schemaDatabaseID(schema string) string {
+	// schema = "fleet_<n>_<dbID>"; we need the dbID which follows the second "_".
+	// But internalID is numeric, so split on "fleet_" prefix then on first "_".
+	rest := strings.TrimPrefix(schema, "fleet_")
+	idx := strings.IndexByte(rest, '_')
+	if idx < 0 {
+		return ""
+	}
+	return rest[idx+1:]
 }
 
 func expandPermissionRoles(roles []string) []string {
@@ -918,34 +1087,14 @@ func expandPermissionRoles(roles []string) []string {
 	return out
 }
 
-func (p *postgresDocumentDB) checkDocumentPermission(ctx context.Context, schema, collectionID, docID string, tenant int64, permType string, roles []string) error {
-	if bypassDocumentPermissions(roles) {
-		return nil
-	}
-	permsTable := permsTableName(schema)
-	sql := fmt.Sprintf(`SELECT EXISTS(SELECT 1 FROM %s p WHERE p._tenant = ? AND p._collection = ? AND p._document = ? AND p._type = ? AND p._permission = ANY(?::text[]))`, permsTable)
-	var ok bool
-	if err := p.db.DB.QueryRowContext(ctx, sql, tenant, collectionID, docID, permType, pgTextArray(expandPermissionRoles(roles))).Scan(&ok); err != nil {
-		return err
-	}
-	if !ok {
-		return ErrPermissionDenied
-	}
-	return nil
-}
-
 func validateDocID(docID string) error {
 	if docID == "" {
-		return errors.New("document id is required")
+		return status.Error(codes.InvalidArgument, "document id is required")
 	}
 	if !docIDRe.MatchString(docID) {
-		return fmt.Errorf("invalid document id: %s", docID)
+		return status.Error(codes.InvalidArgument, fmt.Sprintf("invalid document id: %s", docID))
 	}
 	return nil
-}
-
-func hasAdminRole(roles []string) bool {
-	return bypassDocumentPermissions(roles)
 }
 
 func mapQueryField(field string) string {

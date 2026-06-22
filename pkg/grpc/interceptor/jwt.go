@@ -7,7 +7,6 @@ import (
 
 	"github.com/deeploop-ai/fleet/internal/domain/shared"
 	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
-	"github.com/samber/lo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -109,10 +108,7 @@ func extractCredential(md metadata.MD) (shared.CredentialType, string, error) {
 		}
 	}
 	if raw := firstMetadataValue(md, "cookie"); raw != "" {
-		if projectID, token, ok := parseSessionCookie(raw); ok {
-			ctx := context.Background()
-			_ = ctx
-			_ = projectID
+		if _, token, ok := parseSessionCookie(raw); ok {
 			return shared.CredentialTypeSession, token, nil
 		}
 	}
@@ -160,10 +156,4 @@ func firstMetadataValue(md metadata.MD, key string) string {
 		return ""
 	}
 	return strings.TrimSpace(values[0])
-}
-
-func CollectPublicMethods() []string { return nil }
-
-func loContains(items []string, target string) bool {
-	return lo.Contains(items, target)
 }

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+
 	"github.com/deeploop-ai/fleet/internal/api"
 	"github.com/deeploop-ai/fleet/internal/app"
 	"github.com/deeploop-ai/fleet/internal/domain"
@@ -34,6 +36,9 @@ func NewAppConfig(app lynx.Lynx) (*config.AppConfig, error) {
 	var c config.AppConfig
 	if err := app.Config().Unmarshal(&c, lynx.TagNameJSON); err != nil {
 		return nil, err
+	}
+	if secret := c.GetSecurity().GetJwt().GetSecret(); secret == "" {
+		return nil, errors.New("security.jwt.secret must be set (env FLEET_SECURITY_JWT_SECRET)")
 	}
 	return &c, nil
 }

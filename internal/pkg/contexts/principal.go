@@ -25,3 +25,15 @@ func ProjectID(ctx context.Context) (string, bool) {
 	s, ok := v.(string)
 	return s, ok && s != ""
 }
+
+// WithAuditResource attaches the resource id being acted upon (e.g. the
+// project id targeted by a delete) so the audit interceptor can record it.
+func WithAuditResource(ctx context.Context, resourceID string) context.Context {
+	return context.WithValue(ctx, ContextKeyAuditResource, resourceID)
+}
+
+// AuditResource returns the audit resource id stored in ctx, if any.
+func AuditResource(ctx context.Context) string {
+	v, _ := ctx.Value(ContextKeyAuditResource).(string)
+	return v
+}

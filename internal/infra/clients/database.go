@@ -51,10 +51,6 @@ func NewDatabase(dataClients *DataClients) *Database {
 	return dataClients.DB
 }
 
-func NewRedisClient(dataClients *DataClients) *redis.Client {
-	return dataClients.RDB
-}
-
 func newDatabase(cfg *config.Database) (*Database, func(), error) {
 	source := strings.TrimSpace(cfg.GetSource())
 	if source == "" {

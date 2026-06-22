@@ -33,14 +33,14 @@ func TestTeams_Memberships(t *testing.T) {
 	uc := NewTeams(projectRepo, docDB)
 	ownerID := "owner-user-id"
 	ownerEmail := "owner@fleet.local"
-	roles := []string{"users", "user:" + ownerID}
-	team, ownerMembership, err := uc.CreateTeamWithOwner(ctx, projectID, "Engineering", ownerID, ownerEmail, roles)
+	principal := databases.Principal{Roles: []string{"users", "user:" + ownerID}}
+	team, ownerMembership, err := uc.CreateTeamWithOwner(ctx, projectID, "Engineering", ownerID, ownerEmail, principal)
 	require.NoError(t, err)
 	require.NotEmpty(t, team.ID)
 	require.Equal(t, teams.StatusAccepted, ownerMembership.Data["status"])
 	require.Equal(t, int64(1), teamTotal(t, team))
 
-	ownerRoles := []string{"users", "user:" + ownerID, "team:" + team.ID}
+	ownerRoles := databases.Principal{Roles: []string{"users", "user:" + ownerID, "team:" + team.ID}}
 
 	memberUserID := "member-user-id"
 	_, err = docDB.CreateDocument(ctx, projectID, "default", "users", databases.Document{
@@ -51,7 +51,7 @@ func TestTeams_Memberships(t *testing.T) {
 			"name":          "Member User",
 			"status":        "active",
 		},
-	}, nil)
+	}, nil, databases.SystemPrincipal)
 	require.NoError(t, err)
 
 	invite, err := uc.CreateMembership(ctx, projectID, CreateMembershipCommand{
@@ -64,12 +64,12 @@ func TestTeams_Memberships(t *testing.T) {
 	require.Equal(t, teams.StatusPending, invite.Data["status"])
 	require.Equal(t, memberUserID, invite.Data["user_id"])
 
-	memberRoles := []string{"users", "user:" + memberUserID}
+	memberRoles := databases.Principal{Roles: []string{"users", "user:" + memberUserID}}
 	authCtx := contexts.WithPrincipal(ctx, &shared.Principal{
 		ProjectID: projectID,
 		UserID:    memberUserID,
 		Email:     "member@fleet.local",
-		Roles:     memberRoles,
+		Roles:     memberRoles.Roles,
 	})
 
 	accepted, err := uc.UpdateMembershipStatus(authCtx, projectID, team.ID, invite.ID, teams.StatusAccepted, memberRoles)

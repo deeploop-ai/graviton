@@ -63,11 +63,25 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Default API key for the default project.
+	// Default API key for the default project. Uses a deterministic id so that
+	// re-running seed does not create duplicate keys; the secret is only printed
+	// on first creation. To rotate, delete the row and re-run seed.
+	apiKeyID := "default-default-api-key"
+	exists, err := db.NewSelect().Model((*model.APIKey)(nil)).
+		Where("id = ?", apiKeyID).Where("project_id = ?", "default").Exists(ctx)
+	if err != nil {
+		fmt.Println("check api key:", err)
+		os.Exit(1)
+	}
+	if exists {
+		fmt.Println("seeded project=default admin=admin@fleet.local api_key=(already exists, id=" + apiKeyID + ")")
+		return
+	}
+
 	apiSecret := "fleet-default-api-key-" + idgen.UUID().String()
 	apiHash := sha256.Sum256([]byte(apiSecret))
 	apiKey := &model.APIKey{
-		ID:         idgen.UUID().String(),
+		ID:         apiKeyID,
 		ProjectID:  "default",
 		Name:       "Default API Key",
 		SecretHash: hex.EncodeToString(apiHash[:]),
@@ -76,7 +90,7 @@ func main() {
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	}
-	if _, err := db.NewInsert().Model(apiKey).On("CONFLICT (id) DO NOTHING").Exec(ctx); err != nil {
+	if _, err := db.NewInsert().Model(apiKey).Exec(ctx); err != nil {
 		fmt.Println("insert api key:", err)
 		os.Exit(1)
 	}

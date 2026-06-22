@@ -36,14 +36,13 @@ func (s *DatabasesService) CreateDatabase(ctx context.Context, req *serverv1.Cre
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	id := req.GetId()
-	if id == "" {
-		id = "default"
+	if req.GetId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "id is required")
 	}
-	if err := s.databases.CreateDatabase(ctx, projectID, id, req.GetName()); err != nil {
+	if err := s.databases.CreateDatabase(ctx, projectID, req.GetId(), req.GetName()); err != nil {
 		return nil, err
 	}
-	return &serverv1.Database{Id: id, Name: req.GetName()}, nil
+	return &serverv1.Database{Id: req.GetId(), Name: req.GetName()}, nil
 }
 
 func (s *DatabasesService) ListDatabases(ctx context.Context, _ *sharedv1.ListRequest) (*serverv1.ListDatabasesResponse, error) {
@@ -93,7 +92,11 @@ func (s *DatabasesService) CreateCollection(ctx context.Context, req *serverv1.C
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	if err := s.databases.CreateCollection(ctx, projectID, req.GetDatabaseId(), req.GetId(), req.GetName(), nil, nil); err != nil {
+	perms, err := databases.ParsePermissionStrings(req.GetPermissions())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	if err := s.databases.CreateCollection(ctx, projectID, req.GetDatabaseId(), req.GetId(), req.GetName(), nil, nil, perms); err != nil {
 		return nil, err
 	}
 	col, err := s.databases.GetCollection(ctx, projectID, req.GetDatabaseId(), req.GetId())
@@ -221,7 +224,7 @@ func (s *DatabasesService) CreateDocument(ctx context.Context, req *serverv1.Cre
 		req.GetDocumentId(),
 		data,
 		perms,
-		principalRoles(ctx),
+		dbPrincipal(ctx),
 	)
 	if err != nil {
 		return nil, err
@@ -238,7 +241,7 @@ func (s *DatabasesService) ListDocuments(ctx context.Context, req *serverv1.List
 		Queries:   req.GetQueries(),
 		PageSize:  req.GetPageSize(),
 		PageToken: req.GetPageToken(),
-	}, principalRoles(ctx))
+	}, dbPrincipal(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -261,7 +264,7 @@ func (s *DatabasesService) GetDocument(ctx context.Context, req *serverv1.GetDoc
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	doc, err := s.databases.GetDocument(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), req.GetDocumentId(), principalRoles(ctx))
+	doc, err := s.databases.GetDocument(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), req.GetDocumentId(), dbPrincipal(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -280,7 +283,8 @@ func (s *DatabasesService) UpdateDocument(ctx context.Context, req *serverv1.Upd
 		req.GetCollectionId(),
 		req.GetDocumentId(),
 		updateData(req.GetData()),
-		principalRoles(ctx),
+		nil,
+		dbPrincipal(ctx),
 	)
 	if err != nil {
 		return nil, err
@@ -293,7 +297,7 @@ func (s *DatabasesService) DeleteDocument(ctx context.Context, req *serverv1.Get
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	if err := s.databases.DeleteDocument(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), req.GetDocumentId(), principalRoles(ctx)); err != nil {
+	if err := s.databases.DeleteDocument(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), req.GetDocumentId(), dbPrincipal(ctx)); err != nil {
 		return nil, err
 	}
 	return &sharedv1.Empty{}, nil
@@ -304,7 +308,7 @@ func (s *DatabasesService) CountDocuments(ctx context.Context, req *serverv1.Lis
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	count, err := s.databases.CountDocuments(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), req.GetQueries(), principalRoles(ctx))
+	count, err := s.databases.CountDocuments(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), req.GetQueries(), dbPrincipal(ctx))
 	if err != nil {
 		return nil, err
 	}

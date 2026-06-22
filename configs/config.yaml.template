@@ -6,7 +6,7 @@ server:
     addr: ":9099"
     timeout: "60s"
     cors:
-      allow_origins: ["*"]
+      allow_origins: ["http://fleet.local:9099"]  # set explicit origins; "*" is rejected when allow_credentials=true
       allow_methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
       allow_headers: ["Content-Type", "Authorization", "X-Api-Key", "X-Fleet-Project", "X-Request-Id", "X-Correlation-Id"]
       allow_credentials: true

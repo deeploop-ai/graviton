@@ -10,6 +10,7 @@ import (
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
 	domainstorage "github.com/deeploop-ai/fleet/internal/domain/storage"
 	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
+	"github.com/deeploop-ai/fleet/pkg/query"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -57,7 +58,7 @@ func (s *StorageService) ListBuckets(ctx context.Context, req *sharedv1.ListRequ
 		Queries:   req.GetQueries(),
 		PageSize:  req.GetPageSize(),
 		PageToken: req.GetPageToken(),
-	}, principalRoles(ctx))
+	}, dbPrincipal(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +80,7 @@ func (s *StorageService) GetBucket(ctx context.Context, req *serverv1.GetBucketR
 	buckets, _, err := s.storage.ListBuckets(ctx, projectID, databases.Query{
 		Queries:  []string{"equal(\"$id\",\"" + req.GetId() + "\")"},
 		PageSize: 1,
-	}, principalRoles(ctx))
+	}, dbPrincipal(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +95,7 @@ func (s *StorageService) DeleteBucket(ctx context.Context, req *serverv1.GetBuck
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	if err := s.storage.DeleteBucket(ctx, projectID, req.GetId(), principalRoles(ctx)); err != nil {
+	if err := s.storage.DeleteBucket(ctx, projectID, req.GetId(), dbPrincipal(ctx)); err != nil {
 		return nil, err
 	}
 	return &sharedv1.Empty{}, nil
@@ -106,14 +107,20 @@ func (s *StorageService) CreateFile(ctx context.Context, req *serverv1.CreateFil
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
 	data := req.GetData()
+	p, ok := contexts.Principal(ctx)
+	ownerUserID := ""
+	if ok {
+		ownerUserID = p.UserID
+	}
 	file, err := s.storage.CreateFile(ctx, appstorage.CreateFileCommand{
 		ProjectID:   projectID,
+		OwnerUserID: ownerUserID,
 		BucketID:    req.GetBucketId(),
 		Name:        req.GetName(),
 		MimeType:    req.GetMimeType(),
 		Metadata:    req.GetMetadata(),
 		Permissions: req.GetPermissions(),
-	}, bytes.NewReader(data), int64(len(data)), principalRoles(ctx))
+	}, bytes.NewReader(data), int64(len(data)), dbPrincipal(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -130,8 +137,8 @@ func (s *StorageService) ListFiles(ctx context.Context, req *serverv1.ListFilesR
 		PageSize:  req.GetPageSize(),
 		PageToken: req.GetPageToken(),
 	}
-	q.Queries = append([]string{"equal(\"bucket_id\",\"" + req.GetBucketId() + "\")"}, q.Queries...)
-	files, total, _, err := s.storage.ListFiles(ctx, projectID, req.GetBucketId(), q, principalRoles(ctx))
+	q.Queries = append([]string{query.BuildEqual("bucket_id", req.GetBucketId())}, q.Queries...)
+	files, total, _, err := s.storage.ListFiles(ctx, projectID, req.GetBucketId(), q, dbPrincipal(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +157,7 @@ func (s *StorageService) GetFile(ctx context.Context, req *serverv1.GetFileReque
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	file, _, err := s.storage.GetFile(ctx, projectID, req.GetBucketId(), req.GetFileId(), principalRoles(ctx))
+	file, _, err := s.storage.GetFile(ctx, projectID, req.GetBucketId(), req.GetFileId(), dbPrincipal(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +169,7 @@ func (s *StorageService) DeleteFile(ctx context.Context, req *serverv1.GetFileRe
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	if err := s.storage.DeleteFile(ctx, projectID, req.GetBucketId(), req.GetFileId(), principalRoles(ctx)); err != nil {
+	if err := s.storage.DeleteFile(ctx, projectID, req.GetBucketId(), req.GetFileId(), dbPrincipal(ctx)); err != nil {
 		return nil, err
 	}
 	return &sharedv1.Empty{}, nil
@@ -197,10 +204,10 @@ func mapFile(f *domainstorage.File) *serverv1.File {
 	}
 }
 
-func principalRoles(ctx context.Context) []string {
+func dbPrincipal(ctx context.Context) databases.Principal {
 	p, ok := contexts.Principal(ctx)
 	if !ok {
-		return nil
+		return databases.Principal{}
 	}
-	return p.Roles
+	return databases.Principal{Roles: p.Roles, PlatformAdmin: p.IsPlatformAdmin}
 }

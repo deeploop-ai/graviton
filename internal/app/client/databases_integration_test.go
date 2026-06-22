@@ -44,7 +44,7 @@ func TestClientDatabases_DocumentCRUD(t *testing.T) {
 	require.NoError(t, serverUC.CreateDatabase(ctx, projectID, "app", "Application DB"))
 	require.NoError(t, serverUC.CreateCollection(ctx, projectID, "app", "notes", "Notes", []databases.Attribute{
 		{ID: "title", Key: "title", Type: "string", Size: 256},
-	}, nil))
+	}, nil, nil))
 
 	userCtx := contexts.WithPrincipal(ctx, &shared.Principal{
 		ProjectID: projectID,

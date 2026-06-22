@@ -261,15 +261,74 @@ func unquote(s string) (string, error) {
 	if len(s) < 2 || s[0] != '"' || s[len(s)-1] != '"' {
 		return "", fmt.Errorf("expected quoted string, got %s", s)
 	}
-	return s[1 : len(s)-1], nil
+	return unescapeString(s[1 : len(s)-1]), nil
 }
 
 func unquoteOrLiteral(s string) (string, error) {
 	s = strings.TrimSpace(s)
 	if len(s) >= 2 && s[0] == '"' && s[len(s)-1] == '"' {
-		return s[1 : len(s)-1], nil
+		return unescapeString(s[1 : len(s)-1]), nil
 	}
 	return s, nil
+}
+
+// unescapeString reverses the escaping performed by escapeString.
+func unescapeString(s string) string {
+	var b strings.Builder
+	for i := 0; i < len(s); i++ {
+		if s[i] == '\\' && i+1 < len(s) {
+			b.WriteByte(s[i+1])
+			i++
+			continue
+		}
+		b.WriteByte(s[i])
+	}
+	return b.String()
+}
+
+// escapeString escapes characters that would break the DSL grammar.
+// Use this when composing query strings programmatically.
+func escapeString(s string) string {
+	var b strings.Builder
+	for i := 0; i < len(s); i++ {
+		switch s[i] {
+		case '\\':
+			b.WriteString(`\\`)
+		case '"':
+			b.WriteString(`\"`)
+		default:
+			b.WriteByte(s[i])
+		}
+	}
+	return b.String()
+}
+
+// quoteString wraps a value in double quotes and escapes inner quotes/backslashes.
+func quoteString(s string) string {
+	return `"` + escapeString(s) + `"`
+}
+
+// BuildFilter constructs a single Appwrite-style query string from structured args.
+// It is the safe counterpart to Sprintf-based query construction: values are
+// escaped so that quotes/backslashes inside user input cannot break out of the
+// quoted scope.
+func BuildFilter(op, attr string, values ...string) string {
+	parts := make([]string, 0, len(values)+1)
+	parts = append(parts, quoteString(attr))
+	for _, v := range values {
+		parts = append(parts, quoteString(v))
+	}
+	return op + "(" + strings.Join(parts, ",") + ")"
+}
+
+// BuildEqual is a shorthand for BuildFilter("equal", attr, values...).
+func BuildEqual(attr string, values ...string) string {
+	return BuildFilter("equal", attr, values...)
+}
+
+// BuildLimit constructs a limit(n) query string.
+func BuildLimit(n int) string {
+	return fmt.Sprintf("limit(%d)", n)
 }
 
 func parseArray(s string) ([]string, error) {

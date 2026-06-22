@@ -32,6 +32,9 @@ func (a *APIKeys) Create(ctx context.Context, cmd CreateAPIKeyCommand) (*project
 	if cmd.Name == "" {
 		return nil, "", status.Error(codes.InvalidArgument, "name is required")
 	}
+	if len(cmd.Scopes) == 0 {
+		return nil, "", status.Error(codes.InvalidArgument, "scopes is required (use \"*\" for all scopes)")
+	}
 	id := idgen.UUID().String()
 	secret := idgen.UUID().String() + idgen.UUID().String()
 	hash := sha256.Sum256([]byte(secret))
@@ -72,11 +75,8 @@ func (a *APIKeys) Delete(ctx context.Context, projectID, id string) error {
 	if err != nil {
 		return err
 	}
-	if key == nil {
-		return fmt.Errorf("api key not found")
-	}
-	if key.ProjectID != projectID {
-		return fmt.Errorf("api key not found")
+	if key == nil || key.ProjectID != projectID {
+		return status.Error(codes.NotFound, "api key not found")
 	}
 	return a.repo.DeleteAPIKey(ctx, id)
 }

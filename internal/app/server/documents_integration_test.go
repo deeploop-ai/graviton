@@ -28,7 +28,7 @@ func TestDatabases_DocumentCRUD(t *testing.T) {
 	require.NoError(t, docDB.EnsureSystemCollections(ctx, projectID, internalID))
 
 	uc := NewDatabases(bunrepo.NewProjectRepository(db), docDB)
-	roles := []string{"keys"}
+	principal := databases.Principal{Roles: []string{"keys"}}
 
 	const (
 		dbID   = "app"
@@ -38,38 +38,38 @@ func TestDatabases_DocumentCRUD(t *testing.T) {
 	require.NoError(t, uc.CreateCollection(ctx, projectID, dbID, collID, "Posts", []databases.Attribute{
 		{ID: "title", Key: "title", Type: "string", Size: 256},
 		{ID: "views", Key: "views", Type: "integer"},
-	}, nil))
+	}, nil, nil))
 
 	created, err := uc.CreateDocument(ctx, projectID, dbID, collID, "", map[string]any{
 		"title": "Hello Fleet",
 		"views": 1,
-	}, databases.DefaultDocumentPermissions(), roles)
+	}, databases.DefaultCollectionPermissions(), principal)
 	require.NoError(t, err)
 	require.NotEmpty(t, created.ID)
 	require.Equal(t, "Hello Fleet", created.Data["title"])
 
-	got, err := uc.GetDocument(ctx, projectID, dbID, collID, created.ID, roles)
+	got, err := uc.GetDocument(ctx, projectID, dbID, collID, created.ID, principal)
 	require.NoError(t, err)
 	require.Equal(t, created.ID, got.ID)
 
 	updated, err := uc.UpdateDocument(ctx, projectID, dbID, collID, created.ID, map[string]any{
 		"views": 99,
-	}, roles)
+	}, nil, principal)
 	require.NoError(t, err)
 	require.Equal(t, float64(99), updated.Data["views"])
 
 	list, total, _, err := uc.ListDocuments(ctx, projectID, dbID, collID, databases.Query{
 		Queries: []string{`equal("title","Hello Fleet")`, `orderDesc("$createdAt")`},
-	}, roles)
+	}, principal)
 	require.NoError(t, err)
 	require.Equal(t, int64(1), total)
 	require.Len(t, list, 1)
 
-	count, err := uc.CountDocuments(ctx, projectID, dbID, collID, []string{`equal("title","Hello Fleet")`}, roles)
+	count, err := uc.CountDocuments(ctx, projectID, dbID, collID, []string{`equal("title","Hello Fleet")`}, principal)
 	require.NoError(t, err)
 	require.Equal(t, int64(1), count)
 
-	require.NoError(t, uc.DeleteDocument(ctx, projectID, dbID, collID, created.ID, roles))
-	_, err = uc.GetDocument(ctx, projectID, dbID, collID, created.ID, roles)
+	require.NoError(t, uc.DeleteDocument(ctx, projectID, dbID, collID, created.ID, principal))
+	_, err = uc.GetDocument(ctx, projectID, dbID, collID, created.ID, principal)
 	require.Error(t, err)
 }

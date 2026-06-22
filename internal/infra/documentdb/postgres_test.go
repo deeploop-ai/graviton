@@ -27,13 +27,13 @@ func TestPostgresDocumentDatabase_CRUD(t *testing.T) {
 
 	// Create a custom database and collection.
 	require.NoError(t, docDB.CreateDatabase(ctx, projectID, "app", "Application DB"))
-	require.NoError(t, docDB.CreateCollection(ctx, projectID, "app", "notes", "Notes", nil, nil))
+	require.NoError(t, docDB.CreateCollection(ctx, projectID, "app", "notes", "Notes", nil, nil, nil))
 	require.NoError(t, docDB.CreateCollection(ctx, projectID, "app", "posts", "Posts", []databases.Attribute{
 		{ID: "title", Key: "title", Type: "string", Size: 256},
 		{ID: "views", Key: "views", Type: "integer"},
 	}, []databases.Index{
 		{ID: "title_key", Type: "key", Attributes: []string{"title"}},
-	}))
+	}, nil))
 
 	// Create document.
 	created, err := docDB.CreateDocument(ctx, projectID, "app", "posts", databases.Document{
@@ -45,12 +45,12 @@ func TestPostgresDocumentDatabase_CRUD(t *testing.T) {
 		{Type: "read", Role: "any"},
 		{Type: "update", Role: "any"},
 		{Type: "delete", Role: "any"},
-	})
+	}, databases.SystemPrincipal)
 	require.NoError(t, err)
 	require.NotEmpty(t, created.ID)
 
 	// Get document.
-	got, err := docDB.GetDocument(ctx, projectID, "app", "posts", created.ID, []string{"any"})
+	got, err := docDB.GetDocument(ctx, projectID, "app", "posts", created.ID, databases.Principal{Roles: []string{"any"}})
 	require.NoError(t, err)
 	require.Equal(t, "Hello World", got.Data["title"])
 
@@ -60,26 +60,26 @@ func TestPostgresDocumentDatabase_CRUD(t *testing.T) {
 		Data: map[string]any{
 			"views": 100,
 		},
-	}, nil, []string{"any"})
+	}, nil, databases.Principal{Roles: []string{"any"}})
 	require.NoError(t, err)
 	require.Equal(t, float64(100), updated.Data["views"])
 
 	// List with Appwrite-style query.
 	list, err := docDB.ListDocuments(ctx, projectID, "app", "posts", databases.Query{
 		Queries: []string{`greaterThan("views",50)`, `orderDesc("$createdAt")`},
-	}, []string{"any"})
+	}, databases.Principal{Roles: []string{"any"}})
 	require.NoError(t, err)
 	require.Len(t, list.Documents, 1)
 	require.Equal(t, int64(1), list.TotalCount)
 
 	// Count.
-	count, err := docDB.CountDocuments(ctx, projectID, "app", "posts", []string{`equal("title","Hello World")`}, []string{"any"})
+	count, err := docDB.CountDocuments(ctx, projectID, "app", "posts", []string{`equal("title","Hello World")`}, databases.Principal{Roles: []string{"any"}})
 	require.NoError(t, err)
 	require.Equal(t, int64(1), count)
 
 	// Delete.
-	require.NoError(t, docDB.DeleteDocument(ctx, projectID, "app", "posts", created.ID, []string{"any"}))
-	got2, err := docDB.GetDocument(ctx, projectID, "app", "posts", created.ID, []string{"any"})
+	require.NoError(t, docDB.DeleteDocument(ctx, projectID, "app", "posts", created.ID, databases.Principal{Roles: []string{"any"}}))
+	got2, err := docDB.GetDocument(ctx, projectID, "app", "posts", created.ID, databases.Principal{Roles: []string{"any"}})
 	require.NoError(t, err)
 	require.Nil(t, got2)
 }
@@ -105,34 +105,34 @@ func TestPostgresDocumentDatabase_Permissions(t *testing.T) {
 		},
 	}, []databases.Permission{
 		{Type: "read", Role: "user:alice"},
-	})
+	}, databases.SystemPrincipal)
 	require.NoError(t, err)
 
 	// User without permission cannot read.
 	list, err := docDB.ListDocuments(ctx, projectID, "default", "users", databases.Query{
 		Queries: []string{`equal("$id","` + created.ID + `")`},
-	}, []string{"user:bob"})
+	}, databases.Principal{Roles: []string{"user:bob"}})
 	require.NoError(t, err)
 	require.Len(t, list.Documents, 0)
 
 	// User with permission can read.
 	list, err = docDB.ListDocuments(ctx, projectID, "default", "users", databases.Query{
 		Queries: []string{`equal("$id","` + created.ID + `")`},
-	}, []string{"user:alice"})
+	}, databases.Principal{Roles: []string{"user:alice"}})
 	require.NoError(t, err)
 	require.Len(t, list.Documents, 1)
 
-	// Admin bypasses permissions.
-	list, err = docDB.ListDocuments(ctx, projectID, "default", "users", databases.Query{}, []string{"owner"})
+	// System roles bypass permissions.
+	list, err = docDB.ListDocuments(ctx, projectID, "default", "users", databases.Query{}, databases.SystemPrincipal)
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, len(list.Documents), 1)
 
 	// Get without permission is denied.
-	_, err = docDB.GetDocument(ctx, projectID, "default", "users", created.ID, []string{"user:bob"})
+	_, err = docDB.GetDocument(ctx, projectID, "default", "users", created.ID, databases.Principal{Roles: []string{"user:bob"}})
 	require.ErrorIs(t, err, ErrPermissionDenied)
 
 	// Get with permission succeeds.
-	got, err := docDB.GetDocument(ctx, projectID, "default", "users", created.ID, []string{"user:alice"})
+	got, err := docDB.GetDocument(ctx, projectID, "default", "users", created.ID, databases.Principal{Roles: []string{"user:alice"}})
 	require.NoError(t, err)
 	require.Equal(t, "perm@fleet.local", got.Data["email"])
 }

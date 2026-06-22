@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -32,7 +33,7 @@ func NewGRPCGatewayServer(
 	timeout := parseDuration(httpCfg.GetTimeout(), 60*time.Second)
 
 	grpcAddr := cfg.GetServer().GetGrpc().GetAddr()
-	grpcEndpoint := fmt.Sprintf("localhost:%s", lastPort(grpcAddr))
+	grpcEndpoint := fmt.Sprintf("127.0.0.1:%s", portFromAddr(grpcAddr))
 
 	mux := runtime.NewServeMux(
 		runtime.WithErrorHandler(HTTPErrorHandler),
@@ -89,9 +90,12 @@ func NewGRPCGatewayServer(
 	return &GRPCGatewayServer{lynxhttp.NewServer(combined, lynxhttp.WithAddr(httpCfg.GetAddr()), lynxhttp.WithTimeout(timeout))}, nil
 }
 
-func lastPort(addr string) string {
-	parts := strings.Split(addr, ":")
-	return parts[len(parts)-1]
+func portFromAddr(addr string) string {
+	_, port, err := net.SplitHostPort(addr)
+	if err != nil || port == "" {
+		return "8088"
+	}
+	return port
 }
 
 func authIncomingHeaderMatcher(key string) (string, bool) {

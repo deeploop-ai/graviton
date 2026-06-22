@@ -19,49 +19,49 @@ func NewTeams(teams *server.Teams) *Teams {
 	return &Teams{teams: teams}
 }
 
-func (t *Teams) principal(ctx context.Context) (projectID, userID, email string, roles []string, err error) {
+func (t *Teams) dbPrincipal(ctx context.Context) (projectID, userID, email string, principal databases.Principal, err error) {
 	p, ok := contexts.Principal(ctx)
 	if !ok || p.ProjectID == "" || p.UserID == "" {
-		return "", "", "", nil, status.Error(codes.Unauthenticated, "unauthenticated")
+		return "", "", "", databases.Principal{}, status.Error(codes.Unauthenticated, "unauthenticated")
 	}
-	return p.ProjectID, p.UserID, p.Email, p.Roles, nil
+	return p.ProjectID, p.UserID, p.Email, databases.Principal{Roles: p.Roles, PlatformAdmin: p.IsPlatformAdmin}, nil
 }
 
 func (t *Teams) CreateTeam(ctx context.Context, name string) (*databases.Document, error) {
-	projectID, userID, email, roles, err := t.principal(ctx)
+	projectID, userID, email, principal, err := t.dbPrincipal(ctx)
 	if err != nil {
 		return nil, err
 	}
-	team, _, err := t.teams.CreateTeamWithOwner(ctx, projectID, name, userID, email, roles)
+	team, _, err := t.teams.CreateTeamWithOwner(ctx, projectID, name, userID, email, principal)
 	return team, err
 }
 
 func (t *Teams) ListTeams(ctx context.Context, q databases.Query) ([]databases.Document, int64, string, error) {
-	projectID, _, _, roles, err := t.principal(ctx)
+	projectID, _, _, principal, err := t.dbPrincipal(ctx)
 	if err != nil {
 		return nil, 0, "", err
 	}
-	return t.teams.ListTeams(ctx, projectID, q, roles)
+	return t.teams.ListTeams(ctx, projectID, q, principal)
 }
 
 func (t *Teams) GetTeam(ctx context.Context, teamID string) (*databases.Document, error) {
-	projectID, _, _, roles, err := t.principal(ctx)
+	projectID, _, _, principal, err := t.dbPrincipal(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return t.teams.GetTeam(ctx, projectID, teamID, roles)
+	return t.teams.GetTeam(ctx, projectID, teamID, principal)
 }
 
 func (t *Teams) DeleteTeam(ctx context.Context, teamID string) error {
-	projectID, _, _, roles, err := t.principal(ctx)
+	projectID, _, _, principal, err := t.dbPrincipal(ctx)
 	if err != nil {
 		return err
 	}
-	return t.teams.DeleteTeam(ctx, projectID, teamID, roles)
+	return t.teams.DeleteTeam(ctx, projectID, teamID, principal)
 }
 
 func (t *Teams) CreateMembership(ctx context.Context, teamID, inviteEmail, name string, roles []string) (*databases.Document, error) {
-	projectID, _, _, principalRoles, err := t.principal(ctx)
+	projectID, _, _, principal, err := t.dbPrincipal(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -71,24 +71,24 @@ func (t *Teams) CreateMembership(ctx context.Context, teamID, inviteEmail, name 
 		Name:   name,
 		Roles:  roles,
 		Status: teams.StatusPending,
-	}, principalRoles)
+	}, principal)
 }
 
 func (t *Teams) ListMemberships(ctx context.Context, teamID string) ([]databases.Document, error) {
-	projectID, _, _, roles, err := t.principal(ctx)
+	projectID, _, _, principal, err := t.dbPrincipal(ctx)
 	if err != nil {
 		return nil, err
 	}
-	docs, _, _, err := t.teams.ListMemberships(ctx, projectID, teamID, databases.Query{}, roles)
+	docs, _, _, err := t.teams.ListMemberships(ctx, projectID, teamID, databases.Query{}, principal)
 	return docs, err
 }
 
 func (t *Teams) UpdateMembershipStatus(ctx context.Context, teamID, membershipID, statusVal string) (*databases.Document, error) {
-	projectID, userID, email, roles, err := t.principal(ctx)
+	projectID, userID, email, principal, err := t.dbPrincipal(ctx)
 	if err != nil {
 		return nil, err
 	}
-	doc, err := t.teams.GetMembership(ctx, projectID, teamID, membershipID, roles)
+	doc, err := t.teams.GetMembership(ctx, projectID, teamID, membershipID, principal)
 	if err != nil {
 		return nil, err
 	}
@@ -97,13 +97,13 @@ func (t *Teams) UpdateMembershipStatus(ctx context.Context, teamID, membershipID
 	if memUserID != userID && memEmail != email {
 		return nil, status.Error(codes.PermissionDenied, "cannot update another user's membership")
 	}
-	return t.teams.UpdateMembershipStatus(ctx, projectID, teamID, membershipID, statusVal, roles)
+	return t.teams.UpdateMembershipStatus(ctx, projectID, teamID, membershipID, statusVal, principal)
 }
 
 func (t *Teams) DeleteMembership(ctx context.Context, teamID, membershipID string) error {
-	projectID, _, _, roles, err := t.principal(ctx)
+	projectID, _, _, principal, err := t.dbPrincipal(ctx)
 	if err != nil {
 		return err
 	}
-	return t.teams.DeleteMembership(ctx, projectID, teamID, membershipID, roles)
+	return t.teams.DeleteMembership(ctx, projectID, teamID, membershipID, principal)
 }

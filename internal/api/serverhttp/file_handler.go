@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/deeploop-ai/fleet/internal/app/storage"
+	"github.com/deeploop-ai/fleet/internal/domain/databases"
 	"github.com/deeploop-ai/fleet/internal/domain/shared"
 	"github.com/deeploop-ai/fleet/internal/infra/auth"
 	"github.com/deeploop-ai/fleet/internal/pkg/config"
@@ -41,6 +42,9 @@ func (h *FileHandler) Register(mux *runtime.ServeMux) {
 	_ = mux.HandlePath("GET", "/v1/storage/buckets/{bucketId}/files/{fileId}/view", h.download)
 }
 
+// maxUploadBytes caps the total size of a multipart upload request body.
+const maxUploadBytes = 100 << 20 // 100 MiB
+
 func (h *FileHandler) upload(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 	ctx := r.Context()
 	principal, err := h.authenticate(r)
@@ -59,8 +63,9 @@ func (h *FileHandler) upload(w http.ResponseWriter, r *http.Request, pathParams 
 		return
 	}
 
+	r.Body = http.MaxBytesReader(w, r.Body, maxUploadBytes)
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
-		httpError(w, status.Error(codes.InvalidArgument, "invalid multipart form"))
+		httpError(w, status.Error(codes.InvalidArgument, "invalid multipart form or file too large"))
 		return
 	}
 	defer r.MultipartForm.RemoveAll()
@@ -73,7 +78,7 @@ func (h *FileHandler) upload(w http.ResponseWriter, r *http.Request, pathParams 
 			return
 		}
 		defer file.Close()
-		h.createFile(ctx, w, projectID, bucketID, file, fh.Size, fh.Filename, fh.Header.Get("Content-Type"), principal.Roles)
+		h.createFile(ctx, w, projectID, bucketID, file, fh.Size, fh.Filename, fh.Header.Get("Content-Type"), principal)
 		return
 	}
 
@@ -85,16 +90,17 @@ func (h *FileHandler) upload(w http.ResponseWriter, r *http.Request, pathParams 
 	}
 	defer f.Close()
 
-	h.createFile(ctx, w, projectID, bucketID, f, fh.Size, fh.Filename, fh.Header.Get("Content-Type"), principal.Roles)
+	h.createFile(ctx, w, projectID, bucketID, f, fh.Size, fh.Filename, fh.Header.Get("Content-Type"), principal)
 }
 
-func (h *FileHandler) createFile(ctx context.Context, w http.ResponseWriter, projectID, bucketID string, r io.Reader, size int64, name, contentType string, roles []string) {
+func (h *FileHandler) createFile(ctx context.Context, w http.ResponseWriter, projectID, bucketID string, r io.Reader, size int64, name, contentType string, principal *shared.Principal) {
 	file, err := h.storage.CreateFile(ctx, storage.CreateFileCommand{
-		ProjectID: projectID,
-		BucketID:  bucketID,
-		Name:      name,
-		MimeType:  contentType,
-	}, r, size, roles)
+		ProjectID:   projectID,
+		OwnerUserID: principal.UserID,
+		BucketID:    bucketID,
+		Name:        name,
+		MimeType:    contentType,
+	}, r, size, databases.Principal{Roles: principal.Roles, PlatformAdmin: principal.IsPlatformAdmin})
 	if err != nil {
 		httpError(w, err)
 		return
@@ -129,7 +135,7 @@ func (h *FileHandler) download(w http.ResponseWriter, r *http.Request, pathParam
 		return
 	}
 
-	file, reader, err := h.storage.GetFile(ctx, projectID, bucketID, fileID, principal.Roles)
+	file, reader, err := h.storage.GetFile(ctx, projectID, bucketID, fileID, databases.Principal{Roles: principal.Roles, PlatformAdmin: principal.IsPlatformAdmin})
 	if err != nil {
 		httpError(w, err)
 		return
@@ -183,13 +189,25 @@ func (h *FileHandler) projectID(r *http.Request, p *shared.Principal) string {
 }
 
 func safeFilename(name string) string {
-	name = strings.ReplaceAll(name, `"`, "_")
-	name = strings.ReplaceAll(name, "\n", "")
-	name = strings.ReplaceAll(name, "\r", "")
-	if name == "" {
+	var b strings.Builder
+	for _, r := range name {
+		switch {
+		case r == '"', r == '\\':
+			b.WriteByte('_')
+		case r < 32, r == 127:
+			// drop control characters to prevent header injection
+			continue
+		case r == '\n', r == '\r':
+			continue
+		default:
+			b.WriteRune(r)
+		}
+	}
+	out := strings.TrimSpace(b.String())
+	if out == "" {
 		return "download"
 	}
-	return name
+	return out
 }
 
 func contentDispositionHeader(disposition, name string) string {

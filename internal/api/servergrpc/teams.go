@@ -52,7 +52,7 @@ func (s *TeamsService) ListTeams(ctx context.Context, req *sharedv1.ListRequest)
 		Queries:   req.GetQueries(),
 		PageSize:  req.GetPageSize(),
 		PageToken: req.GetPageToken(),
-	}, principalRoles(ctx))
+	}, dbPrincipal(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (s *TeamsService) GetTeam(ctx context.Context, req *serverv1.GetTeamRequest
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	doc, err := s.teams.GetTeam(ctx, projectID, req.GetId(), principalRoles(ctx))
+	doc, err := s.teams.GetTeam(ctx, projectID, req.GetId(), dbPrincipal(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (s *TeamsService) DeleteTeam(ctx context.Context, req *serverv1.GetTeamRequ
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	if err := s.teams.DeleteTeam(ctx, projectID, req.GetId(), principalRoles(ctx)); err != nil {
+	if err := s.teams.DeleteTeam(ctx, projectID, req.GetId(), dbPrincipal(ctx)); err != nil {
 		return nil, err
 	}
 	return &sharedv1.Empty{}, nil
@@ -104,7 +104,7 @@ func (s *TeamsService) CreateMembership(ctx context.Context, req *serverv1.Creat
 		Name:   req.GetName(),
 		Roles:  req.GetRoles(),
 		Status: req.GetStatus(),
-	}, principalRoles(ctx))
+	}, dbPrincipal(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (s *TeamsService) ListMemberships(ctx context.Context, req *serverv1.ListMe
 		Queries:   req.GetQueries(),
 		PageSize:  req.GetPageSize(),
 		PageToken: req.GetPageToken(),
-	}, principalRoles(ctx))
+	}, dbPrincipal(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +139,7 @@ func (s *TeamsService) GetMembership(ctx context.Context, req *serverv1.GetMembe
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	doc, err := s.teams.GetMembership(ctx, projectID, req.GetTeamId(), req.GetMembershipId(), principalRoles(ctx))
+	doc, err := s.teams.GetMembership(ctx, projectID, req.GetTeamId(), req.GetMembershipId(), dbPrincipal(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +156,7 @@ func (s *TeamsService) UpdateMembership(ctx context.Context, req *serverv1.Updat
 	}
 	doc, err := s.teams.UpdateMembership(ctx, projectID, req.GetTeamId(), req.GetMembershipId(), appserver.UpdateMembershipCommand{
 		Roles: req.GetRoles(),
-	}, principalRoles(ctx))
+	}, dbPrincipal(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ func (s *TeamsService) UpdateMembershipStatus(ctx context.Context, req *serverv1
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	doc, err := s.teams.UpdateMembershipStatus(ctx, projectID, req.GetTeamId(), req.GetMembershipId(), req.GetStatus(), principalRoles(ctx))
+	doc, err := s.teams.UpdateMembershipStatus(ctx, projectID, req.GetTeamId(), req.GetMembershipId(), req.GetStatus(), dbPrincipal(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +180,7 @@ func (s *TeamsService) DeleteMembership(ctx context.Context, req *serverv1.GetMe
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	if err := s.teams.DeleteMembership(ctx, projectID, req.GetTeamId(), req.GetMembershipId(), principalRoles(ctx)); err != nil {
+	if err := s.teams.DeleteMembership(ctx, projectID, req.GetTeamId(), req.GetMembershipId(), dbPrincipal(ctx)); err != nil {
 		return nil, err
 	}
 	return &sharedv1.Empty{}, nil

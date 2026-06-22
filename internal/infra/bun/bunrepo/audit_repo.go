@@ -35,16 +35,17 @@ func (r *auditRepo) Insert(ctx context.Context, entry *audit.Entry) error {
 		metadata = map[string]any{}
 	}
 	m := &model.AuditLog{
-		ID:        id,
-		ProjectID: entry.ProjectID,
-		ActorID:   entry.ActorID,
-		ActorKind: entry.ActorKind,
-		Action:    entry.Action,
-		Status:    entry.Status,
-		IP:        entry.IP,
-		UserAgent: entry.UserAgent,
-		Metadata:  metadata,
-		CreatedAt: createdAt,
+		ID:         id,
+		ProjectID:  entry.ProjectID,
+		ActorID:    entry.ActorID,
+		ActorKind:  entry.ActorKind,
+		Action:     entry.Action,
+		ResourceID: entry.ResourceID,
+		Status:     entry.Status,
+		IP:         entry.IP,
+		UserAgent:  entry.UserAgent,
+		Metadata:   metadata,
+		CreatedAt:  createdAt,
 	}
 	_, err := r.db.NewInsert().Model(m).Exec(ctx)
 	return err

@@ -33,7 +33,7 @@ func TestStorage_Acceptance_ServerAPI(t *testing.T) {
 
 	store := testutil.NewMemObjectStore()
 	uc := NewStorage(&config.AppConfig{}, bunrepo.NewProjectRepository(db), docDB, store)
-	roles := []string{"keys"}
+	principal := databases.Principal{Roles: []string{"keys"}}
 
 	bucket, err := uc.CreateBucket(ctx, CreateBucketCommand{
 		ProjectID: projectID,
@@ -48,18 +48,18 @@ func TestStorage_Acceptance_ServerAPI(t *testing.T) {
 		BucketID:  bucket.ID,
 		Name:      "test.txt",
 		MimeType:  "text/plain",
-	}, bytes.NewReader(content), int64(len(content)), roles)
+	}, bytes.NewReader(content), int64(len(content)), principal)
 	require.NoError(t, err)
 	require.NotEmpty(t, file.ID)
 	require.Equal(t, int64(len(content)), file.Size)
 
-	files, total, _, err := uc.ListFiles(ctx, projectID, bucket.ID, databases.Query{}, roles)
+	files, total, _, err := uc.ListFiles(ctx, projectID, bucket.ID, databases.Query{}, principal)
 	require.NoError(t, err)
 	require.Equal(t, int64(1), total)
 	require.Len(t, files, 1)
 	require.Equal(t, file.ID, files[0].ID)
 
-	gotMeta, reader, err := uc.GetFile(ctx, projectID, bucket.ID, file.ID, roles)
+	gotMeta, reader, err := uc.GetFile(ctx, projectID, bucket.ID, file.ID, principal)
 	require.NoError(t, err)
 	require.NotNil(t, gotMeta)
 	defer reader.Close()
@@ -67,8 +67,8 @@ func TestStorage_Acceptance_ServerAPI(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, content, gotContent)
 
-	require.NoError(t, uc.DeleteFile(ctx, projectID, bucket.ID, file.ID, roles))
-	files, total, _, err = uc.ListFiles(ctx, projectID, bucket.ID, databases.Query{}, roles)
+	require.NoError(t, uc.DeleteFile(ctx, projectID, bucket.ID, file.ID, principal))
+	files, total, _, err = uc.ListFiles(ctx, projectID, bucket.ID, databases.Query{}, principal)
 	require.NoError(t, err)
 	require.Equal(t, int64(0), total)
 	require.Empty(t, files)

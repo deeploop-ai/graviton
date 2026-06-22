@@ -227,7 +227,7 @@ func TestP0_Section9_DynamicDocuments(t *testing.T) {
 	require.NoError(t, err)
 
 	// §9.1 system users collection contains registered user (API key / keys role).
-	docs, total, _, err := usersUC.ListUsers(ctx, projectID, databases.Query{}, []string{"keys"})
+	docs, total, _, err := usersUC.ListUsers(ctx, projectID, databases.Query{}, databases.Principal{Roles: []string{"keys"}})
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, total, int64(1))
 	found := false
@@ -242,7 +242,7 @@ func TestP0_Section9_DynamicDocuments(t *testing.T) {
 	// §9.2 query filter returns only matching user.
 	filtered, filteredTotal, _, err := usersUC.ListUsers(ctx, projectID, databases.Query{
 		Queries: []string{`equal("email","` + email + `")`},
-	}, []string{"keys"})
+	}, databases.Principal{Roles: []string{"keys"}})
 	require.NoError(t, err)
 	require.Equal(t, int64(1), filteredTotal)
 	require.Len(t, filtered, 1)
@@ -256,18 +256,18 @@ func TestP0_Section9_DynamicDocuments(t *testing.T) {
 		},
 	}, []databases.Permission{
 		{Type: "read", Role: "user:alice"},
-	})
+	}, databases.SystemPrincipal)
 	require.NoError(t, err)
 
 	aliceList, err := docDB.ListDocuments(ctx, projectID, "default", "users", databases.Query{
 		Queries: []string{`equal("$id","` + privateUser.ID + `")`},
-	}, []string{"user:alice"})
+	}, databases.Principal{Roles: []string{"user:alice"}})
 	require.NoError(t, err)
 	require.Len(t, aliceList.Documents, 1)
 
 	bobList, err := docDB.ListDocuments(ctx, projectID, "default", "users", databases.Query{
 		Queries: []string{`equal("$id","` + privateUser.ID + `")`},
-	}, []string{"user:bob"})
+	}, databases.Principal{Roles: []string{"user:bob"}})
 	require.NoError(t, err)
 	require.Len(t, bobList.Documents, 0)
 }

@@ -3,17 +3,19 @@ package interceptor
 import "strings"
 
 func apiKeyScopeAllowed(fullMethod string, scopes []string) bool {
-	if len(scopes) == 0 {
+	resource := apiKeyScopeResource(fullMethod)
+	// Methods without a mapped resource (e.g. health) are always allowed.
+	if resource == "" {
 		return true
+	}
+	if len(scopes) == 0 {
+		// An API key with no scopes has no access to resource-scoped methods.
+		return false
 	}
 	for _, s := range scopes {
 		if s == "*" || s == "all" {
 			return true
 		}
-	}
-	resource := apiKeyScopeResource(fullMethod)
-	if resource == "" {
-		return true
 	}
 	for _, s := range scopes {
 		if s == resource || strings.HasPrefix(s, resource+".") {

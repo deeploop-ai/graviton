@@ -6,8 +6,8 @@ func TestAPIKeyScopeAllowed(t *testing.T) {
 	t.Parallel()
 	method := "/fleet.server.v1.UsersService/ListUsers"
 
-	if !apiKeyScopeAllowed(method, nil) {
-		t.Fatal("empty scopes should allow all")
+	if apiKeyScopeAllowed(method, nil) {
+		t.Fatal("empty scopes should deny resource-scoped methods")
 	}
 	if !apiKeyScopeAllowed(method, []string{"*"}) {
 		t.Fatal("wildcard scope should allow")
