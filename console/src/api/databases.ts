@@ -99,7 +99,7 @@ export async function getCollection(
 
 export async function createCollection(
   databaseId: string,
-  input: { id: string; name: string }
+  input: { id: string; name: string; permissions?: string[] }
 ): Promise<Collection> {
   const res = await api.post<Collection>(
     `/server/databases/${databaseId}/collections`,
@@ -176,7 +176,7 @@ export async function getDocument(
 export async function createDocument(
   databaseId: string,
   collectionId: string,
-  input: { data: Record<string, unknown>; document_id?: string }
+  input: { data: Record<string, unknown>; document_id?: string; permissions?: string[] }
 ): Promise<Document> {
   const res = await api.post<Document>(
     `/server/databases/${databaseId}/collections/${collectionId}/documents`,

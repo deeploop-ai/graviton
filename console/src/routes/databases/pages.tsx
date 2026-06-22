@@ -59,6 +59,7 @@ import {
   RowDeleteButton,
   DeleteButton,
 } from "@/components/resource/shared";
+import { PermissionEditor } from "@/components/resource/PermissionEditor";
 
 const ATTRIBUTE_TYPES = [
   { value: "string", label: "String" },
@@ -663,12 +664,14 @@ export function CollectionNewPage() {
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [id, setId] = useState("");
+  const [permissions, setPermissions] = useState<string[]>([]);
 
   const mutation = useMutation({
     mutationFn: () =>
       createCollection(dbId!, {
         id: id || name.toLowerCase().replace(/\s+/g, "_"),
         name,
+        permissions: permissions.length > 0 ? permissions : undefined,
       }),
     onSuccess: (coll) => {
       toast.success("Collection 创建成功");
@@ -691,6 +694,9 @@ export function CollectionNewPage() {
     >
       <FormField id="name" label="名称" value={name} onChange={setName} required placeholder="posts" />
       <FormField id="id" label="ID（可选）" value={id} onChange={setId} placeholder="posts" />
+      <div className="pt-2 border-t">
+        <PermissionEditor permissions={permissions} onChange={setPermissions} />
+      </div>
     </FormPageWrapper>
   );
 }
@@ -771,6 +777,19 @@ export function CollectionDetailPage() {
             { label: "创建时间", value: new Date(collection.created_at).toLocaleString() },
           ]}
         />
+
+        {collection.permissions.length > 0 && (
+          <div className="mt-4 space-y-2">
+            <Label className="text-sm font-medium">权限规则</Label>
+            <div className="flex flex-wrap gap-2">
+              {collection.permissions.map((p) => (
+                <Badge key={p} variant="secondary" className="font-mono text-xs">
+                  {p}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mt-6 space-y-6">
           <DocumentListSection dbId={dbId!} collId={collId!} attributes={collection.attributes} />
@@ -964,6 +983,7 @@ export function DocumentNewPage() {
   const { dbId, collId } = useParams();
   const navigate = useNavigate();
   const [values, setValues] = useState<Record<string, string>>({ __json: "{}" });
+  const [permissions, setPermissions] = useState<string[]>([]);
 
   const { data: collection, isLoading } = useQuery({
     queryKey: ["collections", dbId, collId],
@@ -975,6 +995,7 @@ export function DocumentNewPage() {
     mutationFn: () =>
       createDocument(dbId!, collId!, {
         data: buildDocumentData(collection!.attributes, values),
+        permissions: permissions.length > 0 ? permissions : undefined,
       }),
     onSuccess: (doc) => {
       toast.success("Document 已创建");
@@ -1006,6 +1027,9 @@ export function DocumentNewPage() {
         values={values}
         onChange={(key, value) => setValues((prev) => ({ ...prev, [key]: value }))}
       />
+      <div className="pt-2 border-t">
+        <PermissionEditor permissions={permissions} onChange={setPermissions} />
+      </div>
     </FormPageWrapper>
   );
 }
