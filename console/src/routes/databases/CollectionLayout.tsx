@@ -1,0 +1,114 @@
+import { Link, NavLink, Outlet, useNavigate, useParams } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft, FileText, Layers } from "lucide-react";
+import { toast } from "sonner";
+import { getDatabase, getCollection, deleteCollection } from "@/api/databases";
+import { PageHeader } from "@/components/PageHeader";
+import { Button } from "@/components/ui/button";
+import { DeleteButton, DetailSkeleton, NotFound } from "@/components/resource/shared";
+import { cn } from "@/lib/utils";
+
+export type CollectionOutletContext = {
+  dbId: string;
+  collId: string;
+};
+
+const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+  cn(
+    "inline-flex items-center gap-2 border-b-2 px-1 pb-3 pt-1 text-sm font-medium transition-colors",
+    isActive
+      ? "border-primary text-foreground"
+      : "border-transparent text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground"
+  );
+
+export function CollectionLayout() {
+  const { dbId, collId } = useParams<{ dbId: string; collId: string }>();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const { data: database } = useQuery({
+    queryKey: ["databases", dbId],
+    queryFn: () => getDatabase(dbId!),
+    enabled: !!dbId,
+  });
+
+  const { data: collection, isLoading } = useQuery({
+    queryKey: ["collections", dbId, collId],
+    queryFn: () => getCollection(dbId!, collId!),
+    enabled: !!dbId && !!collId,
+  });
+
+  const remove = useMutation({
+    mutationFn: () => deleteCollection(dbId!, collId!),
+    onSuccess: () => {
+      toast.success("Collection 已删除");
+      queryClient.invalidateQueries({ queryKey: ["collections", dbId] });
+      navigate(`/console/databases/${dbId}`);
+    },
+  });
+
+  if (isLoading) return <DetailSkeleton />;
+  if (!collection || !dbId || !collId) {
+    return <NotFound backTo={`/console/databases/${dbId}`} />;
+  }
+
+  const basePath = `/console/databases/${dbId}/collections/${collId}`;
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title={collection.name}
+        description={database ? `${database.name} · ${collection.id}` : collection.id}
+        actions={
+          <DeleteButton onConfirm={() => remove.mutate()} loading={remove.isPending} />
+        }
+      />
+
+      <div className="space-y-4">
+        <Button variant="ghost" size="sm" className="w-fit" asChild>
+          <Link to={`/console/databases/${dbId}`}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            返回 Database
+          </Link>
+        </Button>
+
+        <nav className="-mb-px flex gap-6 border-b">
+          <NavLink to={basePath} end className={navLinkClass}>
+            <Layers className="h-4 w-4" />
+            Schema
+          </NavLink>
+          <NavLink to={`${basePath}/documents`} className={navLinkClass}>
+            <FileText className="h-4 w-4" />
+            文档
+          </NavLink>
+        </nav>
+      </div>
+
+      <Outlet context={{ dbId, collId } satisfies CollectionOutletContext} />
+    </div>
+  );
+}
+
+export function CollectionStatCard({
+  icon: Icon,
+  label,
+  value,
+  mono,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: React.ReactNode;
+  mono?: boolean;
+}) {
+  return (
+    <div className="rounded-lg border bg-card p-4">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Icon className="h-4 w-4" />
+        {label}
+      </div>
+      <p className={cn("mt-2 text-lg font-semibold", mono && "font-mono text-sm break-all")}>
+        {value}
+      </p>
+    </div>
+  );
+}

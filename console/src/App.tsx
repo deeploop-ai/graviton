@@ -37,9 +37,11 @@ import {
   DatabaseDetailPage,
   CollectionNewPage,
   CollectionDetailPage,
+  DocumentsListPage,
   DocumentNewPage,
   DocumentDetailPage,
 } from "@/routes/databases/pages";
+import { CollectionLayout } from "@/routes/databases/CollectionLayout";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -97,7 +99,10 @@ function AppRoutes() {
         <Route path="databases/new" element={<DatabaseNewPage />} />
         <Route path="databases/:dbId" element={<DatabaseDetailPage />} />
         <Route path="databases/:dbId/collections/new" element={<CollectionNewPage />} />
-        <Route path="databases/:dbId/collections/:collId" element={<CollectionDetailPage />} />
+        <Route path="databases/:dbId/collections/:collId" element={<CollectionLayout />}>
+          <Route index element={<CollectionDetailPage />} />
+          <Route path="documents" element={<DocumentsListPage />} />
+        </Route>
         <Route path="databases/:dbId/collections/:collId/documents/new" element={<DocumentNewPage />} />
         <Route path="databases/:dbId/collections/:collId/documents/:docId" element={<DocumentDetailPage />} />
       </Route>

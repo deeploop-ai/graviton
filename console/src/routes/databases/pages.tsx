@@ -1,8 +1,20 @@
 import { useCallback, useState, useEffect } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useOutletContext } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Settings2 } from "lucide-react";
+import { Plus, Settings2, Shield, Hash, ListTree, Fingerprint, Calendar } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  CollectionStatCard,
+  type CollectionOutletContext,
+} from "@/routes/databases/CollectionLayout";
 import {
   listDatabases,
   getDatabase,
@@ -89,38 +101,59 @@ function AttributeList({
   onAdd: () => void;
 }) {
   return (
-    <Card>
+    <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <CardTitle className="text-lg">Attributes</CardTitle>
+        <div>
+          <CardTitle className="text-base">Attributes</CardTitle>
+          <p className="mt-1 text-sm text-muted-foreground">定义文档字段类型与约束</p>
+        </div>
         <Button size="sm" onClick={onAdd}>
-          <Plus className="h-4 w-4 mr-2" />
-          添加 Attribute
+          <Plus className="mr-2 h-4 w-4" />
+          添加
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1">
         {attributes.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4 text-center">
-            暂无字段定义，点击上方按钮添加第一个 Attribute
-          </p>
-        ) : (
-          <div className="rounded-md border divide-y">
-            {attributes.map((attr) => (
-              <div key={attr.id} className="px-4 py-3 flex items-center justify-between text-sm gap-4">
-                <div className="min-w-0">
-                  <span className="font-mono">{attr.key}</span>
-                  <div className="flex flex-wrap gap-1.5 mt-1">
-                    {attr.required && <Badge variant="secondary">required</Badge>}
-                    {attr.array && <Badge variant="secondary">array</Badge>}
-                    {attr.size ? <Badge variant="secondary">size {attr.size}</Badge> : null}
-                  </div>
-                </div>
-                <Badge variant="outline">
-                  {attr.type}
-                  {attr.array ? "[]" : ""}
-                </Badge>
-              </div>
-            ))}
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-10 text-center">
+            <ListTree className="mb-3 h-8 w-8 text-muted-foreground/50" />
+            <p className="text-sm text-muted-foreground">暂无字段定义</p>
+            <Button size="sm" variant="outline" className="mt-4" onClick={onAdd}>
+              添加第一个 Attribute
+            </Button>
           </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Key</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>约束</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {attributes.map((attr) => (
+                <TableRow key={attr.id}>
+                  <TableCell className="font-mono font-medium">{attr.key}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">
+                      {attr.type}
+                      {attr.array ? "[]" : ""}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1.5">
+                      {attr.required && <Badge variant="secondary">required</Badge>}
+                      {attr.array && <Badge variant="secondary">array</Badge>}
+                      {attr.size ? <Badge variant="secondary">size {attr.size}</Badge> : null}
+                      {!attr.required && !attr.array && !attr.size && (
+                        <span className="text-sm text-muted-foreground">—</span>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </CardContent>
     </Card>
@@ -137,36 +170,56 @@ function IndexList({
   canAdd: boolean;
 }) {
   return (
-    <Card>
+    <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <CardTitle className="text-lg">Indexes</CardTitle>
+        <div>
+          <CardTitle className="text-base">Indexes</CardTitle>
+          <p className="mt-1 text-sm text-muted-foreground">为查询性能创建索引</p>
+        </div>
         <Button size="sm" onClick={onAdd} disabled={!canAdd}>
-          <Plus className="h-4 w-4 mr-2" />
-          添加 Index
+          <Plus className="mr-2 h-4 w-4" />
+          添加
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1">
         {!canAdd && (
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="mb-4 rounded-md bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
             请先添加至少一个 Attribute，再创建 Index。
           </p>
         )}
         {indexes.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4 text-center">
-            {canAdd ? "暂无索引，点击上方按钮添加 Index" : "暂无索引"}
-          </p>
-        ) : (
-          <div className="rounded-md border divide-y">
-            {indexes.map((idx) => (
-              <div key={idx.id} className="px-4 py-3 flex items-center justify-between text-sm gap-4">
-                <div className="min-w-0">
-                  <span className="font-mono text-xs text-muted-foreground">{idx.id}</span>
-                  <p className="font-mono mt-1">{idx.attributes.join(", ")}</p>
-                </div>
-                <Badge variant="outline">{idx.type}</Badge>
-              </div>
-            ))}
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-10 text-center">
+            <Hash className="mb-3 h-8 w-8 text-muted-foreground/50" />
+            <p className="text-sm text-muted-foreground">
+              {canAdd ? "暂无索引" : "添加 Attribute 后可创建索引"}
+            </p>
+            {canAdd && (
+              <Button size="sm" variant="outline" className="mt-4" onClick={onAdd}>
+                添加第一个 Index
+              </Button>
+            )}
           </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Attributes</TableHead>
+                <TableHead>Type</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {indexes.map((idx) => (
+                <TableRow key={idx.id}>
+                  <TableCell className="font-mono text-xs">{idx.id}</TableCell>
+                  <TableCell className="font-mono text-sm">{idx.attributes.join(", ")}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{idx.type}</Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         )}
       </CardContent>
     </Card>
@@ -754,8 +807,7 @@ export function CollectionNewPage() {
 }
 
 export function CollectionDetailPage() {
-  const { dbId, collId } = useParams<{ dbId: string; collId: string }>();
-  const navigate = useNavigate();
+  const { dbId, collId } = useOutletContext<CollectionOutletContext>();
   const queryClient = useQueryClient();
   const [attrDialogOpen, setAttrDialogOpen] = useState(false);
   const [indexDialogOpen, setIndexDialogOpen] = useState(false);
@@ -763,22 +815,12 @@ export function CollectionDetailPage() {
 
   const { data: collection, isLoading } = useQuery({
     queryKey: ["collections", dbId, collId],
-    queryFn: () => getCollection(dbId!, collId!),
-    enabled: !!dbId && !!collId,
-  });
-
-  const remove = useMutation({
-    mutationFn: () => deleteCollection(dbId!, collId!),
-    onSuccess: () => {
-      toast.success("Collection 已删除");
-      queryClient.invalidateQueries({ queryKey: ["collections", dbId] });
-      navigate(`/console/databases/${dbId}`);
-    },
+    queryFn: () => getCollection(dbId, collId),
   });
 
   const updatePerms = useMutation({
     mutationFn: (input: { permissions: string[] }) =>
-      updateCollection(dbId!, collId!, input),
+      updateCollection(dbId, collId, input),
     onSuccess: () => {
       toast.success("权限已更新");
       queryClient.invalidateQueries({ queryKey: ["collections", dbId, collId] });
@@ -793,7 +835,7 @@ export function CollectionDetailPage() {
       size?: number;
       required: boolean;
       array: boolean;
-    }) => createAttribute(dbId!, collId!, input),
+    }) => createAttribute(dbId, collId, input),
     onSuccess: () => {
       toast.success("Attribute 已添加");
       queryClient.invalidateQueries({ queryKey: ["collections", dbId, collId] });
@@ -804,7 +846,7 @@ export function CollectionDetailPage() {
 
   const addIndex = useMutation({
     mutationFn: (input: { id: string; type: string; attributes: string[] }) =>
-      createIndex(dbId!, collId!, {
+      createIndex(dbId, collId, {
         ...input,
         orders: input.attributes.map(() => "asc"),
       }),
@@ -817,55 +859,60 @@ export function CollectionDetailPage() {
   });
 
   if (isLoading) return <DetailSkeleton />;
-  if (!collection) return <NotFound backTo={`/console/databases/${dbId}`} />;
+  if (!collection) return null;
 
   return (
     <>
-      <DetailPageWrapper
-        title={collection.name}
-        description="Collection 详情与 Schema 管理"
-        backTo={`/console/databases/${dbId}`}
-        backLabel="返回 Database"
-        actions={
-          <DeleteButton onConfirm={() => remove.mutate()} loading={remove.isPending} />
-        }
-      >
-        <DetailGrid
-          items={[
-            { label: "ID", value: collection.id, mono: true },
-            { label: "名称", value: collection.name },
-            { label: "Database ID", value: collection.database_id, mono: true },
-            { label: "Attributes", value: collection.attributes.length },
-            { label: "Indexes", value: collection.indexes.length },
-            { label: "创建时间", value: new Date(collection.created_at).toLocaleString() },
-          ]}
-        />
-
-        <div className="mt-4 space-y-2">
-          <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium">权限规则</Label>
-            <Button size="sm" variant="outline" onClick={() => setPermDialogOpen(true)}>
-              <Settings2 className="h-4 w-4 mr-1" />
-              编辑权限
-            </Button>
-          </div>
-          {collection.permissions.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {collection.permissions.map((p) => (
-                <Badge key={p} variant="secondary" className="font-mono text-xs">
-                  {p}
-                </Badge>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              未设置自定义权限规则，使用系统默认策略。
-            </p>
-          )}
+      <div className="space-y-6">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <CollectionStatCard icon={Fingerprint} label="Collection ID" value={collection.id} mono />
+          <CollectionStatCard
+            icon={ListTree}
+            label="Attributes"
+            value={collection.attributes.length}
+          />
+          <CollectionStatCard icon={Hash} label="Indexes" value={collection.indexes.length} />
+          <CollectionStatCard
+            icon={Calendar}
+            label="创建时间"
+            value={new Date(collection.created_at).toLocaleDateString()}
+          />
         </div>
 
-        <div className="mt-6 space-y-6">
-          <DocumentListSection dbId={dbId!} collId={collId!} attributes={collection.attributes} />
+        <Card>
+          <CardHeader className="flex flex-row items-start justify-between space-y-0">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Shield className="h-4 w-4" />
+                权限规则
+              </CardTitle>
+              <p className="mt-1 text-sm text-muted-foreground">
+                集合级权限；无文档级权限的文档将回退到此规则
+              </p>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => setPermDialogOpen(true)}>
+              <Settings2 className="mr-1 h-4 w-4" />
+              编辑
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {collection.permissions.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {collection.permissions.map((p) => (
+                  <Badge key={p} variant="secondary" className="font-mono text-xs">
+                    {p}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                未设置自定义权限规则，使用系统默认策略。
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-6 lg:grid-cols-2">
           <AttributeList
             attributes={collection.attributes}
             onAdd={() => setAttrDialogOpen(true)}
@@ -876,7 +923,7 @@ export function CollectionDetailPage() {
             onAdd={() => setIndexDialogOpen(true)}
           />
         </div>
-      </DetailPageWrapper>
+      </div>
 
       <AddAttributeDialog
         open={attrDialogOpen}
@@ -926,6 +973,7 @@ function DocumentListSection({
   attributes: Attribute[];
 }) {
   const queryClient = useQueryClient();
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ["documents", dbId, collId],
     queryFn: () => listDocuments(dbId, collId),
@@ -941,21 +989,43 @@ function DocumentListSection({
 
   const columns: ColumnDef<Document>[] = [
     ...documentColumns,
-    ...attributes.slice(0, 3).map((attr) => ({
+    ...attributes.slice(0, 4).map((attr) => ({
       key: attr.key,
       header: attr.key,
-      cell: (d: Document) => String(d.data?.[attr.key] ?? "—"),
+      cell: (d: Document) => {
+        const val = d.data?.[attr.key];
+        if (val == null) return "—";
+        const text = typeof val === "object" ? JSON.stringify(val) : String(val);
+        return text.length > 48 ? `${text.slice(0, 48)}…` : text;
+      },
     })),
   ];
 
+  const getSearchText = useCallback(
+    (d: Document) => `${d.id} ${JSON.stringify(d.data ?? {})}`,
+    []
+  );
+
+  const handleBulkDelete = async (selected: Document[], clear: () => void) => {
+    setBulkDeleting(true);
+    try {
+      await Promise.all(selected.map((d) => deleteDocument(dbId, collId, d.id)));
+      toast.success(`已删除 ${selected.length} 个 Document`);
+      queryClient.invalidateQueries({ queryKey: ["documents", dbId, collId] });
+      clear();
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
   return (
     <ResourceListPage
-      cardTitle="文档列表"
-      searchPlaceholder="搜索 Document ID 或字段..."
+      cardTitle="文档"
+      searchPlaceholder="搜索 Document ID 或字段内容..."
       isLoading={isLoading}
       items={documents}
       columns={columns}
-      getSearchText={(d) => `${d.id} ${JSON.stringify(d.data ?? {})}`}
+      getSearchText={getSearchText}
       toolbarActions={
         <Button asChild size="sm">
           <Link to={`/console/databases/${dbId}/collections/${collId}/documents/new`}>
@@ -964,6 +1034,13 @@ function DocumentListSection({
           </Link>
         </Button>
       }
+      selectionActions={(selected, clear) => (
+        <BulkDeleteButton
+          count={selected.length}
+          loading={bulkDeleting}
+          onConfirm={() => handleBulkDelete(selected, clear)}
+        />
+      )}
       detailPath={(d) =>
         `/console/databases/${dbId}/collections/${collId}/documents/${d.id}`
       }
@@ -974,12 +1051,34 @@ function DocumentListSection({
         />
       )}
       emptyTitle="暂无 Document"
-      emptyDescription="创建第一条文档记录"
+      emptyDescription="在此 Collection 中创建第一条文档记录"
       emptyAction={
-        <Link to={`/console/databases/${dbId}/collections/${collId}/documents/new`}>
-          新建 Document
-        </Link>
+        <Button asChild size="sm">
+          <Link to={`/console/databases/${dbId}/collections/${collId}/documents/new`}>
+            新建 Document
+          </Link>
+        </Button>
       }
+    />
+  );
+}
+
+export function DocumentsListPage() {
+  const { dbId, collId } = useOutletContext<CollectionOutletContext>();
+
+  const { data: collection, isLoading } = useQuery({
+    queryKey: ["collections", dbId, collId],
+    queryFn: () => getCollection(dbId, collId),
+  });
+
+  if (isLoading) return <DetailSkeleton />;
+  if (!collection) return null;
+
+  return (
+    <DocumentListSection
+      dbId={dbId}
+      collId={collId}
+      attributes={collection.attributes}
     />
   );
 }
@@ -1085,15 +1184,17 @@ export function DocumentNewPage() {
 
   if (isLoading) return <DetailSkeleton />;
   if (!collection) {
-    return <NotFound backTo={`/console/databases/${dbId}/collections/${collId}`} />;
+    return <NotFound backTo={`/console/databases/${dbId}/collections/${collId}/documents`} />;
   }
+
+  const documentsPath = `/console/databases/${dbId}/collections/${collId}/documents`;
 
   return (
     <FormPageWrapper
       title="新建 Document"
       description={`Collection: ${collection.name}`}
-      backTo={`/console/databases/${dbId}/collections/${collId}`}
-      backLabel="返回 Collection"
+      backTo={documentsPath}
+      backLabel="返回文档列表"
       loading={create.isPending}
       submitLabel="创建"
       onSubmit={(e) => {
@@ -1167,21 +1268,23 @@ export function DocumentDetailPage() {
     mutationFn: () => deleteDocument(dbId!, collId!, docId!),
     onSuccess: () => {
       toast.success("Document 已删除");
-      navigate(`/console/databases/${dbId}/collections/${collId}`);
+      navigate(`/console/databases/${dbId}/collections/${collId}/documents`);
     },
   });
 
+  const documentsPath = `/console/databases/${dbId}/collections/${collId}/documents`;
+
   if (isLoading) return <DetailSkeleton />;
   if (!document || !collection) {
-    return <NotFound backTo={`/console/databases/${dbId}/collections/${collId}`} />;
+    return <NotFound backTo={documentsPath} />;
   }
 
   return (
     <DetailPageWrapper
       title="Document"
       description={`ID: ${document.id}`}
-      backTo={`/console/databases/${dbId}/collections/${collId}`}
-      backLabel="返回 Collection"
+      backTo={documentsPath}
+      backLabel="返回文档列表"
       actions={<DeleteButton onConfirm={() => remove.mutate()} loading={remove.isPending} />}
     >
       <DetailGrid

@@ -11,6 +11,7 @@ const routeNames: Record<string, string> = {
   new: "新建",
   edit: "编辑",
   collections: "Collections",
+  documents: "文档",
   files: "Files",
 };
 
