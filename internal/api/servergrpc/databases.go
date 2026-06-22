@@ -151,6 +151,28 @@ func (s *DatabasesService) DeleteCollection(ctx context.Context, req *serverv1.G
 	return &sharedv1.Empty{}, nil
 }
 
+func (s *DatabasesService) UpdateCollection(ctx context.Context, req *serverv1.UpdateCollectionRequest) (*serverv1.Collection, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	perms, err := databases.ParsePermissionStrings(req.GetPermissions())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	if err := s.databases.UpdateCollection(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), req.GetName(), perms); err != nil {
+		return nil, err
+	}
+	col, err := s.databases.GetCollection(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId())
+	if err != nil {
+		return nil, err
+	}
+	if col == nil {
+		return nil, status.Error(codes.NotFound, "collection not found")
+	}
+	return mapCollection(col), nil
+}
+
 func (s *DatabasesService) CreateAttribute(ctx context.Context, req *serverv1.CreateAttributeRequest) (*serverv1.Attribute, error) {
 	projectID := s.projectID(ctx)
 	if projectID == "" {

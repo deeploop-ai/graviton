@@ -2,7 +2,7 @@ import { useCallback, useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, Settings2 } from "lucide-react";
 import {
   listDatabases,
   getDatabase,
@@ -12,6 +12,7 @@ import {
   getCollection,
   createCollection,
   deleteCollection,
+  updateCollection,
   createAttribute,
   createIndex,
   listDocuments,
@@ -397,6 +398,57 @@ function AddIndexDialog({
   );
 }
 
+function EditPermissionsDialog({
+  open,
+  onOpenChange,
+  loading,
+  initialPermissions,
+  onSubmit,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  loading: boolean;
+  initialPermissions: string[];
+  onSubmit: (permissions: string[]) => void;
+}) {
+  const [permissions, setPermissions] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (open) {
+      setPermissions(initialPermissions);
+    }
+  }, [open, initialPermissions]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>编辑 Collection 权限</DialogTitle>
+          <DialogDescription>
+            修改集合级权限规则。无文档级权限的文档将回退到此规则。
+          </DialogDescription>
+        </DialogHeader>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSubmit(permissions);
+          }}
+        >
+          <PermissionEditor permissions={permissions} onChange={setPermissions} />
+          <DialogFooter className="mt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              取消
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "保存中..." : "保存"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 const dbColumns: ColumnDef<Database>[] = [
   {
     key: "id",
@@ -707,6 +759,7 @@ export function CollectionDetailPage() {
   const queryClient = useQueryClient();
   const [attrDialogOpen, setAttrDialogOpen] = useState(false);
   const [indexDialogOpen, setIndexDialogOpen] = useState(false);
+  const [permDialogOpen, setPermDialogOpen] = useState(false);
 
   const { data: collection, isLoading } = useQuery({
     queryKey: ["collections", dbId, collId],
@@ -720,6 +773,16 @@ export function CollectionDetailPage() {
       toast.success("Collection 已删除");
       queryClient.invalidateQueries({ queryKey: ["collections", dbId] });
       navigate(`/console/databases/${dbId}`);
+    },
+  });
+
+  const updatePerms = useMutation({
+    mutationFn: (input: { permissions: string[] }) =>
+      updateCollection(dbId!, collId!, input),
+    onSuccess: () => {
+      toast.success("权限已更新");
+      queryClient.invalidateQueries({ queryKey: ["collections", dbId, collId] });
+      setPermDialogOpen(false);
     },
   });
 
@@ -778,9 +841,15 @@ export function CollectionDetailPage() {
           ]}
         />
 
-        {collection.permissions.length > 0 && (
-          <div className="mt-4 space-y-2">
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center justify-between">
             <Label className="text-sm font-medium">权限规则</Label>
+            <Button size="sm" variant="outline" onClick={() => setPermDialogOpen(true)}>
+              <Settings2 className="h-4 w-4 mr-1" />
+              编辑权限
+            </Button>
+          </div>
+          {collection.permissions.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {collection.permissions.map((p) => (
                 <Badge key={p} variant="secondary" className="font-mono text-xs">
@@ -788,8 +857,12 @@ export function CollectionDetailPage() {
                 </Badge>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              未设置自定义权限规则，使用系统默认策略。
+            </p>
+          )}
+        </div>
 
         <div className="mt-6 space-y-6">
           <DocumentListSection dbId={dbId!} collId={collId!} attributes={collection.attributes} />
@@ -817,6 +890,13 @@ export function CollectionDetailPage() {
         loading={addIndex.isPending}
         attributes={collection.attributes}
         onSubmit={(input) => addIndex.mutate(input)}
+      />
+      <EditPermissionsDialog
+        open={permDialogOpen}
+        onOpenChange={setPermDialogOpen}
+        loading={updatePerms.isPending}
+        initialPermissions={collection.permissions}
+        onSubmit={(perms) => updatePerms.mutate({ permissions: perms })}
       />
     </>
   );
@@ -870,7 +950,6 @@ function DocumentListSection({
 
   return (
     <ResourceListPage
-      title="Documents"
       cardTitle="文档列表"
       searchPlaceholder="搜索 Document ID 或字段..."
       isLoading={isLoading}

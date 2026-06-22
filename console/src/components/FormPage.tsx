@@ -22,15 +22,14 @@ export function FormPage({
 }: FormPageProps) {
   return (
     <div className="space-y-6">
-      <PageHeader title={title} description={description} />
-      <div className="flex items-center justify-between gap-4">
+      <PageHeader title={title} description={description} actions={actions} />
+      <div className="flex items-center gap-2">
         <Button variant="ghost" size="sm" asChild>
           <Link to={backTo}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             {backLabel}
           </Link>
         </Button>
-        {actions}
       </div>
       {children}
     </div>
@@ -56,15 +55,14 @@ export function DetailPage({
 }: DetailPageProps) {
   return (
     <div className="space-y-6">
-      <PageHeader title={title} description={description} />
-      <div className="flex items-center justify-between gap-4">
+      <PageHeader title={title} description={description} actions={actions} />
+      <div className="flex items-center gap-2">
         <Button variant="ghost" size="sm" asChild>
           <Link to={backTo}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             {backLabel}
           </Link>
         </Button>
-        {actions}
       </div>
       {children}
     </div>

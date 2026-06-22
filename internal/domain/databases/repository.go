@@ -14,6 +14,7 @@ type DocumentDB interface {
 	GetCollection(ctx context.Context, projectID, databaseID, collectionID string) (*Collection, error)
 	ListCollections(ctx context.Context, projectID, databaseID string) ([]Collection, error)
 	DeleteCollection(ctx context.Context, projectID, databaseID, collectionID string) error
+	UpdateCollection(ctx context.Context, projectID, databaseID, collectionID, name string, perms []Permission) error
 
 	// Attribute / Index
 	CreateAttribute(ctx context.Context, projectID, databaseID, collectionID string, attr Attribute) error

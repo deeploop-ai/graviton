@@ -226,6 +226,25 @@ func (p *postgresDocumentDB) DeleteCollection(ctx context.Context, projectID, da
 	return err
 }
 
+func (p *postgresDocumentDB) UpdateCollection(ctx context.Context, projectID, databaseID, collectionID, name string, perms []databases.Permission) error {
+	if _, err := p.resolveInternalID(ctx, projectID); err != nil {
+		return err
+	}
+	if err := p.setCollectionPermissions(ctx, projectID, databaseID, collectionID, perms); err != nil {
+		return err
+	}
+	if name != "" {
+		_, err := p.conn(ctx).NewUpdate().Model((*model.DocumentCollection)(nil)).
+			Set("name = ?, updated_at = ?", name, time.Now()).
+			Where("project_id = ? AND database_id = ? AND id = ?", projectID, databaseID, collectionID).
+			Exec(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (p *postgresDocumentDB) CreateAttribute(ctx context.Context, projectID, databaseID, collectionID string, attr databases.Attribute) error {
 	internalID, err := p.resolveInternalID(ctx, projectID)
 	if err != nil {

@@ -20,7 +20,7 @@ function segmentLabel(segment: string, prevSegment?: string): string {
   return segment;
 }
 
-export function PageHeader({ title, description }: { title: string; description?: string }) {
+export function PageHeader({ title, description, actions }: { title: string; description?: string; actions?: React.ReactNode }) {
   const location = useLocation();
   const segments = location.pathname.replace("/console", "").split("/").filter(Boolean);
 
@@ -50,9 +50,12 @@ export function PageHeader({ title, description }: { title: string; description?
           );
         })}
       </nav>
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-        {description && <p className="text-muted-foreground">{description}</p>}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+          {description && <p className="text-muted-foreground">{description}</p>}
+        </div>
+        {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
       </div>
     </div>
   );

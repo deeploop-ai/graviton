@@ -262,6 +262,48 @@
         "tags": [
           "DatabasesService"
         ]
+      },
+      "patch": {
+        "operationId": "DatabasesService_UpdateCollection",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Collection"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "databaseId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "collectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DatabasesServiceUpdateCollectionBody"
+            }
+          }
+        ],
+        "tags": [
+          "DatabasesService"
+        ]
       }
     },
     "/v1/server/databases/{databaseId}/collections/{collectionId}/attributes": {
@@ -759,6 +801,20 @@
           }
         },
         "orders": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "DatabasesServiceUpdateCollectionBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "permissions": {
           "type": "array",
           "items": {
             "type": "string"

@@ -28,6 +28,7 @@ const (
 	DatabasesService_ListCollections_FullMethodName  = "/fleet.server.v1.DatabasesService/ListCollections"
 	DatabasesService_GetCollection_FullMethodName    = "/fleet.server.v1.DatabasesService/GetCollection"
 	DatabasesService_DeleteCollection_FullMethodName = "/fleet.server.v1.DatabasesService/DeleteCollection"
+	DatabasesService_UpdateCollection_FullMethodName = "/fleet.server.v1.DatabasesService/UpdateCollection"
 	DatabasesService_CreateAttribute_FullMethodName  = "/fleet.server.v1.DatabasesService/CreateAttribute"
 	DatabasesService_CreateIndex_FullMethodName      = "/fleet.server.v1.DatabasesService/CreateIndex"
 	DatabasesService_CreateDocument_FullMethodName   = "/fleet.server.v1.DatabasesService/CreateDocument"
@@ -50,6 +51,7 @@ type DatabasesServiceClient interface {
 	ListCollections(ctx context.Context, in *ListCollectionsRequest, opts ...grpc.CallOption) (*ListCollectionsResponse, error)
 	GetCollection(ctx context.Context, in *GetCollectionRequest, opts ...grpc.CallOption) (*Collection, error)
 	DeleteCollection(ctx context.Context, in *GetCollectionRequest, opts ...grpc.CallOption) (*v1.Empty, error)
+	UpdateCollection(ctx context.Context, in *UpdateCollectionRequest, opts ...grpc.CallOption) (*Collection, error)
 	CreateAttribute(ctx context.Context, in *CreateAttributeRequest, opts ...grpc.CallOption) (*Attribute, error)
 	CreateIndex(ctx context.Context, in *CreateIndexRequest, opts ...grpc.CallOption) (*Index, error)
 	CreateDocument(ctx context.Context, in *CreateDocumentRequest, opts ...grpc.CallOption) (*Document, error)
@@ -148,6 +150,16 @@ func (c *databasesServiceClient) DeleteCollection(ctx context.Context, in *GetCo
 	return out, nil
 }
 
+func (c *databasesServiceClient) UpdateCollection(ctx context.Context, in *UpdateCollectionRequest, opts ...grpc.CallOption) (*Collection, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Collection)
+	err := c.cc.Invoke(ctx, DatabasesService_UpdateCollection_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *databasesServiceClient) CreateAttribute(ctx context.Context, in *CreateAttributeRequest, opts ...grpc.CallOption) (*Attribute, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Attribute)
@@ -240,6 +252,7 @@ type DatabasesServiceServer interface {
 	ListCollections(context.Context, *ListCollectionsRequest) (*ListCollectionsResponse, error)
 	GetCollection(context.Context, *GetCollectionRequest) (*Collection, error)
 	DeleteCollection(context.Context, *GetCollectionRequest) (*v1.Empty, error)
+	UpdateCollection(context.Context, *UpdateCollectionRequest) (*Collection, error)
 	CreateAttribute(context.Context, *CreateAttributeRequest) (*Attribute, error)
 	CreateIndex(context.Context, *CreateIndexRequest) (*Index, error)
 	CreateDocument(context.Context, *CreateDocumentRequest) (*Document, error)
@@ -281,6 +294,9 @@ func (UnimplementedDatabasesServiceServer) GetCollection(context.Context, *GetCo
 }
 func (UnimplementedDatabasesServiceServer) DeleteCollection(context.Context, *GetCollectionRequest) (*v1.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteCollection not implemented")
+}
+func (UnimplementedDatabasesServiceServer) UpdateCollection(context.Context, *UpdateCollectionRequest) (*Collection, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateCollection not implemented")
 }
 func (UnimplementedDatabasesServiceServer) CreateAttribute(context.Context, *CreateAttributeRequest) (*Attribute, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateAttribute not implemented")
@@ -471,6 +487,24 @@ func _DatabasesService_DeleteCollection_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DatabasesService_UpdateCollection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCollectionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DatabasesServiceServer).UpdateCollection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DatabasesService_UpdateCollection_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DatabasesServiceServer).UpdateCollection(ctx, req.(*UpdateCollectionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DatabasesService_CreateAttribute_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateAttributeRequest)
 	if err := dec(in); err != nil {
@@ -653,6 +687,10 @@ var DatabasesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteCollection",
 			Handler:    _DatabasesService_DeleteCollection_Handler,
+		},
+		{
+			MethodName: "UpdateCollection",
+			Handler:    _DatabasesService_UpdateCollection_Handler,
 		},
 		{
 			MethodName: "CreateAttribute",

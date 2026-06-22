@@ -117,6 +117,18 @@ export async function deleteCollection(
   );
 }
 
+export async function updateCollection(
+  databaseId: string,
+  collectionId: string,
+  input: { name?: string; permissions?: string[] }
+): Promise<Collection> {
+  const res = await api.patch<Collection>(
+    `/server/databases/${databaseId}/collections/${collectionId}`,
+    input
+  );
+  return normalizeCollection(res.data);
+}
+
 export async function createAttribute(
   databaseId: string,
   collectionId: string,

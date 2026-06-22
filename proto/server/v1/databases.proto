@@ -45,6 +45,10 @@ service DatabasesService {
     option (google.api.http) = { delete: "/v1/server/databases/{database_id}/collections/{collection_id}" };
   }
 
+  rpc UpdateCollection(UpdateCollectionRequest) returns (Collection) {
+    option (google.api.http) = { patch: "/v1/server/databases/{database_id}/collections/{collection_id}", body: "*" };
+  }
+
   rpc CreateAttribute(CreateAttributeRequest) returns (Attribute) {
     option (google.api.http) = { post: "/v1/server/databases/{database_id}/collections/{collection_id}/attributes", body: "*" };
   }
@@ -116,6 +120,13 @@ message ListCollectionsRequest {
 message GetCollectionRequest {
   string database_id = 1;
   string collection_id = 2;
+}
+
+message UpdateCollectionRequest {
+  string database_id = 1;
+  string collection_id = 2;
+  string name = 3;
+  repeated string permissions = 4;
 }
 
 message ListCollectionsResponse {

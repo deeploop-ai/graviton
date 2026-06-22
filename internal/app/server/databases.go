@@ -105,6 +105,19 @@ func (d *Databases) DeleteCollection(ctx context.Context, projectID, databaseID,
 	return d.docDB.DeleteCollection(ctx, projectID, databaseID, collectionID)
 }
 
+func (d *Databases) UpdateCollection(ctx context.Context, projectID, databaseID, collectionID, name string, perms []databases.Permission) error {
+	if err := d.ValidateIdentifier(databaseID); err != nil {
+		return status.Error(codes.InvalidArgument, "database_id is required")
+	}
+	if err := d.ValidateIdentifier(collectionID); err != nil {
+		return status.Error(codes.InvalidArgument, "collection_id is required")
+	}
+	if _, err := d.resolveProject(ctx, projectID); err != nil {
+		return err
+	}
+	return d.docDB.UpdateCollection(ctx, projectID, databaseID, collectionID, name, perms)
+}
+
 func (d *Databases) CreateAttribute(ctx context.Context, projectID, databaseID, collectionID string, attr databases.Attribute) error {
 	if err := d.ValidateIdentifier(databaseID); err != nil {
 		return status.Error(codes.InvalidArgument, "database_id is required")

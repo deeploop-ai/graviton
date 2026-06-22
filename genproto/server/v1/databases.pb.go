@@ -429,6 +429,74 @@ func (x *GetCollectionRequest) GetCollectionId() string {
 	return ""
 }
 
+type UpdateCollectionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DatabaseId    string                 `protobuf:"bytes,1,opt,name=database_id,json=databaseId,proto3" json:"database_id,omitempty"`
+	CollectionId  string                 `protobuf:"bytes,2,opt,name=collection_id,json=collectionId,proto3" json:"collection_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Permissions   []string               `protobuf:"bytes,4,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCollectionRequest) Reset() {
+	*x = UpdateCollectionRequest{}
+	mi := &file_server_v1_databases_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCollectionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCollectionRequest) ProtoMessage() {}
+
+func (x *UpdateCollectionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_server_v1_databases_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCollectionRequest.ProtoReflect.Descriptor instead.
+func (*UpdateCollectionRequest) Descriptor() ([]byte, []int) {
+	return file_server_v1_databases_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *UpdateCollectionRequest) GetDatabaseId() string {
+	if x != nil {
+		return x.DatabaseId
+	}
+	return ""
+}
+
+func (x *UpdateCollectionRequest) GetCollectionId() string {
+	if x != nil {
+		return x.CollectionId
+	}
+	return ""
+}
+
+func (x *UpdateCollectionRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateCollectionRequest) GetPermissions() []string {
+	if x != nil {
+		return x.Permissions
+	}
+	return nil
+}
+
 type ListCollectionsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Collections   []*Collection          `protobuf:"bytes,1,rep,name=collections,proto3" json:"collections,omitempty"`
@@ -439,7 +507,7 @@ type ListCollectionsResponse struct {
 
 func (x *ListCollectionsResponse) Reset() {
 	*x = ListCollectionsResponse{}
-	mi := &file_server_v1_databases_proto_msgTypes[7]
+	mi := &file_server_v1_databases_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -451,7 +519,7 @@ func (x *ListCollectionsResponse) String() string {
 func (*ListCollectionsResponse) ProtoMessage() {}
 
 func (x *ListCollectionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_databases_proto_msgTypes[7]
+	mi := &file_server_v1_databases_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -464,7 +532,7 @@ func (x *ListCollectionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCollectionsResponse.ProtoReflect.Descriptor instead.
 func (*ListCollectionsResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_databases_proto_rawDescGZIP(), []int{7}
+	return file_server_v1_databases_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ListCollectionsResponse) GetCollections() []*Collection {
@@ -497,7 +565,7 @@ type Collection struct {
 
 func (x *Collection) Reset() {
 	*x = Collection{}
-	mi := &file_server_v1_databases_proto_msgTypes[8]
+	mi := &file_server_v1_databases_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -509,7 +577,7 @@ func (x *Collection) String() string {
 func (*Collection) ProtoMessage() {}
 
 func (x *Collection) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_databases_proto_msgTypes[8]
+	mi := &file_server_v1_databases_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -522,7 +590,7 @@ func (x *Collection) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Collection.ProtoReflect.Descriptor instead.
 func (*Collection) Descriptor() ([]byte, []int) {
-	return file_server_v1_databases_proto_rawDescGZIP(), []int{8}
+	return file_server_v1_databases_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *Collection) GetId() string {
@@ -597,7 +665,7 @@ type CreateAttributeRequest struct {
 
 func (x *CreateAttributeRequest) Reset() {
 	*x = CreateAttributeRequest{}
-	mi := &file_server_v1_databases_proto_msgTypes[9]
+	mi := &file_server_v1_databases_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -609,7 +677,7 @@ func (x *CreateAttributeRequest) String() string {
 func (*CreateAttributeRequest) ProtoMessage() {}
 
 func (x *CreateAttributeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_databases_proto_msgTypes[9]
+	mi := &file_server_v1_databases_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -622,7 +690,7 @@ func (x *CreateAttributeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateAttributeRequest.ProtoReflect.Descriptor instead.
 func (*CreateAttributeRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_databases_proto_rawDescGZIP(), []int{9}
+	return file_server_v1_databases_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *CreateAttributeRequest) GetDatabaseId() string {
@@ -696,7 +764,7 @@ type Attribute struct {
 
 func (x *Attribute) Reset() {
 	*x = Attribute{}
-	mi := &file_server_v1_databases_proto_msgTypes[10]
+	mi := &file_server_v1_databases_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -708,7 +776,7 @@ func (x *Attribute) String() string {
 func (*Attribute) ProtoMessage() {}
 
 func (x *Attribute) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_databases_proto_msgTypes[10]
+	mi := &file_server_v1_databases_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -721,7 +789,7 @@ func (x *Attribute) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Attribute.ProtoReflect.Descriptor instead.
 func (*Attribute) Descriptor() ([]byte, []int) {
-	return file_server_v1_databases_proto_rawDescGZIP(), []int{10}
+	return file_server_v1_databases_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *Attribute) GetId() string {
@@ -787,7 +855,7 @@ type CreateIndexRequest struct {
 
 func (x *CreateIndexRequest) Reset() {
 	*x = CreateIndexRequest{}
-	mi := &file_server_v1_databases_proto_msgTypes[11]
+	mi := &file_server_v1_databases_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -799,7 +867,7 @@ func (x *CreateIndexRequest) String() string {
 func (*CreateIndexRequest) ProtoMessage() {}
 
 func (x *CreateIndexRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_databases_proto_msgTypes[11]
+	mi := &file_server_v1_databases_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -812,7 +880,7 @@ func (x *CreateIndexRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateIndexRequest.ProtoReflect.Descriptor instead.
 func (*CreateIndexRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_databases_proto_rawDescGZIP(), []int{11}
+	return file_server_v1_databases_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *CreateIndexRequest) GetDatabaseId() string {
@@ -869,7 +937,7 @@ type Index struct {
 
 func (x *Index) Reset() {
 	*x = Index{}
-	mi := &file_server_v1_databases_proto_msgTypes[12]
+	mi := &file_server_v1_databases_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -881,7 +949,7 @@ func (x *Index) String() string {
 func (*Index) ProtoMessage() {}
 
 func (x *Index) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_databases_proto_msgTypes[12]
+	mi := &file_server_v1_databases_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -894,7 +962,7 @@ func (x *Index) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Index.ProtoReflect.Descriptor instead.
 func (*Index) Descriptor() ([]byte, []int) {
-	return file_server_v1_databases_proto_rawDescGZIP(), []int{12}
+	return file_server_v1_databases_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *Index) GetId() string {
@@ -937,7 +1005,7 @@ type Document struct {
 
 func (x *Document) Reset() {
 	*x = Document{}
-	mi := &file_server_v1_databases_proto_msgTypes[13]
+	mi := &file_server_v1_databases_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -949,7 +1017,7 @@ func (x *Document) String() string {
 func (*Document) ProtoMessage() {}
 
 func (x *Document) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_databases_proto_msgTypes[13]
+	mi := &file_server_v1_databases_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -962,7 +1030,7 @@ func (x *Document) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Document.ProtoReflect.Descriptor instead.
 func (*Document) Descriptor() ([]byte, []int) {
-	return file_server_v1_databases_proto_rawDescGZIP(), []int{13}
+	return file_server_v1_databases_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *Document) GetId() string {
@@ -1006,7 +1074,7 @@ type CreateDocumentRequest struct {
 
 func (x *CreateDocumentRequest) Reset() {
 	*x = CreateDocumentRequest{}
-	mi := &file_server_v1_databases_proto_msgTypes[14]
+	mi := &file_server_v1_databases_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1018,7 +1086,7 @@ func (x *CreateDocumentRequest) String() string {
 func (*CreateDocumentRequest) ProtoMessage() {}
 
 func (x *CreateDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_databases_proto_msgTypes[14]
+	mi := &file_server_v1_databases_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1031,7 +1099,7 @@ func (x *CreateDocumentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateDocumentRequest.ProtoReflect.Descriptor instead.
 func (*CreateDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_databases_proto_rawDescGZIP(), []int{14}
+	return file_server_v1_databases_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *CreateDocumentRequest) GetDatabaseId() string {
@@ -1081,7 +1149,7 @@ type UpdateDocumentRequest struct {
 
 func (x *UpdateDocumentRequest) Reset() {
 	*x = UpdateDocumentRequest{}
-	mi := &file_server_v1_databases_proto_msgTypes[15]
+	mi := &file_server_v1_databases_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1093,7 +1161,7 @@ func (x *UpdateDocumentRequest) String() string {
 func (*UpdateDocumentRequest) ProtoMessage() {}
 
 func (x *UpdateDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_databases_proto_msgTypes[15]
+	mi := &file_server_v1_databases_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1106,7 +1174,7 @@ func (x *UpdateDocumentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateDocumentRequest.ProtoReflect.Descriptor instead.
 func (*UpdateDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_databases_proto_rawDescGZIP(), []int{15}
+	return file_server_v1_databases_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *UpdateDocumentRequest) GetDatabaseId() string {
@@ -1148,7 +1216,7 @@ type GetDocumentRequest struct {
 
 func (x *GetDocumentRequest) Reset() {
 	*x = GetDocumentRequest{}
-	mi := &file_server_v1_databases_proto_msgTypes[16]
+	mi := &file_server_v1_databases_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1160,7 +1228,7 @@ func (x *GetDocumentRequest) String() string {
 func (*GetDocumentRequest) ProtoMessage() {}
 
 func (x *GetDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_databases_proto_msgTypes[16]
+	mi := &file_server_v1_databases_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1173,7 +1241,7 @@ func (x *GetDocumentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetDocumentRequest.ProtoReflect.Descriptor instead.
 func (*GetDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_databases_proto_rawDescGZIP(), []int{16}
+	return file_server_v1_databases_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *GetDocumentRequest) GetDatabaseId() string {
@@ -1210,7 +1278,7 @@ type ListDocumentsRequest struct {
 
 func (x *ListDocumentsRequest) Reset() {
 	*x = ListDocumentsRequest{}
-	mi := &file_server_v1_databases_proto_msgTypes[17]
+	mi := &file_server_v1_databases_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1222,7 +1290,7 @@ func (x *ListDocumentsRequest) String() string {
 func (*ListDocumentsRequest) ProtoMessage() {}
 
 func (x *ListDocumentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_databases_proto_msgTypes[17]
+	mi := &file_server_v1_databases_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1235,7 +1303,7 @@ func (x *ListDocumentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDocumentsRequest.ProtoReflect.Descriptor instead.
 func (*ListDocumentsRequest) Descriptor() ([]byte, []int) {
-	return file_server_v1_databases_proto_rawDescGZIP(), []int{17}
+	return file_server_v1_databases_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ListDocumentsRequest) GetDatabaseId() string {
@@ -1283,7 +1351,7 @@ type ListDocumentsResponse struct {
 
 func (x *ListDocumentsResponse) Reset() {
 	*x = ListDocumentsResponse{}
-	mi := &file_server_v1_databases_proto_msgTypes[18]
+	mi := &file_server_v1_databases_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1295,7 +1363,7 @@ func (x *ListDocumentsResponse) String() string {
 func (*ListDocumentsResponse) ProtoMessage() {}
 
 func (x *ListDocumentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_databases_proto_msgTypes[18]
+	mi := &file_server_v1_databases_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1308,7 +1376,7 @@ func (x *ListDocumentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDocumentsResponse.ProtoReflect.Descriptor instead.
 func (*ListDocumentsResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_databases_proto_rawDescGZIP(), []int{18}
+	return file_server_v1_databases_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ListDocumentsResponse) GetDocuments() []*Document {
@@ -1334,7 +1402,7 @@ type CountDocumentsResponse struct {
 
 func (x *CountDocumentsResponse) Reset() {
 	*x = CountDocumentsResponse{}
-	mi := &file_server_v1_databases_proto_msgTypes[19]
+	mi := &file_server_v1_databases_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1346,7 +1414,7 @@ func (x *CountDocumentsResponse) String() string {
 func (*CountDocumentsResponse) ProtoMessage() {}
 
 func (x *CountDocumentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_server_v1_databases_proto_msgTypes[19]
+	mi := &file_server_v1_databases_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1359,7 +1427,7 @@ func (x *CountDocumentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CountDocumentsResponse.ProtoReflect.Descriptor instead.
 func (*CountDocumentsResponse) Descriptor() ([]byte, []int) {
-	return file_server_v1_databases_proto_rawDescGZIP(), []int{19}
+	return file_server_v1_databases_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *CountDocumentsResponse) GetCount() int64 {
@@ -1405,7 +1473,13 @@ const file_server_v1_databases_proto_rawDesc = "" +
 	"\x14GetCollectionRequest\x12\x1f\n" +
 	"\vdatabase_id\x18\x01 \x01(\tR\n" +
 	"databaseId\x12#\n" +
-	"\rcollection_id\x18\x02 \x01(\tR\fcollectionId\"\x8f\x01\n" +
+	"\rcollection_id\x18\x02 \x01(\tR\fcollectionId\"\x95\x01\n" +
+	"\x17UpdateCollectionRequest\x12\x1f\n" +
+	"\vdatabase_id\x18\x01 \x01(\tR\n" +
+	"databaseId\x12#\n" +
+	"\rcollection_id\x18\x02 \x01(\tR\fcollectionId\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
+	"\vpermissions\x18\x04 \x03(\tR\vpermissions\"\x8f\x01\n" +
 	"\x17ListCollectionsResponse\x12=\n" +
 	"\vcollections\x18\x01 \x03(\v2\x1b.fleet.server.v1.CollectionR\vcollections\x125\n" +
 	"\x04meta\x18\x02 \x01(\v2!.fleet.shared.v1.ListResponseMetaR\x04meta\"\xd7\x02\n" +
@@ -1499,7 +1573,7 @@ const file_server_v1_databases_proto_rawDesc = "" +
 	"\tdocuments\x18\x01 \x03(\v2\x19.fleet.server.v1.DocumentR\tdocuments\x125\n" +
 	"\x04meta\x18\x02 \x01(\v2!.fleet.shared.v1.ListResponseMetaR\x04meta\".\n" +
 	"\x16CountDocumentsResponse\x12\x14\n" +
-	"\x05count\x18\x01 \x01(\x03R\x05count2\xda\x13\n" +
+	"\x05count\x18\x01 \x01(\x03R\x05count2\x81\x15\n" +
 	"\x10DatabasesService\x12t\n" +
 	"\x0eCreateDatabase\x12&.fleet.server.v1.CreateDatabaseRequest\x1a\x19.fleet.server.v1.Database\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/v1/server/databases\x12s\n" +
 	"\rListDatabases\x12\x1c.fleet.shared.v1.ListRequest\x1a&.fleet.server.v1.ListDatabasesResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/v1/server/databases\x12p\n" +
@@ -1508,7 +1582,8 @@ const file_server_v1_databases_proto_rawDesc = "" +
 	"\x10CreateCollection\x12(.fleet.server.v1.CreateCollectionRequest\x1a\x1b.fleet.server.v1.Collection\"9\x82\xd3\xe4\x93\x023:\x01*\"./v1/server/databases/{database_id}/collections\x12\x9c\x01\n" +
 	"\x0fListCollections\x12'.fleet.server.v1.ListCollectionsRequest\x1a(.fleet.server.v1.ListCollectionsResponse\"6\x82\xd3\xe4\x93\x020\x12./v1/server/databases/{database_id}/collections\x12\x9b\x01\n" +
 	"\rGetCollection\x12%.fleet.server.v1.GetCollectionRequest\x1a\x1b.fleet.server.v1.Collection\"F\x82\xd3\xe4\x93\x02@\x12>/v1/server/databases/{database_id}/collections/{collection_id}\x12\x99\x01\n" +
-	"\x10DeleteCollection\x12%.fleet.server.v1.GetCollectionRequest\x1a\x16.fleet.shared.v1.Empty\"F\x82\xd3\xe4\x93\x02@*>/v1/server/databases/{database_id}/collections/{collection_id}\x12\xac\x01\n" +
+	"\x10DeleteCollection\x12%.fleet.server.v1.GetCollectionRequest\x1a\x16.fleet.shared.v1.Empty\"F\x82\xd3\xe4\x93\x02@*>/v1/server/databases/{database_id}/collections/{collection_id}\x12\xa4\x01\n" +
+	"\x10UpdateCollection\x12(.fleet.server.v1.UpdateCollectionRequest\x1a\x1b.fleet.server.v1.Collection\"I\x82\xd3\xe4\x93\x02C:\x01*2>/v1/server/databases/{database_id}/collections/{collection_id}\x12\xac\x01\n" +
 	"\x0fCreateAttribute\x12'.fleet.server.v1.CreateAttributeRequest\x1a\x1a.fleet.server.v1.Attribute\"T\x82\xd3\xe4\x93\x02N:\x01*\"I/v1/server/databases/{database_id}/collections/{collection_id}/attributes\x12\x9d\x01\n" +
 	"\vCreateIndex\x12#.fleet.server.v1.CreateIndexRequest\x1a\x16.fleet.server.v1.Index\"Q\x82\xd3\xe4\x93\x02K:\x01*\"F/v1/server/databases/{database_id}/collections/{collection_id}/indexes\x12\xa8\x01\n" +
 	"\x0eCreateDocument\x12&.fleet.server.v1.CreateDocumentRequest\x1a\x19.fleet.server.v1.Document\"S\x82\xd3\xe4\x93\x02M:\x01*\"H/v1/server/databases/{database_id}/collections/{collection_id}/documents\x12\xb0\x01\n" +
@@ -1530,7 +1605,7 @@ func file_server_v1_databases_proto_rawDescGZIP() []byte {
 	return file_server_v1_databases_proto_rawDescData
 }
 
-var file_server_v1_databases_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_server_v1_databases_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_server_v1_databases_proto_goTypes = []any{
 	(*CreateDatabaseRequest)(nil),   // 0: fleet.server.v1.CreateDatabaseRequest
 	(*GetDatabaseRequest)(nil),      // 1: fleet.server.v1.GetDatabaseRequest
@@ -1539,77 +1614,80 @@ var file_server_v1_databases_proto_goTypes = []any{
 	(*CreateCollectionRequest)(nil), // 4: fleet.server.v1.CreateCollectionRequest
 	(*ListCollectionsRequest)(nil),  // 5: fleet.server.v1.ListCollectionsRequest
 	(*GetCollectionRequest)(nil),    // 6: fleet.server.v1.GetCollectionRequest
-	(*ListCollectionsResponse)(nil), // 7: fleet.server.v1.ListCollectionsResponse
-	(*Collection)(nil),              // 8: fleet.server.v1.Collection
-	(*CreateAttributeRequest)(nil),  // 9: fleet.server.v1.CreateAttributeRequest
-	(*Attribute)(nil),               // 10: fleet.server.v1.Attribute
-	(*CreateIndexRequest)(nil),      // 11: fleet.server.v1.CreateIndexRequest
-	(*Index)(nil),                   // 12: fleet.server.v1.Index
-	(*Document)(nil),                // 13: fleet.server.v1.Document
-	(*CreateDocumentRequest)(nil),   // 14: fleet.server.v1.CreateDocumentRequest
-	(*UpdateDocumentRequest)(nil),   // 15: fleet.server.v1.UpdateDocumentRequest
-	(*GetDocumentRequest)(nil),      // 16: fleet.server.v1.GetDocumentRequest
-	(*ListDocumentsRequest)(nil),    // 17: fleet.server.v1.ListDocumentsRequest
-	(*ListDocumentsResponse)(nil),   // 18: fleet.server.v1.ListDocumentsResponse
-	(*CountDocumentsResponse)(nil),  // 19: fleet.server.v1.CountDocumentsResponse
-	(*v1.ListResponseMeta)(nil),     // 20: fleet.shared.v1.ListResponseMeta
-	(*timestamppb.Timestamp)(nil),   // 21: google.protobuf.Timestamp
-	(*structpb.Struct)(nil),         // 22: google.protobuf.Struct
-	(*v1.ListRequest)(nil),          // 23: fleet.shared.v1.ListRequest
-	(*v1.Empty)(nil),                // 24: fleet.shared.v1.Empty
+	(*UpdateCollectionRequest)(nil), // 7: fleet.server.v1.UpdateCollectionRequest
+	(*ListCollectionsResponse)(nil), // 8: fleet.server.v1.ListCollectionsResponse
+	(*Collection)(nil),              // 9: fleet.server.v1.Collection
+	(*CreateAttributeRequest)(nil),  // 10: fleet.server.v1.CreateAttributeRequest
+	(*Attribute)(nil),               // 11: fleet.server.v1.Attribute
+	(*CreateIndexRequest)(nil),      // 12: fleet.server.v1.CreateIndexRequest
+	(*Index)(nil),                   // 13: fleet.server.v1.Index
+	(*Document)(nil),                // 14: fleet.server.v1.Document
+	(*CreateDocumentRequest)(nil),   // 15: fleet.server.v1.CreateDocumentRequest
+	(*UpdateDocumentRequest)(nil),   // 16: fleet.server.v1.UpdateDocumentRequest
+	(*GetDocumentRequest)(nil),      // 17: fleet.server.v1.GetDocumentRequest
+	(*ListDocumentsRequest)(nil),    // 18: fleet.server.v1.ListDocumentsRequest
+	(*ListDocumentsResponse)(nil),   // 19: fleet.server.v1.ListDocumentsResponse
+	(*CountDocumentsResponse)(nil),  // 20: fleet.server.v1.CountDocumentsResponse
+	(*v1.ListResponseMeta)(nil),     // 21: fleet.shared.v1.ListResponseMeta
+	(*timestamppb.Timestamp)(nil),   // 22: google.protobuf.Timestamp
+	(*structpb.Struct)(nil),         // 23: google.protobuf.Struct
+	(*v1.ListRequest)(nil),          // 24: fleet.shared.v1.ListRequest
+	(*v1.Empty)(nil),                // 25: fleet.shared.v1.Empty
 }
 var file_server_v1_databases_proto_depIdxs = []int32{
 	3,  // 0: fleet.server.v1.ListDatabasesResponse.databases:type_name -> fleet.server.v1.Database
-	20, // 1: fleet.server.v1.ListDatabasesResponse.meta:type_name -> fleet.shared.v1.ListResponseMeta
-	21, // 2: fleet.server.v1.Database.created_at:type_name -> google.protobuf.Timestamp
-	21, // 3: fleet.server.v1.Database.updated_at:type_name -> google.protobuf.Timestamp
-	8,  // 4: fleet.server.v1.ListCollectionsResponse.collections:type_name -> fleet.server.v1.Collection
-	20, // 5: fleet.server.v1.ListCollectionsResponse.meta:type_name -> fleet.shared.v1.ListResponseMeta
-	10, // 6: fleet.server.v1.Collection.attributes:type_name -> fleet.server.v1.Attribute
-	12, // 7: fleet.server.v1.Collection.indexes:type_name -> fleet.server.v1.Index
-	21, // 8: fleet.server.v1.Collection.created_at:type_name -> google.protobuf.Timestamp
-	21, // 9: fleet.server.v1.Collection.updated_at:type_name -> google.protobuf.Timestamp
-	22, // 10: fleet.server.v1.Document.data:type_name -> google.protobuf.Struct
-	21, // 11: fleet.server.v1.Document.created_at:type_name -> google.protobuf.Timestamp
-	21, // 12: fleet.server.v1.Document.updated_at:type_name -> google.protobuf.Timestamp
-	22, // 13: fleet.server.v1.CreateDocumentRequest.data:type_name -> google.protobuf.Struct
-	22, // 14: fleet.server.v1.UpdateDocumentRequest.data:type_name -> google.protobuf.Struct
-	13, // 15: fleet.server.v1.ListDocumentsResponse.documents:type_name -> fleet.server.v1.Document
-	20, // 16: fleet.server.v1.ListDocumentsResponse.meta:type_name -> fleet.shared.v1.ListResponseMeta
+	21, // 1: fleet.server.v1.ListDatabasesResponse.meta:type_name -> fleet.shared.v1.ListResponseMeta
+	22, // 2: fleet.server.v1.Database.created_at:type_name -> google.protobuf.Timestamp
+	22, // 3: fleet.server.v1.Database.updated_at:type_name -> google.protobuf.Timestamp
+	9,  // 4: fleet.server.v1.ListCollectionsResponse.collections:type_name -> fleet.server.v1.Collection
+	21, // 5: fleet.server.v1.ListCollectionsResponse.meta:type_name -> fleet.shared.v1.ListResponseMeta
+	11, // 6: fleet.server.v1.Collection.attributes:type_name -> fleet.server.v1.Attribute
+	13, // 7: fleet.server.v1.Collection.indexes:type_name -> fleet.server.v1.Index
+	22, // 8: fleet.server.v1.Collection.created_at:type_name -> google.protobuf.Timestamp
+	22, // 9: fleet.server.v1.Collection.updated_at:type_name -> google.protobuf.Timestamp
+	23, // 10: fleet.server.v1.Document.data:type_name -> google.protobuf.Struct
+	22, // 11: fleet.server.v1.Document.created_at:type_name -> google.protobuf.Timestamp
+	22, // 12: fleet.server.v1.Document.updated_at:type_name -> google.protobuf.Timestamp
+	23, // 13: fleet.server.v1.CreateDocumentRequest.data:type_name -> google.protobuf.Struct
+	23, // 14: fleet.server.v1.UpdateDocumentRequest.data:type_name -> google.protobuf.Struct
+	14, // 15: fleet.server.v1.ListDocumentsResponse.documents:type_name -> fleet.server.v1.Document
+	21, // 16: fleet.server.v1.ListDocumentsResponse.meta:type_name -> fleet.shared.v1.ListResponseMeta
 	0,  // 17: fleet.server.v1.DatabasesService.CreateDatabase:input_type -> fleet.server.v1.CreateDatabaseRequest
-	23, // 18: fleet.server.v1.DatabasesService.ListDatabases:input_type -> fleet.shared.v1.ListRequest
+	24, // 18: fleet.server.v1.DatabasesService.ListDatabases:input_type -> fleet.shared.v1.ListRequest
 	1,  // 19: fleet.server.v1.DatabasesService.GetDatabase:input_type -> fleet.server.v1.GetDatabaseRequest
 	1,  // 20: fleet.server.v1.DatabasesService.DeleteDatabase:input_type -> fleet.server.v1.GetDatabaseRequest
 	4,  // 21: fleet.server.v1.DatabasesService.CreateCollection:input_type -> fleet.server.v1.CreateCollectionRequest
 	5,  // 22: fleet.server.v1.DatabasesService.ListCollections:input_type -> fleet.server.v1.ListCollectionsRequest
 	6,  // 23: fleet.server.v1.DatabasesService.GetCollection:input_type -> fleet.server.v1.GetCollectionRequest
 	6,  // 24: fleet.server.v1.DatabasesService.DeleteCollection:input_type -> fleet.server.v1.GetCollectionRequest
-	9,  // 25: fleet.server.v1.DatabasesService.CreateAttribute:input_type -> fleet.server.v1.CreateAttributeRequest
-	11, // 26: fleet.server.v1.DatabasesService.CreateIndex:input_type -> fleet.server.v1.CreateIndexRequest
-	14, // 27: fleet.server.v1.DatabasesService.CreateDocument:input_type -> fleet.server.v1.CreateDocumentRequest
-	17, // 28: fleet.server.v1.DatabasesService.ListDocuments:input_type -> fleet.server.v1.ListDocumentsRequest
-	16, // 29: fleet.server.v1.DatabasesService.GetDocument:input_type -> fleet.server.v1.GetDocumentRequest
-	15, // 30: fleet.server.v1.DatabasesService.UpdateDocument:input_type -> fleet.server.v1.UpdateDocumentRequest
-	16, // 31: fleet.server.v1.DatabasesService.DeleteDocument:input_type -> fleet.server.v1.GetDocumentRequest
-	17, // 32: fleet.server.v1.DatabasesService.CountDocuments:input_type -> fleet.server.v1.ListDocumentsRequest
-	3,  // 33: fleet.server.v1.DatabasesService.CreateDatabase:output_type -> fleet.server.v1.Database
-	2,  // 34: fleet.server.v1.DatabasesService.ListDatabases:output_type -> fleet.server.v1.ListDatabasesResponse
-	3,  // 35: fleet.server.v1.DatabasesService.GetDatabase:output_type -> fleet.server.v1.Database
-	24, // 36: fleet.server.v1.DatabasesService.DeleteDatabase:output_type -> fleet.shared.v1.Empty
-	8,  // 37: fleet.server.v1.DatabasesService.CreateCollection:output_type -> fleet.server.v1.Collection
-	7,  // 38: fleet.server.v1.DatabasesService.ListCollections:output_type -> fleet.server.v1.ListCollectionsResponse
-	8,  // 39: fleet.server.v1.DatabasesService.GetCollection:output_type -> fleet.server.v1.Collection
-	24, // 40: fleet.server.v1.DatabasesService.DeleteCollection:output_type -> fleet.shared.v1.Empty
-	10, // 41: fleet.server.v1.DatabasesService.CreateAttribute:output_type -> fleet.server.v1.Attribute
-	12, // 42: fleet.server.v1.DatabasesService.CreateIndex:output_type -> fleet.server.v1.Index
-	13, // 43: fleet.server.v1.DatabasesService.CreateDocument:output_type -> fleet.server.v1.Document
-	18, // 44: fleet.server.v1.DatabasesService.ListDocuments:output_type -> fleet.server.v1.ListDocumentsResponse
-	13, // 45: fleet.server.v1.DatabasesService.GetDocument:output_type -> fleet.server.v1.Document
-	13, // 46: fleet.server.v1.DatabasesService.UpdateDocument:output_type -> fleet.server.v1.Document
-	24, // 47: fleet.server.v1.DatabasesService.DeleteDocument:output_type -> fleet.shared.v1.Empty
-	19, // 48: fleet.server.v1.DatabasesService.CountDocuments:output_type -> fleet.server.v1.CountDocumentsResponse
-	33, // [33:49] is the sub-list for method output_type
-	17, // [17:33] is the sub-list for method input_type
+	7,  // 25: fleet.server.v1.DatabasesService.UpdateCollection:input_type -> fleet.server.v1.UpdateCollectionRequest
+	10, // 26: fleet.server.v1.DatabasesService.CreateAttribute:input_type -> fleet.server.v1.CreateAttributeRequest
+	12, // 27: fleet.server.v1.DatabasesService.CreateIndex:input_type -> fleet.server.v1.CreateIndexRequest
+	15, // 28: fleet.server.v1.DatabasesService.CreateDocument:input_type -> fleet.server.v1.CreateDocumentRequest
+	18, // 29: fleet.server.v1.DatabasesService.ListDocuments:input_type -> fleet.server.v1.ListDocumentsRequest
+	17, // 30: fleet.server.v1.DatabasesService.GetDocument:input_type -> fleet.server.v1.GetDocumentRequest
+	16, // 31: fleet.server.v1.DatabasesService.UpdateDocument:input_type -> fleet.server.v1.UpdateDocumentRequest
+	17, // 32: fleet.server.v1.DatabasesService.DeleteDocument:input_type -> fleet.server.v1.GetDocumentRequest
+	18, // 33: fleet.server.v1.DatabasesService.CountDocuments:input_type -> fleet.server.v1.ListDocumentsRequest
+	3,  // 34: fleet.server.v1.DatabasesService.CreateDatabase:output_type -> fleet.server.v1.Database
+	2,  // 35: fleet.server.v1.DatabasesService.ListDatabases:output_type -> fleet.server.v1.ListDatabasesResponse
+	3,  // 36: fleet.server.v1.DatabasesService.GetDatabase:output_type -> fleet.server.v1.Database
+	25, // 37: fleet.server.v1.DatabasesService.DeleteDatabase:output_type -> fleet.shared.v1.Empty
+	9,  // 38: fleet.server.v1.DatabasesService.CreateCollection:output_type -> fleet.server.v1.Collection
+	8,  // 39: fleet.server.v1.DatabasesService.ListCollections:output_type -> fleet.server.v1.ListCollectionsResponse
+	9,  // 40: fleet.server.v1.DatabasesService.GetCollection:output_type -> fleet.server.v1.Collection
+	25, // 41: fleet.server.v1.DatabasesService.DeleteCollection:output_type -> fleet.shared.v1.Empty
+	9,  // 42: fleet.server.v1.DatabasesService.UpdateCollection:output_type -> fleet.server.v1.Collection
+	11, // 43: fleet.server.v1.DatabasesService.CreateAttribute:output_type -> fleet.server.v1.Attribute
+	13, // 44: fleet.server.v1.DatabasesService.CreateIndex:output_type -> fleet.server.v1.Index
+	14, // 45: fleet.server.v1.DatabasesService.CreateDocument:output_type -> fleet.server.v1.Document
+	19, // 46: fleet.server.v1.DatabasesService.ListDocuments:output_type -> fleet.server.v1.ListDocumentsResponse
+	14, // 47: fleet.server.v1.DatabasesService.GetDocument:output_type -> fleet.server.v1.Document
+	14, // 48: fleet.server.v1.DatabasesService.UpdateDocument:output_type -> fleet.server.v1.Document
+	25, // 49: fleet.server.v1.DatabasesService.DeleteDocument:output_type -> fleet.shared.v1.Empty
+	20, // 50: fleet.server.v1.DatabasesService.CountDocuments:output_type -> fleet.server.v1.CountDocumentsResponse
+	34, // [34:51] is the sub-list for method output_type
+	17, // [17:34] is the sub-list for method input_type
 	17, // [17:17] is the sub-list for extension type_name
 	17, // [17:17] is the sub-list for extension extendee
 	0,  // [0:17] is the sub-list for field type_name
@@ -1626,7 +1704,7 @@ func file_server_v1_databases_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_server_v1_databases_proto_rawDesc), len(file_server_v1_databases_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
