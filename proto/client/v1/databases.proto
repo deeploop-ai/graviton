@@ -19,10 +19,12 @@ service DatabasesService {
 
   rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse) {
     option (google.api.http) = { get: "/v1/databases/{database_id}/collections/{collection_id}/documents" };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 
   rpc GetDocument(GetDocumentRequest) returns (Document) {
     option (google.api.http) = { get: "/v1/databases/{database_id}/collections/{collection_id}/documents/{document_id}" };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 
   rpc UpdateDocument(UpdateDocumentRequest) returns (Document) {
@@ -35,6 +37,7 @@ service DatabasesService {
 
   rpc CountDocuments(ListDocumentsRequest) returns (CountDocumentsResponse) {
     option (google.api.http) = { get: "/v1/databases/{database_id}/collections/{collection_id}/documents/count" };
+    option (fleet.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 }
 
@@ -67,6 +70,7 @@ message GetDocumentRequest {
   string database_id = 1;
   string collection_id = 2;
   string document_id = 3;
+  string project_id = 4;
 }
 
 message ListDocumentsRequest {
@@ -75,6 +79,7 @@ message ListDocumentsRequest {
   repeated string queries = 3;
   int32 page_size = 4;
   string page_token = 5;
+  string project_id = 6;
 }
 
 message ListDocumentsResponse {

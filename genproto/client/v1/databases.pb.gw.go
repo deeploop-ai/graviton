@@ -165,6 +165,8 @@ func local_request_DatabasesService_ListDocuments_0(ctx context.Context, marshal
 	return msg, metadata, err
 }
 
+var filter_DatabasesService_GetDocument_0 = &utilities.DoubleArray{Encoding: map[string]int{"database_id": 0, "collection_id": 1, "document_id": 2}, Base: []int{1, 1, 2, 3, 0, 0, 0}, Check: []int{0, 1, 1, 1, 2, 3, 4}}
+
 func request_DatabasesService_GetDocument_0(ctx context.Context, marshaler runtime.Marshaler, client DatabasesServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq GetDocumentRequest
@@ -197,6 +199,12 @@ func request_DatabasesService_GetDocument_0(ctx context.Context, marshaler runti
 	protoReq.DocumentId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "document_id", err)
+	}
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DatabasesService_GetDocument_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	msg, err := client.GetDocument(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -231,6 +239,12 @@ func local_request_DatabasesService_GetDocument_0(ctx context.Context, marshaler
 	protoReq.DocumentId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "document_id", err)
+	}
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DatabasesService_GetDocument_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	msg, err := server.GetDocument(ctx, &protoReq)
 	return msg, metadata, err
@@ -313,6 +327,8 @@ func local_request_DatabasesService_UpdateDocument_0(ctx context.Context, marsha
 	return msg, metadata, err
 }
 
+var filter_DatabasesService_DeleteDocument_0 = &utilities.DoubleArray{Encoding: map[string]int{"database_id": 0, "collection_id": 1, "document_id": 2}, Base: []int{1, 1, 2, 3, 0, 0, 0}, Check: []int{0, 1, 1, 1, 2, 3, 4}}
+
 func request_DatabasesService_DeleteDocument_0(ctx context.Context, marshaler runtime.Marshaler, client DatabasesServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq GetDocumentRequest
@@ -345,6 +361,12 @@ func request_DatabasesService_DeleteDocument_0(ctx context.Context, marshaler ru
 	protoReq.DocumentId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "document_id", err)
+	}
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DatabasesService_DeleteDocument_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	msg, err := client.DeleteDocument(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -379,6 +401,12 @@ func local_request_DatabasesService_DeleteDocument_0(ctx context.Context, marsha
 	protoReq.DocumentId, err = runtime.String(val)
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "document_id", err)
+	}
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_DatabasesService_DeleteDocument_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	msg, err := server.DeleteDocument(ctx, &protoReq)
 	return msg, metadata, err

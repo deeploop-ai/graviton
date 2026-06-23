@@ -15,6 +15,9 @@ type Principal struct {
 	PlatformAdmin bool
 }
 
+// GuestPrincipal is used for unauthenticated Client API read requests.
+var GuestPrincipal = Principal{Roles: []string{"guests"}}
+
 // SystemPrincipal is the principal used by internal infrastructure paths
 // (session validation, post-create reads, email lookup). It bypasses all
 // document-level permission checks.

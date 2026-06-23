@@ -21,22 +21,56 @@ func NewDatabases(projectRepo projects.Repository, docDB databases.DocumentDB) *
 	return &Databases{projectRepo: projectRepo, docDB: docDB}
 }
 
+func (d *Databases) loadProject(ctx context.Context, projectID string) (*projects.Project, error) {
+	if projectID == "" {
+		return nil, status.Error(codes.InvalidArgument, "project_id is required")
+	}
+	project, err := d.projectRepo.GetProject(ctx, projectID)
+	if err != nil {
+		return nil, err
+	}
+	if project == nil {
+		return nil, status.Error(codes.NotFound, "project not found")
+	}
+	if err := d.docDB.EnsureSystemCollections(ctx, project.ID, project.InternalID); err != nil {
+		return nil, fmt.Errorf("ensure system collections: %w", err)
+	}
+	return project, nil
+}
+
 func (d *Databases) resolveProject(ctx context.Context) (*projects.Project, databases.Principal, error) {
 	p, ok := contexts.Principal(ctx)
 	if !ok || p.ProjectID == "" || p.UserID == "" {
 		return nil, databases.Principal{}, status.Error(codes.Unauthenticated, "unauthenticated")
 	}
-	project, err := d.projectRepo.GetProject(ctx, p.ProjectID)
+	project, err := d.loadProject(ctx, p.ProjectID)
 	if err != nil {
 		return nil, databases.Principal{}, err
 	}
-	if project == nil {
-		return nil, databases.Principal{}, status.Error(codes.NotFound, "project not found")
-	}
-	if err := d.docDB.EnsureSystemCollections(ctx, project.ID, project.InternalID); err != nil {
-		return nil, databases.Principal{}, fmt.Errorf("ensure system collections: %w", err)
-	}
 	return project, databases.Principal{Roles: p.Roles}, nil
+}
+
+func (d *Databases) resolveReadPrincipal(ctx context.Context, projectID string) (string, databases.Principal, error) {
+	if p, ok := contexts.Principal(ctx); ok && p.UserID != "" {
+		if projectID != "" && projectID != p.ProjectID {
+			return "", databases.Principal{}, status.Error(codes.InvalidArgument, "project_id mismatch")
+		}
+		project, err := d.loadProject(ctx, p.ProjectID)
+		if err != nil {
+			return "", databases.Principal{}, err
+		}
+		return project.ID, databases.Principal{Roles: p.Roles}, nil
+	}
+	if projectID == "" {
+		if p, ok := contexts.Principal(ctx); ok && p.ProjectID != "" {
+			projectID = p.ProjectID
+		}
+	}
+	project, err := d.loadProject(ctx, projectID)
+	if err != nil {
+		return "", databases.Principal{}, err
+	}
+	return project.ID, databases.GuestPrincipal, nil
 }
 
 func (d *Databases) ensureCollection(ctx context.Context, databaseID, collectionID string) (string, databases.Principal, error) {
@@ -44,7 +78,19 @@ func (d *Databases) ensureCollection(ctx context.Context, databaseID, collection
 	if err != nil {
 		return "", databases.Principal{}, err
 	}
-	col, err := d.docDB.GetCollection(ctx, project.ID, databaseID, collectionID)
+	return d.ensureCollectionForProject(ctx, project.ID, databaseID, collectionID, principal)
+}
+
+func (d *Databases) ensureCollectionForRead(ctx context.Context, projectID, databaseID, collectionID string) (string, databases.Principal, error) {
+	pid, principal, err := d.resolveReadPrincipal(ctx, projectID)
+	if err != nil {
+		return "", databases.Principal{}, err
+	}
+	return d.ensureCollectionForProject(ctx, pid, databaseID, collectionID, principal)
+}
+
+func (d *Databases) ensureCollectionForProject(ctx context.Context, projectID, databaseID, collectionID string, principal databases.Principal) (string, databases.Principal, error) {
+	col, err := d.docDB.GetCollection(ctx, projectID, databaseID, collectionID)
 	if err != nil {
 		return "", databases.Principal{}, err
 	}
@@ -54,7 +100,7 @@ func (d *Databases) ensureCollection(ctx context.Context, databaseID, collection
 	if col.Disabled {
 		return "", databases.Principal{}, shared.MapDocumentDBError(databases.ErrPermissionDenied)
 	}
-	return project.ID, principal, nil
+	return projectID, principal, nil
 }
 
 func (d *Databases) CreateDocument(
@@ -96,26 +142,26 @@ func (d *Databases) CreateDocument(
 
 func (d *Databases) ListDocuments(
 	ctx context.Context,
-	databaseID, collectionID string,
+	projectID, databaseID, collectionID string,
 	q databases.Query,
 ) ([]databases.Document, int64, string, error) {
-	projectID, principal, err := d.ensureCollection(ctx, databaseID, collectionID)
+	pid, principal, err := d.ensureCollectionForRead(ctx, projectID, databaseID, collectionID)
 	if err != nil {
 		return nil, 0, "", err
 	}
-	list, err := d.docDB.ListDocuments(ctx, projectID, databaseID, collectionID, q, principal)
+	list, err := d.docDB.ListDocuments(ctx, pid, databaseID, collectionID, q, principal)
 	if err != nil {
 		return nil, 0, "", shared.MapDocumentDBError(err)
 	}
 	return list.Documents, list.TotalCount, list.NextPageToken, nil
 }
 
-func (d *Databases) GetDocument(ctx context.Context, databaseID, collectionID, documentID string) (*databases.Document, error) {
-	projectID, principal, err := d.ensureCollection(ctx, databaseID, collectionID)
+func (d *Databases) GetDocument(ctx context.Context, projectID, databaseID, collectionID, documentID string) (*databases.Document, error) {
+	pid, principal, err := d.ensureCollectionForRead(ctx, projectID, databaseID, collectionID)
 	if err != nil {
 		return nil, err
 	}
-	doc, err := d.docDB.GetDocument(ctx, projectID, databaseID, collectionID, documentID, principal)
+	doc, err := d.docDB.GetDocument(ctx, pid, databaseID, collectionID, documentID, principal)
 	if err != nil {
 		return nil, shared.MapDocumentDBError(err)
 	}
@@ -163,12 +209,12 @@ func (d *Databases) DeleteDocument(ctx context.Context, databaseID, collectionID
 	return shared.MapDocumentDBError(d.docDB.DeleteDocument(ctx, projectID, databaseID, collectionID, documentID, principal))
 }
 
-func (d *Databases) CountDocuments(ctx context.Context, databaseID, collectionID string, queries []string) (int64, error) {
-	projectID, principal, err := d.ensureCollection(ctx, databaseID, collectionID)
+func (d *Databases) CountDocuments(ctx context.Context, projectID, databaseID, collectionID string, queries []string) (int64, error) {
+	pid, principal, err := d.ensureCollectionForRead(ctx, projectID, databaseID, collectionID)
 	if err != nil {
 		return 0, err
 	}
-	count, err := d.docDB.CountDocuments(ctx, projectID, databaseID, collectionID, queries, principal)
+	count, err := d.docDB.CountDocuments(ctx, pid, databaseID, collectionID, queries, principal)
 	return count, shared.MapDocumentDBError(err)
 }
 

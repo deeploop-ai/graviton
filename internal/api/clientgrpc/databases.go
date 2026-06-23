@@ -7,7 +7,9 @@ import (
 	sharedv1 "github.com/deeploop-ai/fleet/genproto/shared/v1"
 	"github.com/deeploop-ai/fleet/internal/app/client"
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
+	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -39,7 +41,11 @@ func (s *DatabasesService) CreateDocument(ctx context.Context, req *clientv1.Cre
 }
 
 func (s *DatabasesService) ListDocuments(ctx context.Context, req *clientv1.ListDocumentsRequest) (*clientv1.ListDocumentsResponse, error) {
-	docs, total, _, err := s.databases.ListDocuments(ctx, req.GetDatabaseId(), req.GetCollectionId(), databases.Query{
+	projectID, err := resolveProjectID(ctx, req.GetProjectId())
+	if err != nil {
+		return nil, err
+	}
+	docs, total, _, err := s.databases.ListDocuments(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), databases.Query{
 		Queries:   req.GetQueries(),
 		PageSize:  req.GetPageSize(),
 		PageToken: req.GetPageToken(),
@@ -62,7 +68,11 @@ func (s *DatabasesService) ListDocuments(ctx context.Context, req *clientv1.List
 }
 
 func (s *DatabasesService) GetDocument(ctx context.Context, req *clientv1.GetDocumentRequest) (*clientv1.Document, error) {
-	doc, err := s.databases.GetDocument(ctx, req.GetDatabaseId(), req.GetCollectionId(), req.GetDocumentId())
+	projectID, err := resolveProjectID(ctx, req.GetProjectId())
+	if err != nil {
+		return nil, err
+	}
+	doc, err := s.databases.GetDocument(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), req.GetDocumentId())
 	if err != nil {
 		return nil, err
 	}
@@ -97,11 +107,30 @@ func (s *DatabasesService) DeleteDocument(ctx context.Context, req *clientv1.Get
 }
 
 func (s *DatabasesService) CountDocuments(ctx context.Context, req *clientv1.ListDocumentsRequest) (*clientv1.CountDocumentsResponse, error) {
-	count, err := s.databases.CountDocuments(ctx, req.GetDatabaseId(), req.GetCollectionId(), req.GetQueries())
+	projectID, err := resolveProjectID(ctx, req.GetProjectId())
+	if err != nil {
+		return nil, err
+	}
+	count, err := s.databases.CountDocuments(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), req.GetQueries())
 	if err != nil {
 		return nil, err
 	}
 	return &clientv1.CountDocumentsResponse{Count: count}, nil
+}
+
+func resolveProjectID(ctx context.Context, reqProjectID string) (string, error) {
+	if reqProjectID != "" {
+		return reqProjectID, nil
+	}
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		if values := md.Get("x-fleet-project"); len(values) > 0 && values[0] != "" {
+			return values[0], nil
+		}
+	}
+	if p, ok := contexts.Principal(ctx); ok && p.ProjectID != "" {
+		return p.ProjectID, nil
+	}
+	return "", status.Error(codes.InvalidArgument, "project_id is required")
 }
 
 func mapClientDocument(doc *databases.Document) (*clientv1.Document, error) {

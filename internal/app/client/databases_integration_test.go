@@ -59,7 +59,7 @@ func TestClientDatabases_DocumentCRUD(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, created.ID)
 
-	got, err := clientUC.GetDocument(userCtx, "app", "notes", created.ID)
+	got, err := clientUC.GetDocument(userCtx, projectID, "app", "notes", created.ID)
 	require.NoError(t, err)
 	require.Equal(t, "Client note", got.Data["title"])
 
@@ -68,7 +68,7 @@ func TestClientDatabases_DocumentCRUD(t *testing.T) {
 		UserID:    "other-user",
 		Roles:     []string{"users", "user:other-user"},
 	})
-	_, err = clientUC.GetDocument(otherCtx, "app", "notes", created.ID)
+	_, err = clientUC.GetDocument(otherCtx, projectID, "app", "notes", created.ID)
 	require.Error(t, err)
 
 	updated, err := clientUC.UpdateDocument(userCtx, "app", "notes", created.ID, map[string]any{
@@ -77,12 +77,67 @@ func TestClientDatabases_DocumentCRUD(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "Updated note", updated.Data["title"])
 
-	list, total, _, err := clientUC.ListDocuments(userCtx, "app", "notes", databases.Query{})
+	list, total, _, err := clientUC.ListDocuments(userCtx, projectID, "app", "notes", databases.Query{})
 	require.NoError(t, err)
 	require.Equal(t, int64(1), total)
 	require.Len(t, list, 1)
 
 	require.NoError(t, clientUC.DeleteDocument(userCtx, "app", "notes", created.ID))
+}
+
+func TestClientDatabases_GuestPublicRead(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	ctx := context.Background()
+	db := testutil.SetupTestDB(t)
+	defer db.Close()
+
+	projectID, internalID, cleanup := testutil.CreateTestProject(ctx, db)
+	defer cleanup()
+
+	docDB := documentdb.NewPostgresDocumentDB(db)
+	require.NoError(t, docDB.EnsureSystemCollections(ctx, projectID, internalID))
+
+	projectRepo := bunrepo.NewProjectRepository(db)
+	serverUC := appserver.NewDatabases(projectRepo, docDB)
+	require.NoError(t, serverUC.CreateDatabase(ctx, projectID, "app", "Application DB"))
+	require.NoError(t, serverUC.CreateCollection(ctx, projectID, "app", "posts", "Posts", []databases.Attribute{
+		{ID: "title", Key: "title", Type: "string", Size: 256},
+	}, nil, []databases.Permission{
+		{Type: "read", Role: "any"},
+		{Type: "create", Role: "users"},
+	}, true))
+
+	clientUC := NewDatabases(projectRepo, docDB)
+	_, err := docDB.CreateDocument(ctx, projectID, "app", "posts", databases.Document{
+		Data: map[string]any{"title": "Public post"},
+	}, nil, databases.SystemPrincipal)
+	require.NoError(t, err)
+
+	list, total, _, err := clientUC.ListDocuments(ctx, projectID, "app", "posts", databases.Query{})
+	require.NoError(t, err)
+	require.Equal(t, int64(1), total)
+	require.Len(t, list, 1)
+	require.Equal(t, "Public post", list[0].Data["title"])
+
+	lockedUC := appserver.NewDatabases(projectRepo, docDB)
+	require.NoError(t, lockedUC.CreateCollection(ctx, projectID, "app", "private", "Private", []databases.Attribute{
+		{ID: "title", Key: "title", Type: "string", Size: 256},
+	}, nil, []databases.Permission{
+		{Type: "read", Role: "users"},
+		{Type: "create", Role: "users"},
+	}, true))
+	created, err := docDB.CreateDocument(ctx, projectID, "app", "private", databases.Document{
+		Data: map[string]any{"title": "Secret"},
+	}, []databases.Permission{
+		{Type: "read", Role: "user:owner"},
+	}, databases.SystemPrincipal)
+	require.NoError(t, err)
+
+	_, err = clientUC.GetDocument(ctx, projectID, "app", "private", created.ID)
+	require.Error(t, err)
 }
 
 func testConfig() *config.AppConfig {

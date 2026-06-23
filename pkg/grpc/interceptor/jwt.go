@@ -51,6 +51,13 @@ func NewAuthInterceptor(validator Validator, publicMethods, apiKeyMethods []stri
 
 func (i *AuthInterceptor) UnaryAuthMiddleware(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 	if _, ok := i.publicMethods[info.FullMethod]; ok {
+		if md, ok := metadata.FromIncomingContext(ctx); ok {
+			if credentialType, token, err := extractCredential(md); err == nil {
+				if principal, err := i.validator.ValidateCredential(ctx, token, credentialType); err == nil && principal != nil {
+					ctx = contexts.WithPrincipal(ctx, principal)
+				}
+			}
+		}
 		return handler(ctx, req)
 	}
 
