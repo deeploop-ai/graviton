@@ -4,7 +4,7 @@ import { useFleet } from "@/lib/fleet-context";
 const nav = [
   { to: "/app", label: "概览", end: true },
   { to: "/app/account", label: "Account" },
-  { to: "/app/documents", label: "Documents" },
+  { to: "/app/databases", label: "Databases" },
   { to: "/app/teams", label: "Teams" },
   { to: "/app/server", label: "Server API" },
   { to: "/app/settings", label: "设置" },

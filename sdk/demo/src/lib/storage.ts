@@ -4,6 +4,8 @@ export interface AppSettings {
   apiKey: string;
   demoDbId: string;
   demoCollId: string;
+  demoDocId: string;
+  demoIndexId: string;
 }
 
 export interface AuthState {
@@ -23,6 +25,8 @@ const defaultSettings = (): AppSettings => ({
   apiKey: "",
   demoDbId: "",
   demoCollId: "posts",
+  demoDocId: "",
+  demoIndexId: "",
 });
 
 export function loadSettings(): AppSettings {

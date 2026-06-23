@@ -36,7 +36,7 @@ task sdk-demo
 |------|------|
 | `/register` `/login` | 用户注册与登录（Client Account SDK） |
 | `/app/account` | me / prefs / sessions / refresh |
-| `/app/documents` | Server 初始化演示库 + Client 文档 CRUD |
+| `/app/databases` | Server + Client Databases API 全功能验证 |
 | `/app/teams` | 建队、刷新 Token、邀请成员 |
 | `/app/server` | Health / Projects / Users / Teams / Databases |
 | `/app/settings` | Endpoint、Project ID、API Key 配置 |
@@ -60,6 +60,6 @@ await client.databases.createDocument("app", "notes", { data: { title: "Hi" } })
 
 ## 已实现 API surface
 
-**Client：** Account（注册/登录/会话/偏好）、Databases 文档 CRUD、Teams 与 Memberships。
+**Client：** Account（注册/登录/会话/偏好）、Databases（文档 CRUD + count）、Teams 与 Memberships。
 
-**Server：** Health、Projects、Users、Teams、Databases（库/集合/属性/文档）、API Keys、Storage（Bucket/File）。
+**Server：** Health、Projects、Users、Teams、Databases（库/集合/属性/索引/文档/Bulk）、API Keys、Storage（Bucket/File）。

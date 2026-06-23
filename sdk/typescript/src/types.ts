@@ -40,6 +40,7 @@ export interface Session {
 export interface Document {
   id: string;
   data: Record<string, unknown>;
+  permissions?: string[];
   created_at: string;
   updated_at: string;
 }
@@ -109,6 +110,7 @@ export interface Attribute {
   size?: number;
   required: boolean;
   array: boolean;
+  default_value?: string;
 }
 
 export interface Index {
@@ -125,8 +127,20 @@ export interface Collection {
   permissions: string[];
   attributes: Attribute[];
   indexes: Index[];
+  document_security?: boolean;
+  disabled?: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface BulkDocumentsResponse {
+  affected: number;
+}
+
+export interface UpdateDocumentInput {
+  data?: Record<string, unknown>;
+  permissions?: string[];
+  increment?: Record<string, number>;
 }
 
 export interface Bucket {

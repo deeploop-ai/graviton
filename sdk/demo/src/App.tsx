@@ -3,7 +3,7 @@ import { FleetProvider } from "@/lib/fleet-context";
 import { AppLayout, AuthLayout } from "@/components/Layout";
 import { GuestRoute, ProtectedRoute } from "@/components/RouteGuards";
 import { AccountPage } from "@/pages/AccountPage";
-import { DocumentsPage } from "@/pages/DocumentsPage";
+import { DatabasesPage } from "@/pages/DatabasesPage";
 import { HomePage } from "@/pages/HomePage";
 import { LoginPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
@@ -29,7 +29,7 @@ export default function App() {
             <Route element={<AppLayout />}>
               <Route path="/app" element={<HomePage />} />
               <Route path="/app/account" element={<AccountPage />} />
-              <Route path="/app/documents" element={<DocumentsPage />} />
+              <Route path="/app/databases" element={<DatabasesPage />} />
               <Route path="/app/teams" element={<TeamsPage />} />
               <Route path="/app/server" element={<ServerPage />} />
               <Route path="/app/settings" element={<SettingsPage />} />

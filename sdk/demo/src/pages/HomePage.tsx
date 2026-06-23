@@ -10,10 +10,10 @@ const cards = [
     code: "client.account.*",
   },
   {
-    title: "Documents API",
-    path: "/app/documents",
-    desc: "文档 CRUD 与 Server 环境初始化",
-    code: "client.databases.*",
+    title: "Databases API",
+    path: "/app/databases",
+    desc: "Server + Client Databases 全功能验证",
+    code: "databases.*",
   },
   {
     title: "Teams API",

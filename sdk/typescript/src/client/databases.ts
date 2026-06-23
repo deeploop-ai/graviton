@@ -1,5 +1,5 @@
 import { listQuery, type HttpTransport } from "../http.js";
-import type { Document, ListParams } from "../types.js";
+import type { Document, ListMeta, ListParams, UpdateDocumentInput } from "../types.js";
 
 export class ClientDatabasesService {
   constructor(private readonly http: HttpTransport) {}
@@ -32,14 +32,14 @@ export class ClientDatabasesService {
     databaseId: string,
     collectionId: string,
     params?: ListParams
-  ): Promise<{ documents: Document[]; total_count?: number }> {
+  ): Promise<{ documents: Document[]; meta?: ListMeta }> {
     const res = await this.http.request<{
       documents: Document[];
-      meta?: { total_count?: number };
+      meta?: ListMeta;
     }>("GET", `/v1/databases/${databaseId}/collections/${collectionId}/documents`, {
       query: listQuery(params),
     });
-    return { documents: res.documents ?? [], total_count: res.meta?.total_count };
+    return { documents: res.documents ?? [], meta: res.meta };
   }
 
   async getDocument(
@@ -57,7 +57,7 @@ export class ClientDatabasesService {
     databaseId: string,
     collectionId: string,
     documentId: string,
-    data: Record<string, unknown>
+    input: UpdateDocumentInput
   ): Promise<Document> {
     return this.http.request<Document>(
       "PATCH",
@@ -67,7 +67,7 @@ export class ClientDatabasesService {
           database_id: databaseId,
           collection_id: collectionId,
           document_id: documentId,
-          data,
+          ...input,
         },
       }
     );
