@@ -27,13 +27,13 @@ func TestPostgresDocumentDatabase_CRUD(t *testing.T) {
 
 	// Create a custom database and collection.
 	require.NoError(t, docDB.CreateDatabase(ctx, projectID, "app", "Application DB"))
-	require.NoError(t, docDB.CreateCollection(ctx, projectID, "app", "notes", "Notes", nil, nil, nil))
+	require.NoError(t, docDB.CreateCollection(ctx, projectID, "app", "notes", "Notes", nil, nil, nil, true))
 	require.NoError(t, docDB.CreateCollection(ctx, projectID, "app", "posts", "Posts", []databases.Attribute{
 		{ID: "title", Key: "title", Type: "string", Size: 256},
 		{ID: "views", Key: "views", Type: "integer"},
 	}, []databases.Index{
 		{ID: "title_key", Type: "key", Attributes: []string{"title"}},
-	}, nil))
+	}, nil, true))
 
 	// Create document.
 	created, err := docDB.CreateDocument(ctx, projectID, "app", "posts", databases.Document{
@@ -55,12 +55,12 @@ func TestPostgresDocumentDatabase_CRUD(t *testing.T) {
 	require.Equal(t, "Hello World", got.Data["title"])
 
 	// Update document.
-	updated, err := docDB.UpdateDocument(ctx, projectID, "app", "posts", databases.Document{
+	updated, err := docDB.UpdateDocument(ctx, projectID, "app", "posts", databases.SimpleDocumentUpdate(databases.Document{
 		ID: got.ID,
 		Data: map[string]any{
 			"views": 100,
 		},
-	}, nil, databases.Principal{Roles: []string{"any"}})
+	}, nil), databases.Principal{Roles: []string{"any"}})
 	require.NoError(t, err)
 	require.Equal(t, float64(100), updated.Data["views"])
 

@@ -28,6 +28,8 @@ export interface Collection {
   database_id: string;
   name: string;
   permissions: string[];
+  document_security?: boolean;
+  disabled?: boolean;
   attributes: Attribute[];
   indexes: Index[];
   created_at: string;
@@ -37,6 +39,7 @@ export interface Collection {
 export interface Document {
   id: string;
   data: Record<string, unknown>;
+  permissions?: string[];
   created_at: string;
   updated_at: string;
 }
@@ -99,7 +102,7 @@ export async function getCollection(
 
 export async function createCollection(
   databaseId: string,
-  input: { id: string; name: string; permissions?: string[] }
+  input: { id: string; name: string; permissions?: string[]; document_security?: boolean }
 ): Promise<Collection> {
   const res = await api.post<Collection>(
     `/server/databases/${databaseId}/collections`,
@@ -120,11 +123,23 @@ export async function deleteCollection(
 export async function updateCollection(
   databaseId: string,
   collectionId: string,
-  input: { name?: string; permissions?: string[] }
+  input: {
+    name?: string;
+    permissions?: string[];
+    document_security?: boolean;
+    disabled?: boolean;
+  }
 ): Promise<Collection> {
+  const body: Record<string, unknown> = {};
+  if (input.name !== undefined) body.name = input.name;
+  if (input.document_security !== undefined) body.document_security = input.document_security;
+  if (input.disabled !== undefined) body.disabled = input.disabled;
+  if (input.permissions !== undefined) {
+    body.permissions = { values: input.permissions };
+  }
   const res = await api.patch<Collection>(
     `/server/databases/${databaseId}/collections/${collectionId}`,
-    input
+    body
   );
   return normalizeCollection(res.data);
 }
@@ -201,11 +216,15 @@ export async function updateDocument(
   databaseId: string,
   collectionId: string,
   documentId: string,
-  data: Record<string, unknown>
+  input: {
+    data?: Record<string, unknown>;
+    permissions?: string[];
+    increment?: Record<string, number>;
+  }
 ): Promise<Document> {
   const res = await api.patch<Document>(
     `/server/databases/${databaseId}/collections/${collectionId}/documents/${documentId}`,
-    { data }
+    input
   );
   return res.data;
 }

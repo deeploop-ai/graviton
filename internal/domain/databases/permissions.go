@@ -28,11 +28,41 @@ func DefaultCollectionPermissions() []Permission {
 	}
 }
 
+// ExpandPermissionRoles augments caller roles for ACL matching.
+// "any" is always included (public read:any). "users" is added only when the
+// caller is authenticated (has the users role).
+func ExpandPermissionRoles(roles []string) []string {
+	seen := make(map[string]struct{}, len(roles)+2)
+	out := make([]string, 0, len(roles)+2)
+	hasUsers := false
+	for _, r := range roles {
+		if r == "users" {
+			hasUsers = true
+		}
+		if _, ok := seen[r]; ok {
+			continue
+		}
+		seen[r] = struct{}{}
+		out = append(out, r)
+	}
+	if _, ok := seen["any"]; !ok {
+		out = append(out, "any")
+	}
+	if hasUsers {
+		if _, ok := seen["users"]; !ok {
+			out = append(out, "users")
+		}
+	}
+	return out
+}
+
 // CollectionAllows reports whether the collection-level permission list grants
 // the given operation type to any of the provided roles.
+// "write" on a permission expands to create, update, and delete.
 func CollectionAllows(perms []Permission, permType string, roles []string) bool {
+	types := matchTypes(permType)
 	for _, p := range perms {
-		if p.Type != permType {
+		if !containsType(types, p.Type) {
 			continue
 		}
 		for _, r := range roles {
@@ -44,7 +74,52 @@ func CollectionAllows(perms []Permission, permType string, roles []string) bool 
 	return false
 }
 
+// AllowsDocumentAccess implements Appwrite-style documentSecurity semantics:
+//   - documentSecurity=false: only collection permissions apply
+//   - documentSecurity=true: collection OR document permissions (when document has _perms)
+func AllowsDocumentAccess(coll *Collection, docPerms []Permission, docHasPerms bool, permType string, roles []string) bool {
+	if coll == nil {
+		return false
+	}
+	expanded := ExpandPermissionRoles(roles)
+	collOK := CollectionAllows(coll.Permissions, permType, expanded)
+	if !coll.DocumentSecurity {
+		return collOK
+	}
+	if !docHasPerms {
+		return collOK
+	}
+	return collOK || CollectionAllows(docPerms, permType, expanded)
+}
+
+// ListAccessDenied reports whether list/count should be rejected outright.
+func ListAccessDenied(coll *Collection, roles []string) bool {
+	if coll == nil {
+		return true
+	}
+	expanded := ExpandPermissionRoles(roles)
+	if CollectionAllows(coll.Permissions, "read", expanded) {
+		return false
+	}
+	return !coll.DocumentSecurity
+}
+
+// SkipDocumentPermissionFilter reports whether list/count can skip per-document
+// permission SQL when the caller has collection-level read access.
+func SkipDocumentPermissionFilter(coll *Collection, roles []string) bool {
+	if coll == nil {
+		return false
+	}
+	return CollectionAllows(coll.Permissions, "read", ExpandPermissionRoles(roles))
+}
+
+// FormatPermissionString renders a permission as type:role.
+func FormatPermissionString(p Permission) string {
+	return p.Type + ":" + p.Role
+}
+
 // ParsePermissionStrings converts "read:any" style strings into Permission values.
+// "write:role" expands to create, update, and delete for that role.
 func ParsePermissionStrings(items []string) ([]Permission, error) {
 	if len(items) == 0 {
 		return DefaultCollectionPermissions(), nil
@@ -55,7 +130,60 @@ func ParsePermissionStrings(items []string) ([]Permission, error) {
 		if !ok || typ == "" || role == "" {
 			return nil, fmt.Errorf("invalid permission %q (expected type:role)", item)
 		}
+		if typ == "write" {
+			out = append(out,
+				Permission{Type: "create", Role: role},
+				Permission{Type: "update", Role: role},
+				Permission{Type: "delete", Role: role},
+			)
+			continue
+		}
 		out = append(out, Permission{Type: typ, Role: role})
 	}
 	return out, nil
+}
+
+// ValidateGrantablePermissions ensures the grantor may assign the given roles.
+// Privileged callers (API key via keys role with scopes, platform admin) skip checks.
+func ValidateGrantablePermissions(grantor Principal, perms []Permission, privileged bool) error {
+	if privileged || grantor.IsSystem() || grantor.PlatformAdmin {
+		return nil
+	}
+	expanded := ExpandPermissionRoles(grantor.Roles)
+	for _, p := range perms {
+		if p.Type == "create" {
+			continue
+		}
+		if !roleHeld(expanded, p.Role) {
+			return fmt.Errorf("cannot grant role %q without holding it", p.Role)
+		}
+	}
+	return nil
+}
+
+func roleHeld(roles []string, target string) bool {
+	for _, r := range roles {
+		if r == target {
+			return true
+		}
+	}
+	return false
+}
+
+func matchTypes(permType string) []string {
+	switch permType {
+	case "create", "update", "delete":
+		return []string{permType, "write"}
+	default:
+		return []string{permType}
+	}
+}
+
+func containsType(types []string, t string) bool {
+	for _, x := range types {
+		if x == t {
+			return true
+		}
+	}
+	return false
 }

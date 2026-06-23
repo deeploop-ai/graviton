@@ -339,6 +339,19 @@
       "properties": {
         "data": {
           "type": "object"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "increment": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "format": "int64"
+          }
         }
       }
     },
@@ -358,6 +371,12 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

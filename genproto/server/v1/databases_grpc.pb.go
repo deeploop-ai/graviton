@@ -20,23 +20,27 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DatabasesService_CreateDatabase_FullMethodName   = "/fleet.server.v1.DatabasesService/CreateDatabase"
-	DatabasesService_ListDatabases_FullMethodName    = "/fleet.server.v1.DatabasesService/ListDatabases"
-	DatabasesService_GetDatabase_FullMethodName      = "/fleet.server.v1.DatabasesService/GetDatabase"
-	DatabasesService_DeleteDatabase_FullMethodName   = "/fleet.server.v1.DatabasesService/DeleteDatabase"
-	DatabasesService_CreateCollection_FullMethodName = "/fleet.server.v1.DatabasesService/CreateCollection"
-	DatabasesService_ListCollections_FullMethodName  = "/fleet.server.v1.DatabasesService/ListCollections"
-	DatabasesService_GetCollection_FullMethodName    = "/fleet.server.v1.DatabasesService/GetCollection"
-	DatabasesService_DeleteCollection_FullMethodName = "/fleet.server.v1.DatabasesService/DeleteCollection"
-	DatabasesService_UpdateCollection_FullMethodName = "/fleet.server.v1.DatabasesService/UpdateCollection"
-	DatabasesService_CreateAttribute_FullMethodName  = "/fleet.server.v1.DatabasesService/CreateAttribute"
-	DatabasesService_CreateIndex_FullMethodName      = "/fleet.server.v1.DatabasesService/CreateIndex"
-	DatabasesService_CreateDocument_FullMethodName   = "/fleet.server.v1.DatabasesService/CreateDocument"
-	DatabasesService_ListDocuments_FullMethodName    = "/fleet.server.v1.DatabasesService/ListDocuments"
-	DatabasesService_GetDocument_FullMethodName      = "/fleet.server.v1.DatabasesService/GetDocument"
-	DatabasesService_UpdateDocument_FullMethodName   = "/fleet.server.v1.DatabasesService/UpdateDocument"
-	DatabasesService_DeleteDocument_FullMethodName   = "/fleet.server.v1.DatabasesService/DeleteDocument"
-	DatabasesService_CountDocuments_FullMethodName   = "/fleet.server.v1.DatabasesService/CountDocuments"
+	DatabasesService_CreateDatabase_FullMethodName      = "/fleet.server.v1.DatabasesService/CreateDatabase"
+	DatabasesService_ListDatabases_FullMethodName       = "/fleet.server.v1.DatabasesService/ListDatabases"
+	DatabasesService_GetDatabase_FullMethodName         = "/fleet.server.v1.DatabasesService/GetDatabase"
+	DatabasesService_DeleteDatabase_FullMethodName      = "/fleet.server.v1.DatabasesService/DeleteDatabase"
+	DatabasesService_CreateCollection_FullMethodName    = "/fleet.server.v1.DatabasesService/CreateCollection"
+	DatabasesService_ListCollections_FullMethodName     = "/fleet.server.v1.DatabasesService/ListCollections"
+	DatabasesService_GetCollection_FullMethodName       = "/fleet.server.v1.DatabasesService/GetCollection"
+	DatabasesService_DeleteCollection_FullMethodName    = "/fleet.server.v1.DatabasesService/DeleteCollection"
+	DatabasesService_UpdateCollection_FullMethodName    = "/fleet.server.v1.DatabasesService/UpdateCollection"
+	DatabasesService_CreateAttribute_FullMethodName     = "/fleet.server.v1.DatabasesService/CreateAttribute"
+	DatabasesService_DeleteAttribute_FullMethodName     = "/fleet.server.v1.DatabasesService/DeleteAttribute"
+	DatabasesService_CreateIndex_FullMethodName         = "/fleet.server.v1.DatabasesService/CreateIndex"
+	DatabasesService_DeleteIndex_FullMethodName         = "/fleet.server.v1.DatabasesService/DeleteIndex"
+	DatabasesService_CreateDocument_FullMethodName      = "/fleet.server.v1.DatabasesService/CreateDocument"
+	DatabasesService_ListDocuments_FullMethodName       = "/fleet.server.v1.DatabasesService/ListDocuments"
+	DatabasesService_GetDocument_FullMethodName         = "/fleet.server.v1.DatabasesService/GetDocument"
+	DatabasesService_UpdateDocument_FullMethodName      = "/fleet.server.v1.DatabasesService/UpdateDocument"
+	DatabasesService_DeleteDocument_FullMethodName      = "/fleet.server.v1.DatabasesService/DeleteDocument"
+	DatabasesService_CountDocuments_FullMethodName      = "/fleet.server.v1.DatabasesService/CountDocuments"
+	DatabasesService_BulkUpdateDocuments_FullMethodName = "/fleet.server.v1.DatabasesService/BulkUpdateDocuments"
+	DatabasesService_BulkDeleteDocuments_FullMethodName = "/fleet.server.v1.DatabasesService/BulkDeleteDocuments"
 )
 
 // DatabasesServiceClient is the client API for DatabasesService service.
@@ -53,13 +57,17 @@ type DatabasesServiceClient interface {
 	DeleteCollection(ctx context.Context, in *GetCollectionRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 	UpdateCollection(ctx context.Context, in *UpdateCollectionRequest, opts ...grpc.CallOption) (*Collection, error)
 	CreateAttribute(ctx context.Context, in *CreateAttributeRequest, opts ...grpc.CallOption) (*Attribute, error)
+	DeleteAttribute(ctx context.Context, in *DeleteAttributeRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 	CreateIndex(ctx context.Context, in *CreateIndexRequest, opts ...grpc.CallOption) (*Index, error)
+	DeleteIndex(ctx context.Context, in *DeleteIndexRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 	CreateDocument(ctx context.Context, in *CreateDocumentRequest, opts ...grpc.CallOption) (*Document, error)
 	ListDocuments(ctx context.Context, in *ListDocumentsRequest, opts ...grpc.CallOption) (*ListDocumentsResponse, error)
 	GetDocument(ctx context.Context, in *GetDocumentRequest, opts ...grpc.CallOption) (*Document, error)
 	UpdateDocument(ctx context.Context, in *UpdateDocumentRequest, opts ...grpc.CallOption) (*Document, error)
 	DeleteDocument(ctx context.Context, in *GetDocumentRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 	CountDocuments(ctx context.Context, in *ListDocumentsRequest, opts ...grpc.CallOption) (*CountDocumentsResponse, error)
+	BulkUpdateDocuments(ctx context.Context, in *BulkUpdateDocumentsRequest, opts ...grpc.CallOption) (*BulkDocumentsResponse, error)
+	BulkDeleteDocuments(ctx context.Context, in *BulkDeleteDocumentsRequest, opts ...grpc.CallOption) (*BulkDocumentsResponse, error)
 }
 
 type databasesServiceClient struct {
@@ -170,10 +178,30 @@ func (c *databasesServiceClient) CreateAttribute(ctx context.Context, in *Create
 	return out, nil
 }
 
+func (c *databasesServiceClient) DeleteAttribute(ctx context.Context, in *DeleteAttributeRequest, opts ...grpc.CallOption) (*v1.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Empty)
+	err := c.cc.Invoke(ctx, DatabasesService_DeleteAttribute_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *databasesServiceClient) CreateIndex(ctx context.Context, in *CreateIndexRequest, opts ...grpc.CallOption) (*Index, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Index)
 	err := c.cc.Invoke(ctx, DatabasesService_CreateIndex_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *databasesServiceClient) DeleteIndex(ctx context.Context, in *DeleteIndexRequest, opts ...grpc.CallOption) (*v1.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Empty)
+	err := c.cc.Invoke(ctx, DatabasesService_DeleteIndex_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -240,6 +268,26 @@ func (c *databasesServiceClient) CountDocuments(ctx context.Context, in *ListDoc
 	return out, nil
 }
 
+func (c *databasesServiceClient) BulkUpdateDocuments(ctx context.Context, in *BulkUpdateDocumentsRequest, opts ...grpc.CallOption) (*BulkDocumentsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BulkDocumentsResponse)
+	err := c.cc.Invoke(ctx, DatabasesService_BulkUpdateDocuments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *databasesServiceClient) BulkDeleteDocuments(ctx context.Context, in *BulkDeleteDocumentsRequest, opts ...grpc.CallOption) (*BulkDocumentsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BulkDocumentsResponse)
+	err := c.cc.Invoke(ctx, DatabasesService_BulkDeleteDocuments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DatabasesServiceServer is the server API for DatabasesService service.
 // All implementations must embed UnimplementedDatabasesServiceServer
 // for forward compatibility.
@@ -254,13 +302,17 @@ type DatabasesServiceServer interface {
 	DeleteCollection(context.Context, *GetCollectionRequest) (*v1.Empty, error)
 	UpdateCollection(context.Context, *UpdateCollectionRequest) (*Collection, error)
 	CreateAttribute(context.Context, *CreateAttributeRequest) (*Attribute, error)
+	DeleteAttribute(context.Context, *DeleteAttributeRequest) (*v1.Empty, error)
 	CreateIndex(context.Context, *CreateIndexRequest) (*Index, error)
+	DeleteIndex(context.Context, *DeleteIndexRequest) (*v1.Empty, error)
 	CreateDocument(context.Context, *CreateDocumentRequest) (*Document, error)
 	ListDocuments(context.Context, *ListDocumentsRequest) (*ListDocumentsResponse, error)
 	GetDocument(context.Context, *GetDocumentRequest) (*Document, error)
 	UpdateDocument(context.Context, *UpdateDocumentRequest) (*Document, error)
 	DeleteDocument(context.Context, *GetDocumentRequest) (*v1.Empty, error)
 	CountDocuments(context.Context, *ListDocumentsRequest) (*CountDocumentsResponse, error)
+	BulkUpdateDocuments(context.Context, *BulkUpdateDocumentsRequest) (*BulkDocumentsResponse, error)
+	BulkDeleteDocuments(context.Context, *BulkDeleteDocumentsRequest) (*BulkDocumentsResponse, error)
 	mustEmbedUnimplementedDatabasesServiceServer()
 }
 
@@ -301,8 +353,14 @@ func (UnimplementedDatabasesServiceServer) UpdateCollection(context.Context, *Up
 func (UnimplementedDatabasesServiceServer) CreateAttribute(context.Context, *CreateAttributeRequest) (*Attribute, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateAttribute not implemented")
 }
+func (UnimplementedDatabasesServiceServer) DeleteAttribute(context.Context, *DeleteAttributeRequest) (*v1.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteAttribute not implemented")
+}
 func (UnimplementedDatabasesServiceServer) CreateIndex(context.Context, *CreateIndexRequest) (*Index, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateIndex not implemented")
+}
+func (UnimplementedDatabasesServiceServer) DeleteIndex(context.Context, *DeleteIndexRequest) (*v1.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteIndex not implemented")
 }
 func (UnimplementedDatabasesServiceServer) CreateDocument(context.Context, *CreateDocumentRequest) (*Document, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateDocument not implemented")
@@ -321,6 +379,12 @@ func (UnimplementedDatabasesServiceServer) DeleteDocument(context.Context, *GetD
 }
 func (UnimplementedDatabasesServiceServer) CountDocuments(context.Context, *ListDocumentsRequest) (*CountDocumentsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CountDocuments not implemented")
+}
+func (UnimplementedDatabasesServiceServer) BulkUpdateDocuments(context.Context, *BulkUpdateDocumentsRequest) (*BulkDocumentsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method BulkUpdateDocuments not implemented")
+}
+func (UnimplementedDatabasesServiceServer) BulkDeleteDocuments(context.Context, *BulkDeleteDocumentsRequest) (*BulkDocumentsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method BulkDeleteDocuments not implemented")
 }
 func (UnimplementedDatabasesServiceServer) mustEmbedUnimplementedDatabasesServiceServer() {}
 func (UnimplementedDatabasesServiceServer) testEmbeddedByValue()                          {}
@@ -523,6 +587,24 @@ func _DatabasesService_CreateAttribute_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DatabasesService_DeleteAttribute_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteAttributeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DatabasesServiceServer).DeleteAttribute(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DatabasesService_DeleteAttribute_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DatabasesServiceServer).DeleteAttribute(ctx, req.(*DeleteAttributeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _DatabasesService_CreateIndex_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateIndexRequest)
 	if err := dec(in); err != nil {
@@ -537,6 +619,24 @@ func _DatabasesService_CreateIndex_Handler(srv interface{}, ctx context.Context,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DatabasesServiceServer).CreateIndex(ctx, req.(*CreateIndexRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DatabasesService_DeleteIndex_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteIndexRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DatabasesServiceServer).DeleteIndex(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DatabasesService_DeleteIndex_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DatabasesServiceServer).DeleteIndex(ctx, req.(*DeleteIndexRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -649,6 +749,42 @@ func _DatabasesService_CountDocuments_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DatabasesService_BulkUpdateDocuments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BulkUpdateDocumentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DatabasesServiceServer).BulkUpdateDocuments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DatabasesService_BulkUpdateDocuments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DatabasesServiceServer).BulkUpdateDocuments(ctx, req.(*BulkUpdateDocumentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DatabasesService_BulkDeleteDocuments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BulkDeleteDocumentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DatabasesServiceServer).BulkDeleteDocuments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DatabasesService_BulkDeleteDocuments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DatabasesServiceServer).BulkDeleteDocuments(ctx, req.(*BulkDeleteDocumentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DatabasesService_ServiceDesc is the grpc.ServiceDesc for DatabasesService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -697,8 +833,16 @@ var DatabasesService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _DatabasesService_CreateAttribute_Handler,
 		},
 		{
+			MethodName: "DeleteAttribute",
+			Handler:    _DatabasesService_DeleteAttribute_Handler,
+		},
+		{
 			MethodName: "CreateIndex",
 			Handler:    _DatabasesService_CreateIndex_Handler,
+		},
+		{
+			MethodName: "DeleteIndex",
+			Handler:    _DatabasesService_DeleteIndex_Handler,
 		},
 		{
 			MethodName: "CreateDocument",
@@ -723,6 +867,14 @@ var DatabasesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CountDocuments",
 			Handler:    _DatabasesService_CountDocuments_Handler,
+		},
+		{
+			MethodName: "BulkUpdateDocuments",
+			Handler:    _DatabasesService_BulkUpdateDocuments_Handler,
+		},
+		{
+			MethodName: "BulkDeleteDocuments",
+			Handler:    _DatabasesService_BulkDeleteDocuments_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

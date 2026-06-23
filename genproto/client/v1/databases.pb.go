@@ -31,6 +31,7 @@ type Document struct {
 	Data          *structpb.Struct       `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	Permissions   []string               `protobuf:"bytes,5,rep,name=permissions,proto3" json:"permissions,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -89,6 +90,13 @@ func (x *Document) GetCreatedAt() *timestamppb.Timestamp {
 func (x *Document) GetUpdatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.UpdatedAt
+	}
+	return nil
+}
+
+func (x *Document) GetPermissions() []string {
+	if x != nil {
+		return x.Permissions
 	}
 	return nil
 }
@@ -175,6 +183,8 @@ type UpdateDocumentRequest struct {
 	CollectionId  string                 `protobuf:"bytes,2,opt,name=collection_id,json=collectionId,proto3" json:"collection_id,omitempty"`
 	DocumentId    string                 `protobuf:"bytes,3,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
 	Data          *structpb.Struct       `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
+	Permissions   []string               `protobuf:"bytes,5,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	Increment     map[string]int64       `protobuf:"bytes,6,rep,name=increment,proto3" json:"increment,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -233,6 +243,20 @@ func (x *UpdateDocumentRequest) GetDocumentId() string {
 func (x *UpdateDocumentRequest) GetData() *structpb.Struct {
 	if x != nil {
 		return x.Data
+	}
+	return nil
+}
+
+func (x *UpdateDocumentRequest) GetPermissions() []string {
+	if x != nil {
+		return x.Permissions
+	}
+	return nil
+}
+
+func (x *UpdateDocumentRequest) GetIncrement() map[string]int64 {
+	if x != nil {
+		return x.Increment
 	}
 	return nil
 }
@@ -473,14 +497,15 @@ var File_client_v1_databases_proto protoreflect.FileDescriptor
 
 const file_client_v1_databases_proto_rawDesc = "" +
 	"\n" +
-	"\x19client/v1/databases.proto\x12\x0ffleet.client.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\"\xbd\x01\n" +
+	"\x19client/v1/databases.proto\x12\x0ffleet.client.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\"\xdf\x01\n" +
 	"\bDocument\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12+\n" +
 	"\x04data\x18\x02 \x01(\v2\x17.google.protobuf.StructR\x04data\x129\n" +
 	"\n" +
 	"created_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xcd\x01\n" +
+	"updated_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12 \n" +
+	"\vpermissions\x18\x05 \x03(\tR\vpermissions\"\xcd\x01\n" +
 	"\x15CreateDocumentRequest\x12\x1f\n" +
 	"\vdatabase_id\x18\x01 \x01(\tR\n" +
 	"databaseId\x12#\n" +
@@ -488,14 +513,19 @@ const file_client_v1_databases_proto_rawDesc = "" +
 	"\vdocument_id\x18\x03 \x01(\tR\n" +
 	"documentId\x12+\n" +
 	"\x04data\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x04data\x12 \n" +
-	"\vpermissions\x18\x05 \x03(\tR\vpermissions\"\xab\x01\n" +
+	"\vpermissions\x18\x05 \x03(\tR\vpermissions\"\xe0\x02\n" +
 	"\x15UpdateDocumentRequest\x12\x1f\n" +
 	"\vdatabase_id\x18\x01 \x01(\tR\n" +
 	"databaseId\x12#\n" +
 	"\rcollection_id\x18\x02 \x01(\tR\fcollectionId\x12\x1f\n" +
 	"\vdocument_id\x18\x03 \x01(\tR\n" +
 	"documentId\x12+\n" +
-	"\x04data\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x04data\"{\n" +
+	"\x04data\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x04data\x12 \n" +
+	"\vpermissions\x18\x05 \x03(\tR\vpermissions\x12S\n" +
+	"\tincrement\x18\x06 \x03(\v25.fleet.client.v1.UpdateDocumentRequest.IncrementEntryR\tincrement\x1a<\n" +
+	"\x0eIncrementEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"{\n" +
 	"\x12GetDocumentRequest\x12\x1f\n" +
 	"\vdatabase_id\x18\x01 \x01(\tR\n" +
 	"databaseId\x12#\n" +
@@ -535,7 +565,7 @@ func file_client_v1_databases_proto_rawDescGZIP() []byte {
 	return file_client_v1_databases_proto_rawDescData
 }
 
-var file_client_v1_databases_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_client_v1_databases_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_client_v1_databases_proto_goTypes = []any{
 	(*Document)(nil),               // 0: fleet.client.v1.Document
 	(*CreateDocumentRequest)(nil),  // 1: fleet.client.v1.CreateDocumentRequest
@@ -544,36 +574,38 @@ var file_client_v1_databases_proto_goTypes = []any{
 	(*ListDocumentsRequest)(nil),   // 4: fleet.client.v1.ListDocumentsRequest
 	(*ListDocumentsResponse)(nil),  // 5: fleet.client.v1.ListDocumentsResponse
 	(*CountDocumentsResponse)(nil), // 6: fleet.client.v1.CountDocumentsResponse
-	(*structpb.Struct)(nil),        // 7: google.protobuf.Struct
-	(*timestamppb.Timestamp)(nil),  // 8: google.protobuf.Timestamp
-	(*v1.ListResponseMeta)(nil),    // 9: fleet.shared.v1.ListResponseMeta
-	(*v1.Empty)(nil),               // 10: fleet.shared.v1.Empty
+	nil,                            // 7: fleet.client.v1.UpdateDocumentRequest.IncrementEntry
+	(*structpb.Struct)(nil),        // 8: google.protobuf.Struct
+	(*timestamppb.Timestamp)(nil),  // 9: google.protobuf.Timestamp
+	(*v1.ListResponseMeta)(nil),    // 10: fleet.shared.v1.ListResponseMeta
+	(*v1.Empty)(nil),               // 11: fleet.shared.v1.Empty
 }
 var file_client_v1_databases_proto_depIdxs = []int32{
-	7,  // 0: fleet.client.v1.Document.data:type_name -> google.protobuf.Struct
-	8,  // 1: fleet.client.v1.Document.created_at:type_name -> google.protobuf.Timestamp
-	8,  // 2: fleet.client.v1.Document.updated_at:type_name -> google.protobuf.Timestamp
-	7,  // 3: fleet.client.v1.CreateDocumentRequest.data:type_name -> google.protobuf.Struct
-	7,  // 4: fleet.client.v1.UpdateDocumentRequest.data:type_name -> google.protobuf.Struct
-	0,  // 5: fleet.client.v1.ListDocumentsResponse.documents:type_name -> fleet.client.v1.Document
-	9,  // 6: fleet.client.v1.ListDocumentsResponse.meta:type_name -> fleet.shared.v1.ListResponseMeta
-	1,  // 7: fleet.client.v1.DatabasesService.CreateDocument:input_type -> fleet.client.v1.CreateDocumentRequest
-	4,  // 8: fleet.client.v1.DatabasesService.ListDocuments:input_type -> fleet.client.v1.ListDocumentsRequest
-	3,  // 9: fleet.client.v1.DatabasesService.GetDocument:input_type -> fleet.client.v1.GetDocumentRequest
-	2,  // 10: fleet.client.v1.DatabasesService.UpdateDocument:input_type -> fleet.client.v1.UpdateDocumentRequest
-	3,  // 11: fleet.client.v1.DatabasesService.DeleteDocument:input_type -> fleet.client.v1.GetDocumentRequest
-	4,  // 12: fleet.client.v1.DatabasesService.CountDocuments:input_type -> fleet.client.v1.ListDocumentsRequest
-	0,  // 13: fleet.client.v1.DatabasesService.CreateDocument:output_type -> fleet.client.v1.Document
-	5,  // 14: fleet.client.v1.DatabasesService.ListDocuments:output_type -> fleet.client.v1.ListDocumentsResponse
-	0,  // 15: fleet.client.v1.DatabasesService.GetDocument:output_type -> fleet.client.v1.Document
-	0,  // 16: fleet.client.v1.DatabasesService.UpdateDocument:output_type -> fleet.client.v1.Document
-	10, // 17: fleet.client.v1.DatabasesService.DeleteDocument:output_type -> fleet.shared.v1.Empty
-	6,  // 18: fleet.client.v1.DatabasesService.CountDocuments:output_type -> fleet.client.v1.CountDocumentsResponse
-	13, // [13:19] is the sub-list for method output_type
-	7,  // [7:13] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	8,  // 0: fleet.client.v1.Document.data:type_name -> google.protobuf.Struct
+	9,  // 1: fleet.client.v1.Document.created_at:type_name -> google.protobuf.Timestamp
+	9,  // 2: fleet.client.v1.Document.updated_at:type_name -> google.protobuf.Timestamp
+	8,  // 3: fleet.client.v1.CreateDocumentRequest.data:type_name -> google.protobuf.Struct
+	8,  // 4: fleet.client.v1.UpdateDocumentRequest.data:type_name -> google.protobuf.Struct
+	7,  // 5: fleet.client.v1.UpdateDocumentRequest.increment:type_name -> fleet.client.v1.UpdateDocumentRequest.IncrementEntry
+	0,  // 6: fleet.client.v1.ListDocumentsResponse.documents:type_name -> fleet.client.v1.Document
+	10, // 7: fleet.client.v1.ListDocumentsResponse.meta:type_name -> fleet.shared.v1.ListResponseMeta
+	1,  // 8: fleet.client.v1.DatabasesService.CreateDocument:input_type -> fleet.client.v1.CreateDocumentRequest
+	4,  // 9: fleet.client.v1.DatabasesService.ListDocuments:input_type -> fleet.client.v1.ListDocumentsRequest
+	3,  // 10: fleet.client.v1.DatabasesService.GetDocument:input_type -> fleet.client.v1.GetDocumentRequest
+	2,  // 11: fleet.client.v1.DatabasesService.UpdateDocument:input_type -> fleet.client.v1.UpdateDocumentRequest
+	3,  // 12: fleet.client.v1.DatabasesService.DeleteDocument:input_type -> fleet.client.v1.GetDocumentRequest
+	4,  // 13: fleet.client.v1.DatabasesService.CountDocuments:input_type -> fleet.client.v1.ListDocumentsRequest
+	0,  // 14: fleet.client.v1.DatabasesService.CreateDocument:output_type -> fleet.client.v1.Document
+	5,  // 15: fleet.client.v1.DatabasesService.ListDocuments:output_type -> fleet.client.v1.ListDocumentsResponse
+	0,  // 16: fleet.client.v1.DatabasesService.GetDocument:output_type -> fleet.client.v1.Document
+	0,  // 17: fleet.client.v1.DatabasesService.UpdateDocument:output_type -> fleet.client.v1.Document
+	11, // 18: fleet.client.v1.DatabasesService.DeleteDocument:output_type -> fleet.shared.v1.Empty
+	6,  // 19: fleet.client.v1.DatabasesService.CountDocuments:output_type -> fleet.client.v1.CountDocumentsResponse
+	14, // [14:20] is the sub-list for method output_type
+	8,  // [8:14] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_client_v1_databases_proto_init() }
@@ -587,7 +619,7 @@ func file_client_v1_databases_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_client_v1_databases_proto_rawDesc), len(file_client_v1_databases_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

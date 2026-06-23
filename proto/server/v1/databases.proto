@@ -53,8 +53,16 @@ service DatabasesService {
     option (google.api.http) = { post: "/v1/server/databases/{database_id}/collections/{collection_id}/attributes", body: "*" };
   }
 
+  rpc DeleteAttribute(DeleteAttributeRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { delete: "/v1/server/databases/{database_id}/collections/{collection_id}/attributes/{key}" };
+  }
+
   rpc CreateIndex(CreateIndexRequest) returns (Index) {
     option (google.api.http) = { post: "/v1/server/databases/{database_id}/collections/{collection_id}/indexes", body: "*" };
+  }
+
+  rpc DeleteIndex(DeleteIndexRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { delete: "/v1/server/databases/{database_id}/collections/{collection_id}/indexes/{index_id}" };
   }
 
   rpc CreateDocument(CreateDocumentRequest) returns (Document) {
@@ -79,6 +87,14 @@ service DatabasesService {
 
   rpc CountDocuments(ListDocumentsRequest) returns (CountDocumentsResponse) {
     option (google.api.http) = { get: "/v1/server/databases/{database_id}/collections/{collection_id}/documents/count" };
+  }
+
+  rpc BulkUpdateDocuments(BulkUpdateDocumentsRequest) returns (BulkDocumentsResponse) {
+    option (google.api.http) = { patch: "/v1/server/databases/{database_id}/collections/{collection_id}/documents/bulk", body: "*" };
+  }
+
+  rpc BulkDeleteDocuments(BulkDeleteDocumentsRequest) returns (BulkDocumentsResponse) {
+    option (google.api.http) = { post: "/v1/server/databases/{database_id}/collections/{collection_id}/documents/bulk/delete", body: "*" };
   }
 }
 
@@ -108,6 +124,7 @@ message CreateCollectionRequest {
   string id = 2;
   string name = 3;
   repeated string permissions = 4;
+  optional bool document_security = 5;
 }
 
 message ListCollectionsRequest {
@@ -126,7 +143,13 @@ message UpdateCollectionRequest {
   string database_id = 1;
   string collection_id = 2;
   string name = 3;
-  repeated string permissions = 4;
+  optional PermissionsUpdate permissions = 4;
+  optional bool document_security = 5;
+  optional bool disabled = 6;
+}
+
+message PermissionsUpdate {
+  repeated string values = 1;
 }
 
 message ListCollectionsResponse {
@@ -143,6 +166,8 @@ message Collection {
   repeated Index indexes = 6;
   google.protobuf.Timestamp created_at = 7;
   google.protobuf.Timestamp updated_at = 8;
+  bool document_security = 9;
+  bool disabled = 10;
 }
 
 message CreateAttributeRequest {
@@ -154,6 +179,12 @@ message CreateAttributeRequest {
   bool required = 6;
   bool array = 7;
   string default_value = 8;
+}
+
+message DeleteAttributeRequest {
+  string database_id = 1;
+  string collection_id = 2;
+  string key = 3;
 }
 
 message Attribute {
@@ -175,6 +206,12 @@ message CreateIndexRequest {
   repeated string orders = 6;
 }
 
+message DeleteIndexRequest {
+  string database_id = 1;
+  string collection_id = 2;
+  string index_id = 3;
+}
+
 message Index {
   string id = 1;
   string type = 2;
@@ -187,6 +224,7 @@ message Document {
   google.protobuf.Struct data = 2;
   google.protobuf.Timestamp created_at = 3;
   google.protobuf.Timestamp updated_at = 4;
+  repeated string permissions = 5;
 }
 
 message CreateDocumentRequest {
@@ -202,6 +240,8 @@ message UpdateDocumentRequest {
   string collection_id = 2;
   string document_id = 3;
   google.protobuf.Struct data = 4;
+  repeated string permissions = 5;
+  map<string, int64> increment = 6;
 }
 
 message GetDocumentRequest {
@@ -225,4 +265,22 @@ message ListDocumentsResponse {
 
 message CountDocumentsResponse {
   int64 count = 1;
+}
+
+message BulkUpdateDocumentsRequest {
+  string database_id = 1;
+  string collection_id = 2;
+  repeated string document_ids = 3;
+  google.protobuf.Struct data = 4;
+  repeated string permissions = 5;
+}
+
+message BulkDeleteDocumentsRequest {
+  string database_id = 1;
+  string collection_id = 2;
+  repeated string document_ids = 3;
+}
+
+message BulkDocumentsResponse {
+  int64 affected = 1;
 }

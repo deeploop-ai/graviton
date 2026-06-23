@@ -350,6 +350,48 @@
         ]
       }
     },
+    "/v1/server/databases/{databaseId}/collections/{collectionId}/attributes/{key}": {
+      "delete": {
+        "operationId": "DatabasesService_DeleteAttribute",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Empty"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "databaseId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "collectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DatabasesService"
+        ]
+      }
+    },
     "/v1/server/databases/{databaseId}/collections/{collectionId}/documents": {
       "get": {
         "operationId": "DatabasesService_ListDocuments",
@@ -443,6 +485,94 @@
             "required": true,
             "schema": {
               "$ref": "#/definitions/fleetserverv1DatabasesServiceCreateDocumentBody"
+            }
+          }
+        ],
+        "tags": [
+          "DatabasesService"
+        ]
+      }
+    },
+    "/v1/server/databases/{databaseId}/collections/{collectionId}/documents/bulk": {
+      "patch": {
+        "operationId": "DatabasesService_BulkUpdateDocuments",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1BulkDocumentsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "databaseId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "collectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DatabasesServiceBulkUpdateDocumentsBody"
+            }
+          }
+        ],
+        "tags": [
+          "DatabasesService"
+        ]
+      }
+    },
+    "/v1/server/databases/{databaseId}/collections/{collectionId}/documents/bulk/delete": {
+      "post": {
+        "operationId": "DatabasesService_BulkDeleteDocuments",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1BulkDocumentsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "databaseId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "collectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DatabasesServiceBulkDeleteDocumentsBody"
             }
           }
         ],
@@ -684,6 +814,48 @@
         ]
       }
     },
+    "/v1/server/databases/{databaseId}/collections/{collectionId}/indexes/{indexId}": {
+      "delete": {
+        "operationId": "DatabasesService_DeleteIndex",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Empty"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "databaseId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "collectionId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "indexId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DatabasesService"
+        ]
+      }
+    },
     "/v1/server/databases/{id}": {
       "get": {
         "operationId": "DatabasesService_GetDatabase",
@@ -744,6 +916,37 @@
     }
   },
   "definitions": {
+    "DatabasesServiceBulkDeleteDocumentsBody": {
+      "type": "object",
+      "properties": {
+        "documentIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "DatabasesServiceBulkUpdateDocumentsBody": {
+      "type": "object",
+      "properties": {
+        "documentIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "data": {
+          "type": "object"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "DatabasesServiceCreateAttributeBody": {
       "type": "object",
       "properties": {
@@ -782,6 +985,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "documentSecurity": {
+          "type": "boolean"
         }
       }
     },
@@ -815,10 +1021,13 @@
           "type": "string"
         },
         "permissions": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "$ref": "#/definitions/v1PermissionsUpdate"
+        },
+        "documentSecurity": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "boolean"
         }
       }
     },
@@ -853,6 +1062,19 @@
       "properties": {
         "data": {
           "type": "object"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "increment": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "format": "int64"
+          }
         }
       }
     },
@@ -872,6 +1094,12 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -953,6 +1181,15 @@
         }
       }
     },
+    "v1BulkDocumentsResponse": {
+      "type": "object",
+      "properties": {
+        "affected": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
     "v1Collection": {
       "type": "object",
       "properties": {
@@ -992,6 +1229,12 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        },
+        "documentSecurity": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "type": "boolean"
         }
       }
     },
@@ -1097,6 +1340,17 @@
         "totalCount": {
           "type": "integer",
           "format": "int32"
+        }
+      }
+    },
+    "v1PermissionsUpdate": {
+      "type": "object",
+      "properties": {
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     }

@@ -90,7 +90,7 @@ func (u *Users) UpdateUser(ctx context.Context, projectID, userID string, update
 		return nil, status.Error(codes.InvalidArgument, "no updatable fields supplied (password_hash, email_verified, status are managed via dedicated endpoints)")
 	}
 	doc := databases.Document{ID: userID, Data: filtered}
-	updated, err := u.docDB.UpdateDocument(ctx, projectID, "default", "users", doc, nil, principal)
+	updated, err := u.docDB.UpdateDocument(ctx, projectID, "default", "users", databases.SimpleDocumentUpdate(doc, nil), principal)
 	if err != nil {
 		return nil, fmt.Errorf("update user: %w", err)
 	}
@@ -114,10 +114,10 @@ func (u *Users) UpdateUserStatus(ctx context.Context, projectID, userID, userSta
 	if _, err := u.resolveProject(ctx, projectID); err != nil {
 		return nil, err
 	}
-	updated, err := u.docDB.UpdateDocument(ctx, projectID, "default", "users", databases.Document{
+	updated, err := u.docDB.UpdateDocument(ctx, projectID, "default", "users", databases.SimpleDocumentUpdate(databases.Document{
 		ID:   userID,
 		Data: map[string]any{"status": userStatus, "updated_at": time.Now().Format(time.RFC3339Nano)},
-	}, nil, principal)
+	}, nil), principal)
 	if err != nil {
 		return nil, fmt.Errorf("update user status: %w", err)
 	}

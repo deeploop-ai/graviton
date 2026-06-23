@@ -48,7 +48,7 @@ func TestDatabases_AcceptanceChain(t *testing.T) {
 	require.NotNil(t, gotDB)
 	require.Equal(t, dbID, gotDB.ID)
 
-	require.NoError(t, uc.CreateCollection(ctx, projectID, dbID, collID, "Posts", nil, nil, nil))
+	require.NoError(t, uc.CreateCollection(ctx, projectID, dbID, collID, "Posts", nil, nil, nil, true))
 
 	colls, err := uc.ListCollections(ctx, projectID, dbID)
 	require.NoError(t, err)

@@ -38,7 +38,7 @@ func TestDatabases_DocumentCRUD(t *testing.T) {
 	require.NoError(t, uc.CreateCollection(ctx, projectID, dbID, collID, "Posts", []databases.Attribute{
 		{ID: "title", Key: "title", Type: "string", Size: 256},
 		{ID: "views", Key: "views", Type: "integer"},
-	}, nil, nil))
+	}, nil, nil, true))
 
 	created, err := uc.CreateDocument(ctx, projectID, dbID, collID, "", map[string]any{
 		"title": "Hello Fleet",
@@ -54,7 +54,7 @@ func TestDatabases_DocumentCRUD(t *testing.T) {
 
 	updated, err := uc.UpdateDocument(ctx, projectID, dbID, collID, created.ID, map[string]any{
 		"views": 99,
-	}, nil, principal)
+	}, nil, nil, principal)
 	require.NoError(t, err)
 	require.Equal(t, float64(99), updated.Data["views"])
 

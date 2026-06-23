@@ -10,23 +10,27 @@ type DocumentDB interface {
 	DeleteDatabase(ctx context.Context, projectID, id string) error
 
 	// Collection
-	CreateCollection(ctx context.Context, projectID, databaseID, collectionID, name string, attrs []Attribute, idxs []Index, perms []Permission) error
+	CreateCollection(ctx context.Context, projectID, databaseID, collectionID, name string, attrs []Attribute, idxs []Index, perms []Permission, documentSecurity bool) error
 	GetCollection(ctx context.Context, projectID, databaseID, collectionID string) (*Collection, error)
 	ListCollections(ctx context.Context, projectID, databaseID string) ([]Collection, error)
 	DeleteCollection(ctx context.Context, projectID, databaseID, collectionID string) error
-	UpdateCollection(ctx context.Context, projectID, databaseID, collectionID, name string, perms []Permission) error
+	UpdateCollection(ctx context.Context, projectID, databaseID, collectionID string, patch CollectionPatch) error
 
 	// Attribute / Index
 	CreateAttribute(ctx context.Context, projectID, databaseID, collectionID string, attr Attribute) error
+	DeleteAttribute(ctx context.Context, projectID, databaseID, collectionID, key string) error
 	CreateIndex(ctx context.Context, projectID, databaseID, collectionID string, idx Index) error
+	DeleteIndex(ctx context.Context, projectID, databaseID, collectionID, indexID string) error
 
 	// Document
 	CreateDocument(ctx context.Context, projectID, databaseID, collectionID string, doc Document, perms []Permission, principal Principal) (Document, error)
 	GetDocument(ctx context.Context, projectID, databaseID, collectionID, docID string, principal Principal) (*Document, error)
-	UpdateDocument(ctx context.Context, projectID, databaseID, collectionID string, doc Document, perms []Permission, principal Principal) (Document, error)
+	UpdateDocument(ctx context.Context, projectID, databaseID, collectionID string, update DocumentUpdate, principal Principal) (Document, error)
 	DeleteDocument(ctx context.Context, projectID, databaseID, collectionID, docID string, principal Principal) error
 	ListDocuments(ctx context.Context, projectID, databaseID, collectionID string, q Query, principal Principal) (*DocumentList, error)
 	CountDocuments(ctx context.Context, projectID, databaseID, collectionID string, queries []string, principal Principal) (int64, error)
+	BulkUpdateDocuments(ctx context.Context, projectID, databaseID, collectionID string, documentIDs []string, data map[string]any, perms []Permission, principal Principal) (int64, error)
+	BulkDeleteDocuments(ctx context.Context, projectID, databaseID, collectionID string, documentIDs []string, principal Principal) (int64, error)
 
 	// System bootstrap
 	EnsureSystemCollections(ctx context.Context, projectID string, internalID int64) error

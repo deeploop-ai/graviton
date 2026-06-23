@@ -96,7 +96,11 @@ func (s *DatabasesService) CreateCollection(ctx context.Context, req *serverv1.C
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	if err := s.databases.CreateCollection(ctx, projectID, req.GetDatabaseId(), req.GetId(), req.GetName(), nil, nil, perms); err != nil {
+	documentSecurity := true
+	if req.DocumentSecurity != nil {
+		documentSecurity = req.GetDocumentSecurity()
+	}
+	if err := s.databases.CreateCollection(ctx, projectID, req.GetDatabaseId(), req.GetId(), req.GetName(), nil, nil, perms, documentSecurity); err != nil {
 		return nil, err
 	}
 	col, err := s.databases.GetCollection(ctx, projectID, req.GetDatabaseId(), req.GetId())
@@ -156,11 +160,23 @@ func (s *DatabasesService) UpdateCollection(ctx context.Context, req *serverv1.U
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
-	perms, err := databases.ParsePermissionStrings(req.GetPermissions())
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+	patch := databases.CollectionPatch{Name: req.GetName()}
+	if req.Permissions != nil {
+		perms, err := databases.ParsePermissionStrings(req.GetPermissions().GetValues())
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		patch.Permissions = &perms
 	}
-	if err := s.databases.UpdateCollection(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), req.GetName(), perms); err != nil {
+	if req.DocumentSecurity != nil {
+		v := req.GetDocumentSecurity()
+		patch.DocumentSecurity = &v
+	}
+	if req.Disabled != nil {
+		v := req.GetDisabled()
+		patch.Disabled = &v
+	}
+	if err := s.databases.UpdateCollection(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), patch); err != nil {
 		return nil, err
 	}
 	col, err := s.databases.GetCollection(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId())
@@ -223,6 +239,28 @@ func (s *DatabasesService) CreateIndex(ctx context.Context, req *serverv1.Create
 		Attributes: idx.Attributes,
 		Orders:     idx.Orders,
 	}, nil
+}
+
+func (s *DatabasesService) DeleteAttribute(ctx context.Context, req *serverv1.DeleteAttributeRequest) (*sharedv1.Empty, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	if err := s.databases.DeleteAttribute(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), req.GetKey()); err != nil {
+		return nil, err
+	}
+	return &sharedv1.Empty{}, nil
+}
+
+func (s *DatabasesService) DeleteIndex(ctx context.Context, req *serverv1.DeleteIndexRequest) (*sharedv1.Empty, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	if err := s.databases.DeleteIndex(ctx, projectID, req.GetDatabaseId(), req.GetCollectionId(), req.GetIndexId()); err != nil {
+		return nil, err
+	}
+	return &sharedv1.Empty{}, nil
 }
 
 func (s *DatabasesService) CreateDocument(ctx context.Context, req *serverv1.CreateDocumentRequest) (*serverv1.Document, error) {
@@ -298,6 +336,14 @@ func (s *DatabasesService) UpdateDocument(ctx context.Context, req *serverv1.Upd
 	if projectID == "" {
 		return nil, status.Error(codes.Unauthenticated, "missing project context")
 	}
+	var perms []databases.Permission
+	if len(req.GetPermissions()) > 0 {
+		var err error
+		perms, err = databases.ParsePermissionStrings(req.GetPermissions())
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	}
 	doc, err := s.databases.UpdateDocument(
 		ctx,
 		projectID,
@@ -305,13 +351,62 @@ func (s *DatabasesService) UpdateDocument(ctx context.Context, req *serverv1.Upd
 		req.GetCollectionId(),
 		req.GetDocumentId(),
 		updateData(req.GetData()),
-		nil,
+		perms,
+		req.GetIncrement(),
 		dbPrincipal(ctx),
 	)
 	if err != nil {
 		return nil, err
 	}
 	return mapDocument(doc)
+}
+
+func (s *DatabasesService) BulkUpdateDocuments(ctx context.Context, req *serverv1.BulkUpdateDocumentsRequest) (*serverv1.BulkDocumentsResponse, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	var perms []databases.Permission
+	if len(req.GetPermissions()) > 0 {
+		var err error
+		perms, err = databases.ParsePermissionStrings(req.GetPermissions())
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	}
+	n, err := s.databases.BulkUpdateDocuments(
+		ctx,
+		projectID,
+		req.GetDatabaseId(),
+		req.GetCollectionId(),
+		req.GetDocumentIds(),
+		updateData(req.GetData()),
+		perms,
+		dbPrincipal(ctx),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &serverv1.BulkDocumentsResponse{Affected: n}, nil
+}
+
+func (s *DatabasesService) BulkDeleteDocuments(ctx context.Context, req *serverv1.BulkDeleteDocumentsRequest) (*serverv1.BulkDocumentsResponse, error) {
+	projectID := s.projectID(ctx)
+	if projectID == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing project context")
+	}
+	n, err := s.databases.BulkDeleteDocuments(
+		ctx,
+		projectID,
+		req.GetDatabaseId(),
+		req.GetCollectionId(),
+		req.GetDocumentIds(),
+		dbPrincipal(ctx),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &serverv1.BulkDocumentsResponse{Affected: n}, nil
 }
 
 func (s *DatabasesService) DeleteDocument(ctx context.Context, req *serverv1.GetDocumentRequest) (*sharedv1.Empty, error) {
@@ -354,11 +449,13 @@ func mapCollection(c *databases.Collection) *serverv1.Collection {
 		return nil
 	}
 	out := &serverv1.Collection{
-		Id:         c.ID,
-		DatabaseId: c.DatabaseID,
-		Name:       c.Name,
-		CreatedAt:  timestamppb.New(c.CreatedAt),
-		UpdatedAt:  timestamppb.New(c.UpdatedAt),
+		Id:               c.ID,
+		DatabaseId:       c.DatabaseID,
+		Name:             c.Name,
+		DocumentSecurity: c.DocumentSecurity,
+		Disabled:         c.Disabled,
+		CreatedAt:        timestamppb.New(c.CreatedAt),
+		UpdatedAt:        timestamppb.New(c.UpdatedAt),
 	}
 	for _, p := range c.Permissions {
 		out.Permissions = append(out.Permissions, p.Type+":"+p.Role)
@@ -397,7 +494,19 @@ func mapDocument(doc *databases.Document) (*serverv1.Document, error) {
 		Data:      data,
 		CreatedAt: timestamppb.New(doc.CreatedAt),
 		UpdatedAt: timestamppb.New(doc.UpdatedAt),
+		Permissions: formatPermissionStrings(doc.Permissions),
 	}, nil
+}
+
+func formatPermissionStrings(perms []databases.Permission) []string {
+	if len(perms) == 0 {
+		return nil
+	}
+	out := make([]string, len(perms))
+	for i, p := range perms {
+		out[i] = databases.FormatPermissionString(p)
+	}
+	return out
 }
 
 func updateData(s *structpb.Struct) map[string]any {

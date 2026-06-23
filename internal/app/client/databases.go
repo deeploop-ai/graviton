@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/deeploop-ai/fleet/internal/app/shared"
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
 	"github.com/deeploop-ai/fleet/internal/domain/projects"
 	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
@@ -50,6 +51,9 @@ func (d *Databases) ensureCollection(ctx context.Context, databaseID, collection
 	if col == nil {
 		return "", databases.Principal{}, status.Error(codes.NotFound, "collection not found")
 	}
+	if col.Disabled {
+		return "", databases.Principal{}, shared.MapDocumentDBError(databases.ErrPermissionDenied)
+	}
 	return project.ID, principal, nil
 }
 
@@ -70,16 +74,19 @@ func (d *Databases) CreateDocument(
 	if len(perms) == 0 {
 		perms = ownerDocumentPermissions(p.UserID)
 	}
+	if err := databases.ValidateGrantablePermissions(principal, perms, false); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 	created, err := d.docDB.CreateDocument(ctx, projectID, databaseID, collectionID, databases.Document{
 		ID:   documentID,
 		Data: data,
 	}, perms, principal)
 	if err != nil {
-		return nil, fmt.Errorf("create document: %w", err)
+		return nil, shared.MapDocumentDBError(fmt.Errorf("create document: %w", err))
 	}
 	got, err := d.docDB.GetDocument(ctx, projectID, databaseID, collectionID, created.ID, principal)
 	if err != nil {
-		return nil, err
+		return nil, shared.MapDocumentDBError(err)
 	}
 	if got == nil {
 		return nil, status.Error(codes.NotFound, "document not found after create")
@@ -98,7 +105,7 @@ func (d *Databases) ListDocuments(
 	}
 	list, err := d.docDB.ListDocuments(ctx, projectID, databaseID, collectionID, q, principal)
 	if err != nil {
-		return nil, 0, "", err
+		return nil, 0, "", shared.MapDocumentDBError(err)
 	}
 	return list.Documents, list.TotalCount, list.NextPageToken, nil
 }
@@ -110,7 +117,7 @@ func (d *Databases) GetDocument(ctx context.Context, databaseID, collectionID, d
 	}
 	doc, err := d.docDB.GetDocument(ctx, projectID, databaseID, collectionID, documentID, principal)
 	if err != nil {
-		return nil, err
+		return nil, shared.MapDocumentDBError(err)
 	}
 	if doc == nil {
 		return nil, status.Error(codes.NotFound, "document not found")
@@ -122,20 +129,28 @@ func (d *Databases) UpdateDocument(
 	ctx context.Context,
 	databaseID, collectionID, documentID string,
 	data map[string]any,
+	perms []databases.Permission,
+	increment map[string]int64,
 ) (*databases.Document, error) {
 	projectID, principal, err := d.ensureCollection(ctx, databaseID, collectionID)
 	if err != nil {
 		return nil, err
 	}
-	if len(data) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "data is required")
+	if len(data) == 0 && len(perms) == 0 && len(increment) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "data, permissions, or increment is required")
 	}
-	updated, err := d.docDB.UpdateDocument(ctx, projectID, databaseID, collectionID, databases.Document{
-		ID:   documentID,
-		Data: data,
-	}, nil, principal)
+	if len(perms) > 0 {
+		if err := databases.ValidateGrantablePermissions(principal, perms, false); err != nil {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+	}
+	updated, err := d.docDB.UpdateDocument(ctx, projectID, databaseID, collectionID, databases.DocumentUpdate{
+		Document:    databases.Document{ID: documentID, Data: data},
+		Permissions: perms,
+		Increment:   increment,
+	}, principal)
 	if err != nil {
-		return nil, fmt.Errorf("update document: %w", err)
+		return nil, shared.MapDocumentDBError(fmt.Errorf("update document: %w", err))
 	}
 	return &updated, nil
 }
@@ -145,7 +160,7 @@ func (d *Databases) DeleteDocument(ctx context.Context, databaseID, collectionID
 	if err != nil {
 		return err
 	}
-	return d.docDB.DeleteDocument(ctx, projectID, databaseID, collectionID, documentID, principal)
+	return shared.MapDocumentDBError(d.docDB.DeleteDocument(ctx, projectID, databaseID, collectionID, documentID, principal))
 }
 
 func (d *Databases) CountDocuments(ctx context.Context, databaseID, collectionID string, queries []string) (int64, error) {
@@ -153,7 +168,8 @@ func (d *Databases) CountDocuments(ctx context.Context, databaseID, collectionID
 	if err != nil {
 		return 0, err
 	}
-	return d.docDB.CountDocuments(ctx, projectID, databaseID, collectionID, queries, principal)
+	count, err := d.docDB.CountDocuments(ctx, projectID, databaseID, collectionID, queries, principal)
+	return count, shared.MapDocumentDBError(err)
 }
 
 func ownerDocumentPermissions(userID string) []databases.Permission {

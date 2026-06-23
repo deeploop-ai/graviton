@@ -44,7 +44,7 @@ func TestClientDatabases_DocumentCRUD(t *testing.T) {
 	require.NoError(t, serverUC.CreateDatabase(ctx, projectID, "app", "Application DB"))
 	require.NoError(t, serverUC.CreateCollection(ctx, projectID, "app", "notes", "Notes", []databases.Attribute{
 		{ID: "title", Key: "title", Type: "string", Size: 256},
-	}, nil, nil))
+	}, nil, nil, true))
 
 	userCtx := contexts.WithPrincipal(ctx, &shared.Principal{
 		ProjectID: projectID,
@@ -73,7 +73,7 @@ func TestClientDatabases_DocumentCRUD(t *testing.T) {
 
 	updated, err := clientUC.UpdateDocument(userCtx, "app", "notes", created.ID, map[string]any{
 		"title": "Updated note",
-	})
+	}, nil, nil)
 	require.NoError(t, err)
 	require.Equal(t, "Updated note", updated.Data["title"])
 

@@ -31,7 +31,7 @@ func TestPermissions_CollectionLevelFallback(t *testing.T) {
 		{Type: "read", Role: "any"},
 		{Type: "update", Role: "users"},
 		{Type: "delete", Role: "users"},
-	}))
+	}, true))
 
 	alice := databases.Principal{Roles: []string{"users", "user:alice"}}
 
@@ -66,10 +66,9 @@ func TestPermissions_DocumentLevelOverridesCollection(t *testing.T) {
 		{ID: "title", Key: "title", Type: "string", Size: 256},
 	}, nil, []databases.Permission{
 		{Type: "create", Role: "users"},
-		{Type: "read", Role: "any"},
 		{Type: "update", Role: "any"},
 		{Type: "delete", Role: "any"},
-	}))
+	}, true))
 
 	alice := databases.Principal{Roles: []string{"users", "user:alice"}}
 	created, err := docDB.CreateDocument(ctx, projectID, "app", "docs", databases.Document{
@@ -109,7 +108,7 @@ func TestPermissions_CreateCheck(t *testing.T) {
 	}, nil, []databases.Permission{
 		{Type: "create", Role: "user:alice"},
 		{Type: "read", Role: "any"},
-	}))
+	}, true))
 
 	_, err := docDB.CreateDocument(ctx, projectID, "app", "locked", databases.Document{
 		Data: map[string]any{"title": "test"},
@@ -144,7 +143,7 @@ func TestPermissions_KeysNotBypass(t *testing.T) {
 		{Type: "read", Role: "any"},
 		{Type: "update", Role: "users"},
 		{Type: "delete", Role: "users"},
-	}))
+	}, true))
 
 	alice := databases.Principal{Roles: []string{"users", "user:alice"}}
 	created, err := docDB.CreateDocument(ctx, projectID, "app", "docs", databases.Document{
@@ -183,7 +182,7 @@ func TestPermissions_PlatformAdminBypass(t *testing.T) {
 		{Type: "read", Role: "any"},
 		{Type: "update", Role: "users"},
 		{Type: "delete", Role: "users"},
-	}))
+	}, true))
 
 	alice := databases.Principal{Roles: []string{"users", "user:alice"}}
 	created, err := docDB.CreateDocument(ctx, projectID, "app", "docs", databases.Document{
@@ -200,10 +199,10 @@ func TestPermissions_PlatformAdminBypass(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "Secret", got.Data["title"])
 
-	_, err = docDB.UpdateDocument(ctx, projectID, "app", "docs", databases.Document{
+	_, err = docDB.UpdateDocument(ctx, projectID, "app", "docs", databases.SimpleDocumentUpdate(databases.Document{
 		ID:   created.ID,
 		Data: map[string]any{"title": "Updated by admin"},
-	}, nil, adminPrincipal)
+	}, nil), adminPrincipal)
 	require.NoError(t, err)
 
 	err = docDB.DeleteDocument(ctx, projectID, "app", "docs", created.ID, adminPrincipal)
@@ -230,7 +229,7 @@ func TestPermissions_SystemPrincipalBypass(t *testing.T) {
 	}, nil, []databases.Permission{
 		{Type: "create", Role: "user:alice"},
 		{Type: "read", Role: "user:alice"},
-	}))
+	}, true))
 
 	_, err := docDB.CreateDocument(ctx, projectID, "app", "docs", databases.Document{
 		Data: map[string]any{"title": "System created"},

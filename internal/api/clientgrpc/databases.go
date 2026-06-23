@@ -70,7 +70,19 @@ func (s *DatabasesService) GetDocument(ctx context.Context, req *clientv1.GetDoc
 }
 
 func (s *DatabasesService) UpdateDocument(ctx context.Context, req *clientv1.UpdateDocumentRequest) (*clientv1.Document, error) {
-	doc, err := s.databases.UpdateDocument(ctx, req.GetDatabaseId(), req.GetCollectionId(), req.GetDocumentId(), updateData(req.GetData()))
+	perms, err := parseOptionalPermissions(req.GetPermissions())
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+	doc, err := s.databases.UpdateDocument(
+		ctx,
+		req.GetDatabaseId(),
+		req.GetCollectionId(),
+		req.GetDocumentId(),
+		updateData(req.GetData()),
+		perms,
+		req.GetIncrement(),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -100,12 +112,16 @@ func mapClientDocument(doc *databases.Document) (*clientv1.Document, error) {
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "document data is not serializable")
 	}
-	return &clientv1.Document{
+	out := &clientv1.Document{
 		Id:        doc.ID,
 		Data:      data,
 		CreatedAt: timestamppb.New(doc.CreatedAt),
 		UpdatedAt: timestamppb.New(doc.UpdatedAt),
-	}, nil
+	}
+	for _, p := range doc.Permissions {
+		out.Permissions = append(out.Permissions, databases.FormatPermissionString(p))
+	}
+	return out, nil
 }
 
 func updateData(s *structpb.Struct) map[string]any {

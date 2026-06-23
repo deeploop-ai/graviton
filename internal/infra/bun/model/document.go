@@ -24,6 +24,7 @@ type DocumentCollection struct {
 	ProjectID        string    `bun:"project_id,pk"`
 	Name             string    `bun:"name,notnull"`
 	DocumentSecurity bool      `bun:"document_security,notnull,default:true"`
+	Disabled         bool      `bun:"disabled,notnull,default:false"`
 	Permissions      []string  `bun:"permissions,array"`
 	CreatedAt        time.Time `bun:"created_at,notnull"`
 	UpdatedAt        time.Time `bun:"updated_at,notnull"`

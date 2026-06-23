@@ -275,15 +275,74 @@ func (a *Account) loadTeamRoles(ctx context.Context, projectID, userID string) (
 	if err != nil {
 		return nil, err
 	}
-	out := make([]string, 0, len(list.Documents)*2)
+	out := make([]string, 0, len(list.Documents)*3)
 	for _, doc := range list.Documents {
 		teamID, _ := doc.Data["team_id"].(string)
 		if teamID == "" {
 			continue
 		}
 		out = append(out, fmt.Sprintf("team:%s", teamID), fmt.Sprintf("member:%s", doc.ID))
+		for _, role := range membershipRoles(doc.Data["roles"]) {
+			out = append(out, fmt.Sprintf("team:%s/%s", teamID, role))
+		}
 	}
 	return out, nil
+}
+
+func membershipRoles(raw any) []string {
+	switch v := raw.(type) {
+	case []any:
+		out := make([]string, 0, len(v))
+		for _, item := range v {
+			if s, ok := item.(string); ok && s != "" {
+				out = append(out, s)
+			}
+		}
+		return out
+	case []string:
+		return v
+	default:
+		return nil
+	}
+}
+
+func (a *Account) loadUserRoles(ctx context.Context, projectID, userID string) ([]string, error) {
+	baseRoles := []string{"users", fmt.Sprintf("user:%s", userID)}
+	doc, err := a.docDB.GetDocument(ctx, projectID, "default", "users", userID, databases.SystemPrincipal)
+	if err != nil {
+		return baseRoles, err
+	}
+	if doc == nil {
+		return baseRoles, nil
+	}
+	if emailVerified, _ := doc.Data["email_verified"].(bool); emailVerified {
+		baseRoles = append(baseRoles, fmt.Sprintf("user:%s/verified", userID))
+	}
+	for _, label := range userLabels(doc.Data["labels"]) {
+		baseRoles = append(baseRoles, "label:"+label)
+	}
+	teamRoles, err := a.loadTeamRoles(ctx, projectID, userID)
+	if err != nil {
+		return baseRoles, err
+	}
+	return append(baseRoles, teamRoles...), nil
+}
+
+func userLabels(raw any) []string {
+	switch v := raw.(type) {
+	case []any:
+		out := make([]string, 0, len(v))
+		for _, item := range v {
+			if s, ok := item.(string); ok && s != "" {
+				out = append(out, s)
+			}
+		}
+		return out
+	case []string:
+		return v
+	default:
+		return nil
+	}
 }
 
 func (a *Account) UpdateAccount(ctx context.Context, cmd UpdateAccountCommand) (*User, error) {
@@ -335,10 +394,10 @@ func (a *Account) UpdateAccount(ctx context.Context, cmd UpdateAccountCommand) (
 		return mapUserDoc(doc), nil
 	}
 
-	updated, err := a.docDB.UpdateDocument(ctx, p.ProjectID, "default", "users", databases.Document{
+	updated, err := a.docDB.UpdateDocument(ctx, p.ProjectID, "default", "users", databases.SimpleDocumentUpdate(databases.Document{
 		ID:   p.UserID,
 		Data: updates,
-	}, nil, databases.Principal{Roles: p.Roles})
+	}, nil), databases.Principal{Roles: p.Roles})
 	if err != nil {
 		if errors.Is(err, documentdb.ErrDuplicateKey) {
 			return nil, status.Error(codes.AlreadyExists, "email already registered")
@@ -428,10 +487,10 @@ func (a *Account) UpdatePrefs(ctx context.Context, prefs map[string]any) (map[st
 	if prefs == nil {
 		return nil, status.Error(codes.InvalidArgument, "prefs is required")
 	}
-	updated, err := a.docDB.UpdateDocument(ctx, p.ProjectID, "default", "users", databases.Document{
+	updated, err := a.docDB.UpdateDocument(ctx, p.ProjectID, "default", "users", databases.SimpleDocumentUpdate(databases.Document{
 		ID:   p.UserID,
 		Data: map[string]any{"prefs": prefs},
-	}, nil, databases.Principal{Roles: p.Roles})
+	}, nil), databases.Principal{Roles: p.Roles})
 	if err != nil {
 		return nil, fmt.Errorf("update prefs: %w", err)
 	}
@@ -512,9 +571,9 @@ func (a *Account) issueTokens(ctx context.Context, projectID, userID, email, ses
 	}
 
 	now := time.Now()
-	baseRoles := []string{"users", fmt.Sprintf("user:%s", userID)}
-	if teamRoles, err := a.loadTeamRoles(ctx, projectID, userID); err == nil {
-		baseRoles = append(baseRoles, teamRoles...)
+	baseRoles, err := a.loadUserRoles(ctx, projectID, userID)
+	if err != nil {
+		return nil, "", err
 	}
 	accessClaims := jwtparser.Claims{
 		TokenID:   idgen.UUID().String(),

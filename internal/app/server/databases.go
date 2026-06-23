@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/deeploop-ai/fleet/internal/app/shared"
 	"github.com/deeploop-ai/fleet/internal/domain/databases"
 	"github.com/deeploop-ai/fleet/internal/domain/projects"
 	"google.golang.org/grpc/codes"
@@ -65,7 +66,7 @@ func (d *Databases) DeleteDatabase(ctx context.Context, projectID, databaseID st
 	return d.docDB.DeleteDatabase(ctx, projectID, databaseID)
 }
 
-func (d *Databases) CreateCollection(ctx context.Context, projectID, databaseID, collectionID, name string, attrs []databases.Attribute, idxs []databases.Index, perms []databases.Permission) error {
+func (d *Databases) CreateCollection(ctx context.Context, projectID, databaseID, collectionID, name string, attrs []databases.Attribute, idxs []databases.Index, perms []databases.Permission, documentSecurity bool) error {
 	if err := d.ValidateIdentifier(databaseID); err != nil {
 		return status.Error(codes.InvalidArgument, "database_id is required")
 	}
@@ -81,7 +82,7 @@ func (d *Databases) CreateCollection(ctx context.Context, projectID, databaseID,
 	if len(perms) == 0 {
 		perms = databases.DefaultCollectionPermissions()
 	}
-	return d.docDB.CreateCollection(ctx, projectID, databaseID, collectionID, name, attrs, idxs, perms)
+	return d.docDB.CreateCollection(ctx, projectID, databaseID, collectionID, name, attrs, idxs, perms, documentSecurity)
 }
 
 func (d *Databases) ListCollections(ctx context.Context, projectID, databaseID string) ([]databases.Collection, error) {
@@ -105,7 +106,7 @@ func (d *Databases) DeleteCollection(ctx context.Context, projectID, databaseID,
 	return d.docDB.DeleteCollection(ctx, projectID, databaseID, collectionID)
 }
 
-func (d *Databases) UpdateCollection(ctx context.Context, projectID, databaseID, collectionID, name string, perms []databases.Permission) error {
+func (d *Databases) UpdateCollection(ctx context.Context, projectID, databaseID, collectionID string, patch databases.CollectionPatch) error {
 	if err := d.ValidateIdentifier(databaseID); err != nil {
 		return status.Error(codes.InvalidArgument, "database_id is required")
 	}
@@ -115,7 +116,7 @@ func (d *Databases) UpdateCollection(ctx context.Context, projectID, databaseID,
 	if _, err := d.resolveProject(ctx, projectID); err != nil {
 		return err
 	}
-	return d.docDB.UpdateCollection(ctx, projectID, databaseID, collectionID, name, perms)
+	return d.docDB.UpdateCollection(ctx, projectID, databaseID, collectionID, patch)
 }
 
 func (d *Databases) CreateAttribute(ctx context.Context, projectID, databaseID, collectionID string, attr databases.Attribute) error {
@@ -154,6 +155,32 @@ func (d *Databases) CreateIndex(ctx context.Context, projectID, databaseID, coll
 	return d.docDB.CreateIndex(ctx, projectID, databaseID, collectionID, idx)
 }
 
+func (d *Databases) DeleteAttribute(ctx context.Context, projectID, databaseID, collectionID, key string) error {
+	if err := d.ValidateIdentifier(databaseID); err != nil {
+		return status.Error(codes.InvalidArgument, "database_id is required")
+	}
+	if err := d.ValidateIdentifier(collectionID); err != nil {
+		return status.Error(codes.InvalidArgument, "collection_id is required")
+	}
+	if _, err := d.resolveProject(ctx, projectID); err != nil {
+		return err
+	}
+	return d.docDB.DeleteAttribute(ctx, projectID, databaseID, collectionID, key)
+}
+
+func (d *Databases) DeleteIndex(ctx context.Context, projectID, databaseID, collectionID, indexID string) error {
+	if err := d.ValidateIdentifier(databaseID); err != nil {
+		return status.Error(codes.InvalidArgument, "database_id is required")
+	}
+	if err := d.ValidateIdentifier(collectionID); err != nil {
+		return status.Error(codes.InvalidArgument, "collection_id is required")
+	}
+	if _, err := d.resolveProject(ctx, projectID); err != nil {
+		return err
+	}
+	return d.docDB.DeleteIndex(ctx, projectID, databaseID, collectionID, indexID)
+}
+
 func (d *Databases) ensureCollection(ctx context.Context, projectID, databaseID, collectionID string, principal databases.Principal) error {
 	if err := d.ValidateIdentifier(databaseID); err != nil {
 		return status.Error(codes.InvalidArgument, "database_id is required")
@@ -171,6 +198,9 @@ func (d *Databases) ensureCollection(ctx context.Context, projectID, databaseID,
 	if col == nil {
 		return status.Error(codes.NotFound, "collection not found")
 	}
+	if col.Disabled && !principal.IsSystem() && !principal.PlatformAdmin {
+		return shared.MapDocumentDBError(databases.ErrPermissionDenied)
+	}
 	return nil
 }
 
@@ -187,14 +217,17 @@ func (d *Databases) CreateDocument(
 	if len(data) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "data is required")
 	}
+	if err := databases.ValidateGrantablePermissions(principal, perms, principal.PlatformAdmin || principal.HasRole("keys")); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 	doc := databases.Document{ID: documentID, Data: data}
 	created, err := d.docDB.CreateDocument(ctx, projectID, databaseID, collectionID, doc, perms, principal)
 	if err != nil {
-		return nil, fmt.Errorf("create document: %w", err)
+		return nil, shared.MapDocumentDBError(fmt.Errorf("create document: %w", err))
 	}
 	got, err := d.docDB.GetDocument(ctx, projectID, databaseID, collectionID, created.ID, principal)
 	if err != nil {
-		return nil, err
+		return nil, shared.MapDocumentDBError(err)
 	}
 	if got == nil {
 		return nil, status.Error(codes.NotFound, "document not found after create")
@@ -213,7 +246,7 @@ func (d *Databases) ListDocuments(
 	}
 	list, err := d.docDB.ListDocuments(ctx, projectID, databaseID, collectionID, q, principal)
 	if err != nil {
-		return nil, 0, "", err
+		return nil, 0, "", shared.MapDocumentDBError(err)
 	}
 	return list.Documents, list.TotalCount, list.NextPageToken, nil
 }
@@ -228,7 +261,7 @@ func (d *Databases) GetDocument(
 	}
 	doc, err := d.docDB.GetDocument(ctx, projectID, databaseID, collectionID, documentID, principal)
 	if err != nil {
-		return nil, err
+		return nil, shared.MapDocumentDBError(err)
 	}
 	if doc == nil {
 		return nil, status.Error(codes.NotFound, "document not found")
@@ -241,25 +274,71 @@ func (d *Databases) UpdateDocument(
 	projectID, databaseID, collectionID, documentID string,
 	data map[string]any,
 	perms []databases.Permission,
+	increment map[string]int64,
 	principal databases.Principal,
 ) (*databases.Document, error) {
 	if err := d.ensureCollection(ctx, projectID, databaseID, collectionID, principal); err != nil {
 		return nil, err
 	}
-	if len(data) == 0 && len(perms) == 0 {
-		return nil, status.Error(codes.InvalidArgument, "data or permissions is required")
+	if len(data) == 0 && len(perms) == 0 && len(increment) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "data, permissions, or increment is required")
+	}
+	if len(perms) > 0 {
+		if err := databases.ValidateGrantablePermissions(principal, perms, principal.PlatformAdmin || principal.HasRole("keys")); err != nil {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
 	}
 	if len(data) == 0 {
 		data = map[string]any{}
 	}
-	updated, err := d.docDB.UpdateDocument(ctx, projectID, databaseID, collectionID, databases.Document{
-		ID:   documentID,
-		Data: data,
-	}, perms, principal)
+	updated, err := d.docDB.UpdateDocument(ctx, projectID, databaseID, collectionID, databases.DocumentUpdate{
+		Document:    databases.Document{ID: documentID, Data: data},
+		Permissions: perms,
+		Increment:   increment,
+	}, principal)
 	if err != nil {
-		return nil, fmt.Errorf("update document: %w", err)
+		return nil, shared.MapDocumentDBError(fmt.Errorf("update document: %w", err))
 	}
 	return &updated, nil
+}
+
+func (d *Databases) BulkUpdateDocuments(
+	ctx context.Context,
+	projectID, databaseID, collectionID string,
+	documentIDs []string,
+	data map[string]any,
+	perms []databases.Permission,
+	principal databases.Principal,
+) (int64, error) {
+	if err := d.ensureCollection(ctx, projectID, databaseID, collectionID, principal); err != nil {
+		return 0, err
+	}
+	if len(documentIDs) == 0 {
+		return 0, status.Error(codes.InvalidArgument, "document_ids is required")
+	}
+	if len(perms) > 0 {
+		if err := databases.ValidateGrantablePermissions(principal, perms, principal.PlatformAdmin || principal.HasRole("keys")); err != nil {
+			return 0, status.Error(codes.InvalidArgument, err.Error())
+		}
+	}
+	n, err := d.docDB.BulkUpdateDocuments(ctx, projectID, databaseID, collectionID, documentIDs, data, perms, principal)
+	return n, shared.MapDocumentDBError(err)
+}
+
+func (d *Databases) BulkDeleteDocuments(
+	ctx context.Context,
+	projectID, databaseID, collectionID string,
+	documentIDs []string,
+	principal databases.Principal,
+) (int64, error) {
+	if err := d.ensureCollection(ctx, projectID, databaseID, collectionID, principal); err != nil {
+		return 0, err
+	}
+	if len(documentIDs) == 0 {
+		return 0, status.Error(codes.InvalidArgument, "document_ids is required")
+	}
+	n, err := d.docDB.BulkDeleteDocuments(ctx, projectID, databaseID, collectionID, documentIDs, principal)
+	return n, shared.MapDocumentDBError(err)
 }
 
 func (d *Databases) DeleteDocument(
@@ -270,7 +349,7 @@ func (d *Databases) DeleteDocument(
 	if err := d.ensureCollection(ctx, projectID, databaseID, collectionID, principal); err != nil {
 		return err
 	}
-	return d.docDB.DeleteDocument(ctx, projectID, databaseID, collectionID, documentID, principal)
+	return shared.MapDocumentDBError(d.docDB.DeleteDocument(ctx, projectID, databaseID, collectionID, documentID, principal))
 }
 
 func (d *Databases) CountDocuments(
@@ -282,10 +361,10 @@ func (d *Databases) CountDocuments(
 	if err := d.ensureCollection(ctx, projectID, databaseID, collectionID, principal); err != nil {
 		return 0, err
 	}
-	return d.docDB.CountDocuments(ctx, projectID, databaseID, collectionID, queries, principal)
+	count, err := d.docDB.CountDocuments(ctx, projectID, databaseID, collectionID, queries, principal)
+	return count, shared.MapDocumentDBError(err)
 }
 
-// MapAttributeType normalizes a validated attribute type to lowercase.
 func (d *Databases) MapAttributeType(t string) string {
 	return strings.ToLower(t)
 }

@@ -251,10 +251,10 @@ func (t *Teams) UpdateMembership(ctx context.Context, projectID, teamID, members
 	if _, err := t.getMembershipDoc(ctx, projectID, teamID, membershipID, principal); err != nil {
 		return nil, err
 	}
-	updated, err := t.docDB.UpdateDocument(ctx, projectID, "default", "memberships", databases.Document{
+	updated, err := t.docDB.UpdateDocument(ctx, projectID, "default", "memberships", databases.SimpleDocumentUpdate(databases.Document{
 		ID:   membershipID,
 		Data: map[string]any{"roles": cmd.Roles},
-	}, nil, principal)
+	}, nil), principal)
 	if err != nil {
 		return nil, fmt.Errorf("update membership: %w", err)
 	}
@@ -301,10 +301,10 @@ func (t *Teams) UpdateMembershipStatus(ctx context.Context, projectID, teamID, m
 	if _, ok := updates["user_id"]; ok {
 		perms = membershipPermissions(teamID, userID)
 	}
-	updated, err := t.docDB.UpdateDocument(ctx, projectID, "default", "memberships", databases.Document{
+	updated, err := t.docDB.UpdateDocument(ctx, projectID, "default", "memberships", databases.SimpleDocumentUpdate(databases.Document{
 		ID:   membershipID,
 		Data: updates,
-	}, perms, principal)
+	}, perms), principal)
 	if err != nil {
 		return nil, fmt.Errorf("update membership status: %w", err)
 	}
@@ -412,10 +412,10 @@ func (t *Teams) adjustTeamTotal(ctx context.Context, projectID, teamID string, d
 	if total < 0 {
 		total = 0
 	}
-	_, err = t.docDB.UpdateDocument(ctx, projectID, "default", "teams", databases.Document{
+	_, err = t.docDB.UpdateDocument(ctx, projectID, "default", "teams", databases.SimpleDocumentUpdate(databases.Document{
 		ID:   teamID,
 		Data: map[string]any{"total": total},
-	}, nil, databases.SystemPrincipal)
+	}, nil), databases.SystemPrincipal)
 	return err
 }
 

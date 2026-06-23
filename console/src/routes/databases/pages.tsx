@@ -1250,12 +1250,9 @@ export function DocumentDetailPage() {
 
   const save = useMutation({
     mutationFn: () =>
-      updateDocument(
-        dbId!,
-        collId!,
-        docId!,
-        buildDocumentData(collection!.attributes, values)
-      ),
+      updateDocument(dbId!, collId!, docId!, {
+        data: buildDocumentData(collection!.attributes, values),
+      }),
     onSuccess: () => {
       toast.success("Document 已更新");
       queryClient.invalidateQueries({ queryKey: ["documents", dbId, collId] });

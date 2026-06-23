@@ -26,19 +26,33 @@ type Permission struct {
 }
 
 type Document struct {
-	ID        string
-	Tenant    int64
-	Data      map[string]any
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	CreatedBy string
-	UpdatedBy string
+	ID          string
+	Tenant      int64
+	Data        map[string]any
+	Permissions []Permission
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	CreatedBy   string
+	UpdatedBy   string
 }
 
 type Query struct {
 	Queries   []string
 	PageSize  int32
 	PageToken string
+}
+
+type CollectionPatch struct {
+	Name             string
+	Permissions      *[]Permission
+	DocumentSecurity *bool
+	Disabled         *bool
+}
+
+type DocumentUpdate struct {
+	Document    Document
+	Permissions []Permission
+	Increment   map[string]int64
 }
 
 type DocumentList struct {
@@ -53,6 +67,7 @@ type Collection struct {
 	ProjectID        string
 	Name             string
 	DocumentSecurity bool
+	Disabled         bool
 	Permissions      []Permission
 	Attributes       []Attribute
 	Indexes          []Index
