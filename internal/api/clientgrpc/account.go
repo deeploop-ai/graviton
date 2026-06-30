@@ -239,6 +239,20 @@ func (s *AccountService) CreatePhoneOTPSession(ctx context.Context, req *clientv
 	}, nil
 }
 
+func (s *AccountService) CreateWeChatMiniProgramSession(ctx context.Context, req *clientv1.CreateWeChatMiniProgramSessionRequest) (*clientv1.SignInResponse, error) {
+	user, tokens, _, err := s.account.CreateWeChatMiniProgramSession(ctx, client.CreateWeChatMiniProgramSessionCommand{
+		ProjectID: req.GetProjectId(),
+		Code:      req.GetCode(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &clientv1.SignInResponse{
+		Account: mapUser(user),
+		Tokens:  mapTokens(tokens),
+	}, nil
+}
+
 func mapUser(u *client.User) *clientv1.Account {
 	if u == nil {
 		return nil

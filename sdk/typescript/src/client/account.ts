@@ -215,4 +215,22 @@ export class AccountService {
     this.http.setAccessToken(res.tokens.access_token);
     return res;
   }
+
+  async createWeChatMiniProgramSession(input: {
+    code: string;
+  }): Promise<{ account: Account; tokens: TokenBundle }> {
+    const res = await this.http.request<{ account: Account; tokens: TokenBundle }>(
+      "POST",
+      "/v1/account/sessions/wechat/miniprogram",
+      {
+        auth: "none",
+        body: {
+          project_id: this.http.getProjectId(),
+          code: input.code,
+        },
+      }
+    );
+    this.http.setAccessToken(res.tokens.access_token);
+    return res;
+  }
 }

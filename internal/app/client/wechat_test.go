@@ -1,0 +1,88 @@
+package client
+
+import (
+	"context"
+	"testing"
+
+	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
+	"github.com/deeploop-ai/orionid/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/orionid/internal/infra/bun/model"
+	"github.com/deeploop-ai/orionid/internal/infra/documentdb"
+	"github.com/deeploop-ai/orionid/internal/pkg/config"
+	"github.com/deeploop-ai/orionid/internal/testutil"
+	"github.com/stretchr/testify/require"
+)
+
+func TestAccount_ResolveWeChatUser_CrossProviderLink(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	ctx := context.Background()
+	db := testutil.SetupTestDB(t)
+	defer db.Close()
+
+	projectID, _, cleanup := testutil.CreateTestProject(ctx, db)
+	defer cleanup()
+
+	cfg := buildTestConfig()
+	projectRepo := bunrepo.NewProjectRepository(db)
+	docDB := documentdb.NewPostgresDocumentDB(db)
+	account := NewTestAccount(cfg, projectRepo, docDB)
+
+	unionID := "union-cross-link"
+	webInfo := &domainauth.OAuthUserInfo{
+		OpenID:      "web-openid",
+		UnionID:     unionID,
+		ProviderUID: domainauth.WeChatIdentityUID(unionID, "web-openid"),
+		Name:        "WeChat Web",
+	}
+
+	user1, err := account.resolveWeChatUser(ctx, projectID, domainauth.ProviderWeChatWeb, webInfo)
+	require.NoError(t, err)
+	require.NotEmpty(t, user1.ID)
+
+	mpInfo := &domainauth.OAuthUserInfo{
+		OpenID:      "mp-openid",
+		UnionID:     unionID,
+		ProviderUID: domainauth.WeChatIdentityUID(unionID, "mp-openid"),
+		Name:        "WeChat MP",
+	}
+	user2, err := account.resolveWeChatUser(ctx, projectID, domainauth.ProviderWeChatMiniProgram, mpInfo)
+	require.NoError(t, err)
+	require.Equal(t, user1.ID, user2.ID)
+}
+
+func TestAccount_CreateWeChatMiniProgramSession(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	ctx := context.Background()
+	db := testutil.SetupTestDB(t)
+	defer db.Close()
+
+	projectID, _, cleanup := testutil.CreateTestProject(ctx, db)
+	defer cleanup()
+
+	_, err := db.NewInsert().Model(&model.ProjectOAuthProvider{
+		ProjectID:    projectID,
+		Provider:     domainauth.ProviderWeChatMiniProgram,
+		Enabled:      true,
+		ClientID:     "wx-test-appid",
+		ClientSecret: "wx-test-secret",
+	}).Exec(ctx)
+	require.NoError(t, err)
+
+	cfg := &config.AppConfig{}
+	projectRepo := bunrepo.NewProjectRepository(db)
+	oauthRepo := bunrepo.NewOAuthProviderRepository(db)
+	docDB := documentdb.NewPostgresDocumentDB(db)
+	account := NewTestAccountWithDeps(cfg, projectRepo, oauthRepo, docDB, nil, nil, nil)
+
+	_, _, _, err = account.CreateWeChatMiniProgramSession(ctx, CreateWeChatMiniProgramSessionCommand{
+		ProjectID: projectID,
+		Code:      "invalid-code",
+	})
+	require.Error(t, err)
+}

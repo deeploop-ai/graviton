@@ -25,6 +25,8 @@ type OAuthStateStore interface {
 // OAuthUserInfo is normalized profile data from an OAuth2 provider.
 type OAuthUserInfo struct {
 	ProviderUID string
+	UnionID     string
+	OpenID      string
 	Email       string
 	Name        string
 	AvatarURL   string

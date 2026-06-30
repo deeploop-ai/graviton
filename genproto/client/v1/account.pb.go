@@ -1541,6 +1541,58 @@ func (x *CreatePhoneOTPSessionRequest) GetOtp() string {
 	return ""
 }
 
+type CreateWeChatMiniProgramSessionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateWeChatMiniProgramSessionRequest) Reset() {
+	*x = CreateWeChatMiniProgramSessionRequest{}
+	mi := &file_client_v1_account_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateWeChatMiniProgramSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateWeChatMiniProgramSessionRequest) ProtoMessage() {}
+
+func (x *CreateWeChatMiniProgramSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateWeChatMiniProgramSessionRequest.ProtoReflect.Descriptor instead.
+func (*CreateWeChatMiniProgramSessionRequest) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *CreateWeChatMiniProgramSessionRequest) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+func (x *CreateWeChatMiniProgramSessionRequest) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
 var File_client_v1_account_proto protoreflect.FileDescriptor
 
 const file_client_v1_account_proto_rawDesc = "" +
@@ -1657,7 +1709,11 @@ const file_client_v1_account_proto_rawDesc = "" +
 	"project_id\x18\x01 \x01(\tR\tprojectId\x12\x14\n" +
 	"\x05phone\x18\x02 \x01(\tR\x05phone\x12!\n" +
 	"\fchallenge_id\x18\x03 \x01(\tR\vchallengeId\x12\x10\n" +
-	"\x03otp\x18\x04 \x01(\tR\x03otp2\xd3\x12\n" +
+	"\x03otp\x18\x04 \x01(\tR\x03otp\"Z\n" +
+	"%CreateWeChatMiniProgramSessionRequest\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x01 \x01(\tR\tprojectId\x12\x12\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code2\x8d\x14\n" +
 	"\x0eAccountService\x12s\n" +
 	"\x06SignUp\x12 .orionid.client.v1.SignUpRequest\x1a!.orionid.client.v1.SignUpResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/sign-up\x12s\n" +
 	"\x06SignIn\x12 .orionid.client.v1.SignInRequest\x1a!.orionid.client.v1.SignInResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/sign-in\x12t\n" +
@@ -1675,7 +1731,8 @@ const file_client_v1_account_proto_rawDesc = "" +
 	"\x13CreateOAuth2Session\x12-.orionid.client.v1.CreateOAuth2SessionRequest\x1a..orionid.client.v1.CreateOAuth2SessionResponse\"4\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02(\x12&/v1/account/sessions/oauth2/{provider}\x12\xb0\x01\n" +
 	"\x18CreateOAuth2TokenSession\x122.orionid.client.v1.CreateOAuth2TokenSessionRequest\x1a!.orionid.client.v1.SignInResponse\"=\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x021:\x01*\",/v1/account/sessions/oauth2/{provider}/token\x12\x91\x01\n" +
 	"\x0eCreatePhoneOTP\x12(.orionid.client.v1.CreatePhoneOTPRequest\x1a$.orionid.client.v1.ChallengeResponse\"/\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/v1/account/sessions/phone-otp\x12\xa3\x01\n" +
-	"\x15CreatePhoneOTPSession\x12/.orionid.client.v1.CreatePhoneOTPSessionRequest\x1a!.orionid.client.v1.SignInResponse\"6\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02*:\x01*\"%/v1/account/sessions/phone-otp/verify\x1a\x06\x92\xb2\x19\x02\b\x02B<Z:github.com/deeploop-ai/orionid/genproto/client/v1;clientv1b\x06proto3"
+	"\x15CreatePhoneOTPSession\x12/.orionid.client.v1.CreatePhoneOTPSessionRequest\x1a!.orionid.client.v1.SignInResponse\"6\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02*:\x01*\"%/v1/account/sessions/phone-otp/verify\x12\xb7\x01\n" +
+	"\x1eCreateWeChatMiniProgramSession\x128.orionid.client.v1.CreateWeChatMiniProgramSessionRequest\x1a!.orionid.client.v1.SignInResponse\"8\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02,:\x01*\"'/v1/account/sessions/wechat/miniprogram\x1a\x06\x92\xb2\x19\x02\b\x02B<Z:github.com/deeploop-ai/orionid/genproto/client/v1;clientv1b\x06proto3"
 
 var (
 	file_client_v1_account_proto_rawDescOnce sync.Once
@@ -1689,52 +1746,53 @@ func file_client_v1_account_proto_rawDescGZIP() []byte {
 	return file_client_v1_account_proto_rawDescData
 }
 
-var file_client_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
+var file_client_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
 var file_client_v1_account_proto_goTypes = []any{
-	(*SignUpRequest)(nil),                   // 0: orionid.client.v1.SignUpRequest
-	(*SignInRequest)(nil),                   // 1: orionid.client.v1.SignInRequest
-	(*SignOutRequest)(nil),                  // 2: orionid.client.v1.SignOutRequest
-	(*MeRequest)(nil),                       // 3: orionid.client.v1.MeRequest
-	(*Account)(nil),                         // 4: orionid.client.v1.Account
-	(*TokenBundle)(nil),                     // 5: orionid.client.v1.TokenBundle
-	(*SignUpResponse)(nil),                  // 6: orionid.client.v1.SignUpResponse
-	(*SignInResponse)(nil),                  // 7: orionid.client.v1.SignInResponse
-	(*RefreshTokenRequest)(nil),             // 8: orionid.client.v1.RefreshTokenRequest
-	(*RefreshTokenResponse)(nil),            // 9: orionid.client.v1.RefreshTokenResponse
-	(*UpdateAccountRequest)(nil),            // 10: orionid.client.v1.UpdateAccountRequest
-	(*Session)(nil),                         // 11: orionid.client.v1.Session
-	(*ListSessionsRequest)(nil),             // 12: orionid.client.v1.ListSessionsRequest
-	(*ListSessionsResponse)(nil),            // 13: orionid.client.v1.ListSessionsResponse
-	(*DeleteSessionRequest)(nil),            // 14: orionid.client.v1.DeleteSessionRequest
-	(*DeleteSessionsRequest)(nil),           // 15: orionid.client.v1.DeleteSessionsRequest
-	(*GetPrefsRequest)(nil),                 // 16: orionid.client.v1.GetPrefsRequest
-	(*GetPrefsResponse)(nil),                // 17: orionid.client.v1.GetPrefsResponse
-	(*UpdatePrefsRequest)(nil),              // 18: orionid.client.v1.UpdatePrefsRequest
-	(*CreateEmailOTPRequest)(nil),           // 19: orionid.client.v1.CreateEmailOTPRequest
-	(*CreateEmailOTPSessionRequest)(nil),    // 20: orionid.client.v1.CreateEmailOTPSessionRequest
-	(*ChallengeResponse)(nil),               // 21: orionid.client.v1.ChallengeResponse
-	(*CreateOAuth2SessionRequest)(nil),      // 22: orionid.client.v1.CreateOAuth2SessionRequest
-	(*CreateOAuth2SessionResponse)(nil),     // 23: orionid.client.v1.CreateOAuth2SessionResponse
-	(*CreateOAuth2TokenSessionRequest)(nil), // 24: orionid.client.v1.CreateOAuth2TokenSessionRequest
-	(*CreatePhoneOTPRequest)(nil),           // 25: orionid.client.v1.CreatePhoneOTPRequest
-	(*CreatePhoneOTPSessionRequest)(nil),    // 26: orionid.client.v1.CreatePhoneOTPSessionRequest
-	(*timestamppb.Timestamp)(nil),           // 27: google.protobuf.Timestamp
-	(*structpb.Struct)(nil),                 // 28: google.protobuf.Struct
-	(*v1.Empty)(nil),                        // 29: orionid.shared.v1.Empty
+	(*SignUpRequest)(nil),                         // 0: orionid.client.v1.SignUpRequest
+	(*SignInRequest)(nil),                         // 1: orionid.client.v1.SignInRequest
+	(*SignOutRequest)(nil),                        // 2: orionid.client.v1.SignOutRequest
+	(*MeRequest)(nil),                             // 3: orionid.client.v1.MeRequest
+	(*Account)(nil),                               // 4: orionid.client.v1.Account
+	(*TokenBundle)(nil),                           // 5: orionid.client.v1.TokenBundle
+	(*SignUpResponse)(nil),                        // 6: orionid.client.v1.SignUpResponse
+	(*SignInResponse)(nil),                        // 7: orionid.client.v1.SignInResponse
+	(*RefreshTokenRequest)(nil),                   // 8: orionid.client.v1.RefreshTokenRequest
+	(*RefreshTokenResponse)(nil),                  // 9: orionid.client.v1.RefreshTokenResponse
+	(*UpdateAccountRequest)(nil),                  // 10: orionid.client.v1.UpdateAccountRequest
+	(*Session)(nil),                               // 11: orionid.client.v1.Session
+	(*ListSessionsRequest)(nil),                   // 12: orionid.client.v1.ListSessionsRequest
+	(*ListSessionsResponse)(nil),                  // 13: orionid.client.v1.ListSessionsResponse
+	(*DeleteSessionRequest)(nil),                  // 14: orionid.client.v1.DeleteSessionRequest
+	(*DeleteSessionsRequest)(nil),                 // 15: orionid.client.v1.DeleteSessionsRequest
+	(*GetPrefsRequest)(nil),                       // 16: orionid.client.v1.GetPrefsRequest
+	(*GetPrefsResponse)(nil),                      // 17: orionid.client.v1.GetPrefsResponse
+	(*UpdatePrefsRequest)(nil),                    // 18: orionid.client.v1.UpdatePrefsRequest
+	(*CreateEmailOTPRequest)(nil),                 // 19: orionid.client.v1.CreateEmailOTPRequest
+	(*CreateEmailOTPSessionRequest)(nil),          // 20: orionid.client.v1.CreateEmailOTPSessionRequest
+	(*ChallengeResponse)(nil),                     // 21: orionid.client.v1.ChallengeResponse
+	(*CreateOAuth2SessionRequest)(nil),            // 22: orionid.client.v1.CreateOAuth2SessionRequest
+	(*CreateOAuth2SessionResponse)(nil),           // 23: orionid.client.v1.CreateOAuth2SessionResponse
+	(*CreateOAuth2TokenSessionRequest)(nil),       // 24: orionid.client.v1.CreateOAuth2TokenSessionRequest
+	(*CreatePhoneOTPRequest)(nil),                 // 25: orionid.client.v1.CreatePhoneOTPRequest
+	(*CreatePhoneOTPSessionRequest)(nil),          // 26: orionid.client.v1.CreatePhoneOTPSessionRequest
+	(*CreateWeChatMiniProgramSessionRequest)(nil), // 27: orionid.client.v1.CreateWeChatMiniProgramSessionRequest
+	(*timestamppb.Timestamp)(nil),                 // 28: google.protobuf.Timestamp
+	(*structpb.Struct)(nil),                       // 29: google.protobuf.Struct
+	(*v1.Empty)(nil),                              // 30: orionid.shared.v1.Empty
 }
 var file_client_v1_account_proto_depIdxs = []int32{
-	27, // 0: orionid.client.v1.Account.created_at:type_name -> google.protobuf.Timestamp
-	27, // 1: orionid.client.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
+	28, // 0: orionid.client.v1.Account.created_at:type_name -> google.protobuf.Timestamp
+	28, // 1: orionid.client.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
 	4,  // 2: orionid.client.v1.SignUpResponse.account:type_name -> orionid.client.v1.Account
 	5,  // 3: orionid.client.v1.SignUpResponse.tokens:type_name -> orionid.client.v1.TokenBundle
 	4,  // 4: orionid.client.v1.SignInResponse.account:type_name -> orionid.client.v1.Account
 	5,  // 5: orionid.client.v1.SignInResponse.tokens:type_name -> orionid.client.v1.TokenBundle
 	5,  // 6: orionid.client.v1.RefreshTokenResponse.tokens:type_name -> orionid.client.v1.TokenBundle
-	27, // 7: orionid.client.v1.Session.expire_at:type_name -> google.protobuf.Timestamp
-	27, // 8: orionid.client.v1.Session.created_at:type_name -> google.protobuf.Timestamp
+	28, // 7: orionid.client.v1.Session.expire_at:type_name -> google.protobuf.Timestamp
+	28, // 8: orionid.client.v1.Session.created_at:type_name -> google.protobuf.Timestamp
 	11, // 9: orionid.client.v1.ListSessionsResponse.sessions:type_name -> orionid.client.v1.Session
-	28, // 10: orionid.client.v1.GetPrefsResponse.prefs:type_name -> google.protobuf.Struct
-	28, // 11: orionid.client.v1.UpdatePrefsRequest.prefs:type_name -> google.protobuf.Struct
+	29, // 10: orionid.client.v1.GetPrefsResponse.prefs:type_name -> google.protobuf.Struct
+	29, // 11: orionid.client.v1.UpdatePrefsRequest.prefs:type_name -> google.protobuf.Struct
 	0,  // 12: orionid.client.v1.AccountService.SignUp:input_type -> orionid.client.v1.SignUpRequest
 	1,  // 13: orionid.client.v1.AccountService.SignIn:input_type -> orionid.client.v1.SignInRequest
 	2,  // 14: orionid.client.v1.AccountService.SignOut:input_type -> orionid.client.v1.SignOutRequest
@@ -1752,25 +1810,27 @@ var file_client_v1_account_proto_depIdxs = []int32{
 	24, // 26: orionid.client.v1.AccountService.CreateOAuth2TokenSession:input_type -> orionid.client.v1.CreateOAuth2TokenSessionRequest
 	25, // 27: orionid.client.v1.AccountService.CreatePhoneOTP:input_type -> orionid.client.v1.CreatePhoneOTPRequest
 	26, // 28: orionid.client.v1.AccountService.CreatePhoneOTPSession:input_type -> orionid.client.v1.CreatePhoneOTPSessionRequest
-	6,  // 29: orionid.client.v1.AccountService.SignUp:output_type -> orionid.client.v1.SignUpResponse
-	7,  // 30: orionid.client.v1.AccountService.SignIn:output_type -> orionid.client.v1.SignInResponse
-	29, // 31: orionid.client.v1.AccountService.SignOut:output_type -> orionid.shared.v1.Empty
-	9,  // 32: orionid.client.v1.AccountService.RefreshToken:output_type -> orionid.client.v1.RefreshTokenResponse
-	4,  // 33: orionid.client.v1.AccountService.Me:output_type -> orionid.client.v1.Account
-	4,  // 34: orionid.client.v1.AccountService.UpdateAccount:output_type -> orionid.client.v1.Account
-	13, // 35: orionid.client.v1.AccountService.ListSessions:output_type -> orionid.client.v1.ListSessionsResponse
-	29, // 36: orionid.client.v1.AccountService.DeleteSession:output_type -> orionid.shared.v1.Empty
-	29, // 37: orionid.client.v1.AccountService.DeleteSessions:output_type -> orionid.shared.v1.Empty
-	17, // 38: orionid.client.v1.AccountService.GetPrefs:output_type -> orionid.client.v1.GetPrefsResponse
-	17, // 39: orionid.client.v1.AccountService.UpdatePrefs:output_type -> orionid.client.v1.GetPrefsResponse
-	21, // 40: orionid.client.v1.AccountService.CreateEmailOTP:output_type -> orionid.client.v1.ChallengeResponse
-	7,  // 41: orionid.client.v1.AccountService.CreateEmailOTPSession:output_type -> orionid.client.v1.SignInResponse
-	23, // 42: orionid.client.v1.AccountService.CreateOAuth2Session:output_type -> orionid.client.v1.CreateOAuth2SessionResponse
-	7,  // 43: orionid.client.v1.AccountService.CreateOAuth2TokenSession:output_type -> orionid.client.v1.SignInResponse
-	21, // 44: orionid.client.v1.AccountService.CreatePhoneOTP:output_type -> orionid.client.v1.ChallengeResponse
-	7,  // 45: orionid.client.v1.AccountService.CreatePhoneOTPSession:output_type -> orionid.client.v1.SignInResponse
-	29, // [29:46] is the sub-list for method output_type
-	12, // [12:29] is the sub-list for method input_type
+	27, // 29: orionid.client.v1.AccountService.CreateWeChatMiniProgramSession:input_type -> orionid.client.v1.CreateWeChatMiniProgramSessionRequest
+	6,  // 30: orionid.client.v1.AccountService.SignUp:output_type -> orionid.client.v1.SignUpResponse
+	7,  // 31: orionid.client.v1.AccountService.SignIn:output_type -> orionid.client.v1.SignInResponse
+	30, // 32: orionid.client.v1.AccountService.SignOut:output_type -> orionid.shared.v1.Empty
+	9,  // 33: orionid.client.v1.AccountService.RefreshToken:output_type -> orionid.client.v1.RefreshTokenResponse
+	4,  // 34: orionid.client.v1.AccountService.Me:output_type -> orionid.client.v1.Account
+	4,  // 35: orionid.client.v1.AccountService.UpdateAccount:output_type -> orionid.client.v1.Account
+	13, // 36: orionid.client.v1.AccountService.ListSessions:output_type -> orionid.client.v1.ListSessionsResponse
+	30, // 37: orionid.client.v1.AccountService.DeleteSession:output_type -> orionid.shared.v1.Empty
+	30, // 38: orionid.client.v1.AccountService.DeleteSessions:output_type -> orionid.shared.v1.Empty
+	17, // 39: orionid.client.v1.AccountService.GetPrefs:output_type -> orionid.client.v1.GetPrefsResponse
+	17, // 40: orionid.client.v1.AccountService.UpdatePrefs:output_type -> orionid.client.v1.GetPrefsResponse
+	21, // 41: orionid.client.v1.AccountService.CreateEmailOTP:output_type -> orionid.client.v1.ChallengeResponse
+	7,  // 42: orionid.client.v1.AccountService.CreateEmailOTPSession:output_type -> orionid.client.v1.SignInResponse
+	23, // 43: orionid.client.v1.AccountService.CreateOAuth2Session:output_type -> orionid.client.v1.CreateOAuth2SessionResponse
+	7,  // 44: orionid.client.v1.AccountService.CreateOAuth2TokenSession:output_type -> orionid.client.v1.SignInResponse
+	21, // 45: orionid.client.v1.AccountService.CreatePhoneOTP:output_type -> orionid.client.v1.ChallengeResponse
+	7,  // 46: orionid.client.v1.AccountService.CreatePhoneOTPSession:output_type -> orionid.client.v1.SignInResponse
+	7,  // 47: orionid.client.v1.AccountService.CreateWeChatMiniProgramSession:output_type -> orionid.client.v1.SignInResponse
+	30, // [30:48] is the sub-list for method output_type
+	12, // [12:30] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
 	12, // [12:12] is the sub-list for extension extendee
 	0,  // [0:12] is the sub-list for field type_name
@@ -1787,7 +1847,7 @@ func file_client_v1_account_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_client_v1_account_proto_rawDesc), len(file_client_v1_account_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   27,
+			NumMessages:   28,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

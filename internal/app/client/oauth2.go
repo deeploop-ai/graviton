@@ -53,6 +53,9 @@ func (a *Account) CreateOAuth2Session(ctx context.Context, cmd CreateOAuth2Sessi
 	if provider == "" {
 		return "", status.Error(codes.InvalidArgument, "provider is required")
 	}
+	if provider == domainauth.ProviderWeChatMiniProgram {
+		return "", status.Error(codes.InvalidArgument, "use CreateWeChatMiniProgramSession for wechat_miniprogram")
+	}
 	if err := validateRedirectURL(cmd.Success); err != nil {
 		return "", status.Errorf(codes.InvalidArgument, "invalid success url: %v", err)
 	}
@@ -76,9 +79,13 @@ func (a *Account) CreateOAuth2Session(ctx context.Context, cmd CreateOAuth2Sessi
 		return "", err
 	}
 
-	verifier := oauth2.GenerateVerifier()
-	challenge := oauth2.S256ChallengeFromVerifier(verifier)
 	stateID := idgen.UUID().String()
+	verifier := ""
+	challenge := ""
+	if usesWeChatPKCE(provider) {
+		verifier = oauth2.GenerateVerifier()
+		challenge = oauth2.S256ChallengeFromVerifier(verifier)
+	}
 	if err := a.oauthState.Save(ctx, domainauth.OAuthState{
 		StateID:      stateID,
 		ProjectID:    projectID,
@@ -278,6 +285,14 @@ func normalizeOAuthProvider(provider string) string {
 		return domainauth.ProviderGoogle
 	case domainauth.ProviderGitHub:
 		return domainauth.ProviderGitHub
+	case domainauth.ProviderWeChatWeb:
+		return domainauth.ProviderWeChatWeb
+	case domainauth.ProviderWeChatMP:
+		return domainauth.ProviderWeChatMP
+	case domainauth.ProviderWeChatMiniProgram:
+		return domainauth.ProviderWeChatMiniProgram
+	case domainauth.ProviderWeChatApp:
+		return domainauth.ProviderWeChatApp
 	default:
 		return ""
 	}

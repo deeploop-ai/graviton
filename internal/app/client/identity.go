@@ -30,6 +30,17 @@ func (a *Account) findIdentity(ctx context.Context, projectID, provider, provide
 
 func (a *Account) createIdentity(ctx context.Context, projectID, userID string, info *domainauth.OAuthUserInfo, provider string) error {
 	identityID := idgen.UUID().String()
+	providerData := map[string]any{
+		"name":       info.Name,
+		"avatar_url": info.AvatarURL,
+		"raw":        info.Raw,
+	}
+	if info.OpenID != "" {
+		providerData["openid"] = info.OpenID
+	}
+	if info.UnionID != "" {
+		providerData["unionid"] = info.UnionID
+	}
 	doc := databases.Document{
 		ID: identityID,
 		Data: map[string]any{
@@ -37,11 +48,7 @@ func (a *Account) createIdentity(ctx context.Context, projectID, userID string, 
 			"provider":       provider,
 			"provider_uid":   info.ProviderUID,
 			"provider_email": info.Email,
-			"provider_data": map[string]any{
-				"name":       info.Name,
-				"avatar_url": info.AvatarURL,
-				"raw":        info.Raw,
-			},
+			"provider_data":  providerData,
 		},
 	}
 	perms := []databases.Permission{
@@ -74,6 +81,9 @@ func mapIdentityDoc(doc *databases.Document) *domainauth.Identity {
 }
 
 func (a *Account) resolveOAuthUser(ctx context.Context, projectID, provider string, info *domainauth.OAuthUserInfo) (*User, error) {
+	if domainauth.IsWeChatProvider(provider) {
+		return a.resolveWeChatUser(ctx, projectID, provider, info)
+	}
 	if info == nil || info.ProviderUID == "" {
 		return nil, fmt.Errorf("oauth profile missing provider uid")
 	}

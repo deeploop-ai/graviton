@@ -426,6 +426,38 @@
         ]
       }
     },
+    "/v1/account/sessions/wechat/miniprogram": {
+      "post": {
+        "operationId": "AccountService_CreateWeChatMiniProgramSession",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/orionidclientv1SignInResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateWeChatMiniProgramSessionRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountService"
+        ]
+      }
+    },
     "/v1/account/sessions/{sessionId}": {
       "delete": {
         "operationId": "AccountService_DeleteSession",
@@ -735,6 +767,17 @@
           "type": "string"
         },
         "otp": {
+          "type": "string"
+        }
+      }
+    },
+    "v1CreateWeChatMiniProgramSessionRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "code": {
           "type": "string"
         }
       }

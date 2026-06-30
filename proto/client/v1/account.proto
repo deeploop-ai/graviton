@@ -97,6 +97,11 @@ service AccountService {
     option (google.api.http) = { post: "/v1/account/sessions/phone-otp/verify", body: "*" };
     option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
+
+  rpc CreateWeChatMiniProgramSession(CreateWeChatMiniProgramSessionRequest) returns (SignInResponse) {
+    option (google.api.http) = { post: "/v1/account/sessions/wechat/miniprogram", body: "*" };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+  }
 }
 
 message SignUpRequest {
@@ -244,4 +249,9 @@ message CreatePhoneOTPSessionRequest {
   string phone = 2;
   string challenge_id = 3;
   string otp = 4;
+}
+
+message CreateWeChatMiniProgramSessionRequest {
+  string project_id = 1;
+  string code = 2;
 }

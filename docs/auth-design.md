@@ -1,7 +1,7 @@
 # Client 认证体系设计
 
 > 最新更新：2026-06-30  
-> 状态：Phase 0 完成，Phase 1（Email OTP）进行中
+> 状态：Phase 4（微信 Web + 小程序）已完成
 
 ---
 
@@ -15,8 +15,7 @@
 | Email OTP | Phase 1 | ✅ 完成 |
 | OAuth2 Google/GitHub | Phase 2 | ✅ 完成 |
 | SMS OTP | Phase 3 | ✅ 完成 |
-| OAuth2（Google / GitHub） | Phase 2 | 待办 |
-| 微信（Web / 小程序） | Phase 4 | 待办 |
+| 微信（Web / 公众号 / 小程序） | Phase 4 | ✅ 完成 |
 
 所有登录方式最终收敛到同一条 **Session 流水线**，复用 JWT + session cookie 机制。
 
@@ -193,7 +192,16 @@ orionid:oauth:state:{state}       → project_id、provider、redirect_uri、pkc
 | 小程序 | `wechat_miniprogram` | code2session |
 | 移动 App | `wechat_app` | 微信 SDK |
 
-身份键优先使用 `unionid`，fallback 到各场景 `openid`。
+身份键优先使用 `unionid`，fallback 到各场景 `openid`。跨场景账号通过 `WeChatProviders()` 循环查找 identities 实现关联。
+
+**API：**
+
+| 场景 | 入口 |
+|------|------|
+| 网站扫码 / 公众号 H5 | 复用 OAuth2：`GET /v1/account/sessions/oauth2/{provider}` → callback |
+| 小程序 | `POST /v1/account/sessions/wechat/miniprogram`（body: `project_id`, `code`） |
+
+微信 OAuth **不使用 PKCE**（`wechat_web` / `wechat_mp`）。`session_key` 仅存在于微信 API 响应，不落库、不返回客户端。
 
 ---
 
@@ -289,7 +297,7 @@ messaging:
 | **Phase 1** | Email OTP API + Redis + SMTP | 5-7 天 | ✅ 完成 |
 | **Phase 2** | OAuth2 Google/GitHub + callback handler | 7-10 天 | ✅ 完成 |
 | **Phase 3** | SMS OTP + Twilio/Dev | 5-7 天 | ✅ 完成 |
-| **Phase 4** | 微信 Web + 小程序 | 10-14 天 | 扫码登录、code2session |
+| **Phase 4** | 微信 Web + 小程序 | 10-14 天 | ✅ 扫码登录、code2session |
 | **Phase 5** | SDK / Demo / Console Settings | 5-7 天 | 前端多 Tab 登录；OAuth/SMTP 配置页 |
 
 ---
@@ -324,6 +332,16 @@ VALUES (
 ```
 
 回调地址固定为：`{server.http.public_url}/v1/account/oauth2/{provider}/callback`
+
+微信 provider 示例（`client_id` = AppID，`client_secret` = AppSecret）：
+
+```sql
+INSERT INTO project_oauth_providers (project_id, provider, client_id, client_secret, scopes)
+VALUES
+  ('<project_id>', 'wechat_web', '<appid>', '<secret>', ARRAY[]::text[]),
+  ('<project_id>', 'wechat_mp', '<appid>', '<secret>', ARRAY[]::text[]),
+  ('<project_id>', 'wechat_miniprogram', '<appid>', '<secret>', ARRAY[]::text[]);
+```
 
 ## 11. 参考
 

@@ -20,23 +20,24 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AccountService_SignUp_FullMethodName                   = "/orionid.client.v1.AccountService/SignUp"
-	AccountService_SignIn_FullMethodName                   = "/orionid.client.v1.AccountService/SignIn"
-	AccountService_SignOut_FullMethodName                  = "/orionid.client.v1.AccountService/SignOut"
-	AccountService_RefreshToken_FullMethodName             = "/orionid.client.v1.AccountService/RefreshToken"
-	AccountService_Me_FullMethodName                       = "/orionid.client.v1.AccountService/Me"
-	AccountService_UpdateAccount_FullMethodName            = "/orionid.client.v1.AccountService/UpdateAccount"
-	AccountService_ListSessions_FullMethodName             = "/orionid.client.v1.AccountService/ListSessions"
-	AccountService_DeleteSession_FullMethodName            = "/orionid.client.v1.AccountService/DeleteSession"
-	AccountService_DeleteSessions_FullMethodName           = "/orionid.client.v1.AccountService/DeleteSessions"
-	AccountService_GetPrefs_FullMethodName                 = "/orionid.client.v1.AccountService/GetPrefs"
-	AccountService_UpdatePrefs_FullMethodName              = "/orionid.client.v1.AccountService/UpdatePrefs"
-	AccountService_CreateEmailOTP_FullMethodName           = "/orionid.client.v1.AccountService/CreateEmailOTP"
-	AccountService_CreateEmailOTPSession_FullMethodName    = "/orionid.client.v1.AccountService/CreateEmailOTPSession"
-	AccountService_CreateOAuth2Session_FullMethodName      = "/orionid.client.v1.AccountService/CreateOAuth2Session"
-	AccountService_CreateOAuth2TokenSession_FullMethodName = "/orionid.client.v1.AccountService/CreateOAuth2TokenSession"
-	AccountService_CreatePhoneOTP_FullMethodName           = "/orionid.client.v1.AccountService/CreatePhoneOTP"
-	AccountService_CreatePhoneOTPSession_FullMethodName    = "/orionid.client.v1.AccountService/CreatePhoneOTPSession"
+	AccountService_SignUp_FullMethodName                         = "/orionid.client.v1.AccountService/SignUp"
+	AccountService_SignIn_FullMethodName                         = "/orionid.client.v1.AccountService/SignIn"
+	AccountService_SignOut_FullMethodName                        = "/orionid.client.v1.AccountService/SignOut"
+	AccountService_RefreshToken_FullMethodName                   = "/orionid.client.v1.AccountService/RefreshToken"
+	AccountService_Me_FullMethodName                             = "/orionid.client.v1.AccountService/Me"
+	AccountService_UpdateAccount_FullMethodName                  = "/orionid.client.v1.AccountService/UpdateAccount"
+	AccountService_ListSessions_FullMethodName                   = "/orionid.client.v1.AccountService/ListSessions"
+	AccountService_DeleteSession_FullMethodName                  = "/orionid.client.v1.AccountService/DeleteSession"
+	AccountService_DeleteSessions_FullMethodName                 = "/orionid.client.v1.AccountService/DeleteSessions"
+	AccountService_GetPrefs_FullMethodName                       = "/orionid.client.v1.AccountService/GetPrefs"
+	AccountService_UpdatePrefs_FullMethodName                    = "/orionid.client.v1.AccountService/UpdatePrefs"
+	AccountService_CreateEmailOTP_FullMethodName                 = "/orionid.client.v1.AccountService/CreateEmailOTP"
+	AccountService_CreateEmailOTPSession_FullMethodName          = "/orionid.client.v1.AccountService/CreateEmailOTPSession"
+	AccountService_CreateOAuth2Session_FullMethodName            = "/orionid.client.v1.AccountService/CreateOAuth2Session"
+	AccountService_CreateOAuth2TokenSession_FullMethodName       = "/orionid.client.v1.AccountService/CreateOAuth2TokenSession"
+	AccountService_CreatePhoneOTP_FullMethodName                 = "/orionid.client.v1.AccountService/CreatePhoneOTP"
+	AccountService_CreatePhoneOTPSession_FullMethodName          = "/orionid.client.v1.AccountService/CreatePhoneOTPSession"
+	AccountService_CreateWeChatMiniProgramSession_FullMethodName = "/orionid.client.v1.AccountService/CreateWeChatMiniProgramSession"
 )
 
 // AccountServiceClient is the client API for AccountService service.
@@ -60,6 +61,7 @@ type AccountServiceClient interface {
 	CreateOAuth2TokenSession(ctx context.Context, in *CreateOAuth2TokenSessionRequest, opts ...grpc.CallOption) (*SignInResponse, error)
 	CreatePhoneOTP(ctx context.Context, in *CreatePhoneOTPRequest, opts ...grpc.CallOption) (*ChallengeResponse, error)
 	CreatePhoneOTPSession(ctx context.Context, in *CreatePhoneOTPSessionRequest, opts ...grpc.CallOption) (*SignInResponse, error)
+	CreateWeChatMiniProgramSession(ctx context.Context, in *CreateWeChatMiniProgramSessionRequest, opts ...grpc.CallOption) (*SignInResponse, error)
 }
 
 type accountServiceClient struct {
@@ -240,6 +242,16 @@ func (c *accountServiceClient) CreatePhoneOTPSession(ctx context.Context, in *Cr
 	return out, nil
 }
 
+func (c *accountServiceClient) CreateWeChatMiniProgramSession(ctx context.Context, in *CreateWeChatMiniProgramSessionRequest, opts ...grpc.CallOption) (*SignInResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SignInResponse)
+	err := c.cc.Invoke(ctx, AccountService_CreateWeChatMiniProgramSession_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AccountServiceServer is the server API for AccountService service.
 // All implementations must embed UnimplementedAccountServiceServer
 // for forward compatibility.
@@ -261,6 +273,7 @@ type AccountServiceServer interface {
 	CreateOAuth2TokenSession(context.Context, *CreateOAuth2TokenSessionRequest) (*SignInResponse, error)
 	CreatePhoneOTP(context.Context, *CreatePhoneOTPRequest) (*ChallengeResponse, error)
 	CreatePhoneOTPSession(context.Context, *CreatePhoneOTPSessionRequest) (*SignInResponse, error)
+	CreateWeChatMiniProgramSession(context.Context, *CreateWeChatMiniProgramSessionRequest) (*SignInResponse, error)
 	mustEmbedUnimplementedAccountServiceServer()
 }
 
@@ -321,6 +334,9 @@ func (UnimplementedAccountServiceServer) CreatePhoneOTP(context.Context, *Create
 }
 func (UnimplementedAccountServiceServer) CreatePhoneOTPSession(context.Context, *CreatePhoneOTPSessionRequest) (*SignInResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreatePhoneOTPSession not implemented")
+}
+func (UnimplementedAccountServiceServer) CreateWeChatMiniProgramSession(context.Context, *CreateWeChatMiniProgramSessionRequest) (*SignInResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateWeChatMiniProgramSession not implemented")
 }
 func (UnimplementedAccountServiceServer) mustEmbedUnimplementedAccountServiceServer() {}
 func (UnimplementedAccountServiceServer) testEmbeddedByValue()                        {}
@@ -649,6 +665,24 @@ func _AccountService_CreatePhoneOTPSession_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AccountService_CreateWeChatMiniProgramSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateWeChatMiniProgramSessionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).CreateWeChatMiniProgramSession(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_CreateWeChatMiniProgramSession_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).CreateWeChatMiniProgramSession(ctx, req.(*CreateWeChatMiniProgramSessionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AccountService_ServiceDesc is the grpc.ServiceDesc for AccountService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -723,6 +757,10 @@ var AccountService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreatePhoneOTPSession",
 			Handler:    _AccountService_CreatePhoneOTPSession_Handler,
+		},
+		{
+			MethodName: "CreateWeChatMiniProgramSession",
+			Handler:    _AccountService_CreateWeChatMiniProgramSession_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

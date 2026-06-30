@@ -41,6 +41,8 @@ func NewOAuthAuthenticator(provider, clientID, clientSecret, redirectURL string,
 			Endpoint:     githuboauth.Endpoint,
 		}
 		return &githubOAuthAuthenticator{genericOAuthAuthenticator{cfg: cfg}}, nil
+	case domainauth.ProviderWeChatWeb, domainauth.ProviderWeChatMP:
+		return newWeChatOAuth(provider, clientID, clientSecret, sanitizeWeChatRedirect(redirectURL))
 	default:
 		return nil, fmt.Errorf("unsupported oauth provider: %s", provider)
 	}
