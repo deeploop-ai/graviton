@@ -14,7 +14,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/deeploop-ai/fleet/genproto/shared/v1"
+	"github.com/deeploop-ai/orionid/genproto/shared/v1"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/utilities"
 	"google.golang.org/grpc"
@@ -206,7 +206,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.server.v1.UsersService/ListUsers", runtime.WithHTTPPathPattern("/v1/server/users"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.UsersService/ListUsers", runtime.WithHTTPPathPattern("/v1/server/users"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -226,7 +226,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.server.v1.UsersService/GetUser", runtime.WithHTTPPathPattern("/v1/server/users/{id}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.UsersService/GetUser", runtime.WithHTTPPathPattern("/v1/server/users/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -246,7 +246,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.server.v1.UsersService/UpdateUser", runtime.WithHTTPPathPattern("/v1/server/users/{id}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.UsersService/UpdateUser", runtime.WithHTTPPathPattern("/v1/server/users/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -266,7 +266,7 @@ func RegisterUsersServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.server.v1.UsersService/DeleteUser", runtime.WithHTTPPathPattern("/v1/server/users/{id}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.UsersService/DeleteUser", runtime.WithHTTPPathPattern("/v1/server/users/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -324,7 +324,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.server.v1.UsersService/ListUsers", runtime.WithHTTPPathPattern("/v1/server/users"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.UsersService/ListUsers", runtime.WithHTTPPathPattern("/v1/server/users"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -341,7 +341,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.server.v1.UsersService/GetUser", runtime.WithHTTPPathPattern("/v1/server/users/{id}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.UsersService/GetUser", runtime.WithHTTPPathPattern("/v1/server/users/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -358,7 +358,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.server.v1.UsersService/UpdateUser", runtime.WithHTTPPathPattern("/v1/server/users/{id}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.UsersService/UpdateUser", runtime.WithHTTPPathPattern("/v1/server/users/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -375,7 +375,7 @@ func RegisterUsersServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.server.v1.UsersService/DeleteUser", runtime.WithHTTPPathPattern("/v1/server/users/{id}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.UsersService/DeleteUser", runtime.WithHTTPPathPattern("/v1/server/users/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return

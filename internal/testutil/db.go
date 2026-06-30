@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/deeploop-ai/fleet/internal/infra/bun/model"
-	"github.com/deeploop-ai/fleet/internal/infra/clients"
+	"github.com/deeploop-ai/orionid/internal/infra/bun/model"
+	"github.com/deeploop-ai/orionid/internal/infra/clients"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
@@ -25,18 +25,18 @@ var testDBSeq atomic.Uint64
 
 // TestDSN returns the DSN for integration tests.
 func TestDSN() string {
-	if dsn := os.Getenv("FLEET_TEST_DATABASE_SOURCE"); dsn != "" {
+	if dsn := os.Getenv("ORIONID_TEST_DATABASE_SOURCE"); dsn != "" {
 		return dsn
 	}
-	return "postgres://fleet:fleet@127.0.0.1:5433/fleet_test?sslmode=disable"
+	return "postgres://orionid:orionid@127.0.0.1:5433/ORIONID_test?sslmode=disable"
 }
 
 // AdminDSN returns a DSN to the postgres maintenance database.
 func AdminDSN() string {
-	if dsn := os.Getenv("FLEET_TEST_ADMIN_DATABASE_SOURCE"); dsn != "" {
+	if dsn := os.Getenv("ORIONID_TEST_ADMIN_DATABASE_SOURCE"); dsn != "" {
 		return dsn
 	}
-	return "postgres://fleet:fleet@127.0.0.1:5433/postgres?sslmode=disable"
+	return "postgres://orionid:orionid@127.0.0.1:5433/postgres?sslmode=disable"
 }
 
 // SetupTestDB creates a fresh test database, runs migrations, and returns a bun DB client.
@@ -88,7 +88,7 @@ func testDBPrefix() string {
 	dsn := TestDSN()
 	u, err := url.Parse(dsn)
 	if err != nil || u.Path == "" || u.Path == "/" {
-		return "fleet_test"
+		return "ORIONID_test"
 	}
 	return strings.TrimPrefix(u.Path, "/")
 }

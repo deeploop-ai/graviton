@@ -1,14 +1,14 @@
 syntax = "proto3";
 
-package fleet.server.v1;
+package orionid.server.v1;
 
-option go_package = "github.com/deeploop-ai/fleet/genproto/server/v1;serverv1";
+option go_package = "github.com/deeploop-ai/orionid/genproto/server/v1;serverv1";
 
 import "google/api/annotations.proto";
 import "shared/v1/authz.proto";
 
 service HealthService {
-  option (fleet.shared.v1.service_auth) = { default_access: ACCESS_PUBLIC };
+  option (orionid.shared.v1.service_auth) = { default_access: ACCESS_PUBLIC };
 
   rpc Check(HealthCheckRequest) returns (HealthCheckResponse) {
     option (google.api.http) = { get: "/v1/health" };

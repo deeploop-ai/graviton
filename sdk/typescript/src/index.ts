@@ -1,3 +1,3 @@
-export { Fleet, FleetError } from "./fleet.js";
-export type { FleetConfig } from "./http.js";
+export { Orionid, OrionidError } from "./orionid.js";
+export type { OrionidConfig } from "./http.js";
 export * from "./types.js";

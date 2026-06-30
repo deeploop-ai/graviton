@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useFleet } from "@/lib/fleet-context";
+import { useOrionid } from "@/lib/orionid-context";
 import { suffix } from "@/lib/storage";
 import { ErrorBanner, JsonPanel, MethodTag, PageHeader } from "@/components/Ui";
 
@@ -15,7 +15,7 @@ type StepResult = { step: string; ok: boolean; data?: unknown; error?: string };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mb-6 rounded-xl border border-fleet-border bg-fleet-panel/40 p-4">
+    <section className="mb-6 rounded-xl border border-orionid-border bg-orionid-panel/40 p-4">
       <h3 className="mb-3 text-sm font-medium text-slate-200">{title}</h3>
       <div className="flex flex-wrap gap-2">{children}</div>
     </section>
@@ -41,7 +41,7 @@ function ActionButton({
 }
 
 export function DatabasesPage() {
-  const { client, settings, updateSettings, serverFleet, run, lastError } = useFleet();
+  const { client, settings, updateSettings, serverClient, run, lastError } = useOrionid();
   const [result, setResult] = useState<unknown>(null);
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("SDK demo document");
@@ -71,34 +71,34 @@ export function DatabasesPage() {
   async function bootstrapEnv() {
     setLoading(true);
     try {
-      const fleet = serverFleet();
+      const Orionid = serverClient();
       const newDbId = `sdk_db_${suffix()}`;
       const newCollId = "posts";
       const data = await run(async () => {
-        await fleet.server.databases.createDatabase({
+        await orionid.server.databases.createDatabase({
           id: newDbId,
           name: `SDK DB ${suffix()}`,
         });
-        await fleet.server.databases.createCollection(newDbId, {
+        await orionid.server.databases.createCollection(newDbId, {
           id: newCollId,
           name: "Posts",
           permissions: [...DEFAULT_COLL_PERMS],
         });
-        await fleet.server.databases.createAttribute(newDbId, newCollId, {
+        await orionid.server.databases.createAttribute(newDbId, newCollId, {
           key: "title",
           type: "string",
           size: 256,
         });
-        await fleet.server.databases.createAttribute(newDbId, newCollId, {
+        await orionid.server.databases.createAttribute(newDbId, newCollId, {
           key: "views",
           type: "integer",
         });
-        const index = await fleet.server.databases.createIndex(newDbId, newCollId, {
+        const index = await orionid.server.databases.createIndex(newDbId, newCollId, {
           id: "idx_title",
           type: "key",
           attributes: ["title"],
         });
-        const doc = await fleet.server.databases.createDocument(newDbId, newCollId, {
+        const doc = await orionid.server.databases.createDocument(newDbId, newCollId, {
           data: { title: "Seed document", views: 0 },
         });
         return {
@@ -132,7 +132,7 @@ export function DatabasesPage() {
   async function runFullVerification() {
     setLoading(true);
     const steps: StepResult[] = [];
-    const fleet = serverFleet();
+    const Orionid = serverClient();
 
     async function step(name: string, fn: () => Promise<unknown>) {
       try {
@@ -155,45 +155,45 @@ export function DatabasesPage() {
 
     try {
       await step("server.createDatabase", () =>
-        fleet.server.databases.createDatabase({ id: testDbId, name: "Verify DB" })
+        orionid.server.databases.createDatabase({ id: testDbId, name: "Verify DB" })
       );
-      await step("server.getDatabase", () => fleet.server.databases.getDatabase(testDbId));
-      await step("server.listDatabases", () => fleet.server.databases.listDatabases({ page_size: 5 }));
+      await step("server.getDatabase", () => orionid.server.databases.getDatabase(testDbId));
+      await step("server.listDatabases", () => orionid.server.databases.listDatabases({ page_size: 5 }));
 
       await step("server.createCollection", () =>
-        fleet.server.databases.createCollection(testDbId, {
+        orionid.server.databases.createCollection(testDbId, {
           id: testCollId,
           name: "Items",
           permissions: [...DEFAULT_COLL_PERMS],
         })
       );
       await step("server.listCollections", () =>
-        fleet.server.databases.listCollections(testDbId)
+        orionid.server.databases.listCollections(testDbId)
       );
       await step("server.getCollection", () =>
-        fleet.server.databases.getCollection(testDbId, testCollId)
+        orionid.server.databases.getCollection(testDbId, testCollId)
       );
       await step("server.updateCollection", () =>
-        fleet.server.databases.updateCollection(testDbId, testCollId, {
+        orionid.server.databases.updateCollection(testDbId, testCollId, {
           name: "Items Updated",
         })
       );
 
       await step("server.createAttribute(title)", () =>
-        fleet.server.databases.createAttribute(testDbId, testCollId, {
+        orionid.server.databases.createAttribute(testDbId, testCollId, {
           key: "title",
           type: "string",
           size: 128,
         })
       );
       await step("server.createAttribute(views)", () =>
-        fleet.server.databases.createAttribute(testDbId, testCollId, {
+        orionid.server.databases.createAttribute(testDbId, testCollId, {
           key: "views",
           type: "integer",
         })
       );
       const index = (await step("server.createIndex", () =>
-        fleet.server.databases.createIndex(testDbId, testCollId, {
+        orionid.server.databases.createIndex(testDbId, testCollId, {
           id: testIndexId,
           type: "key",
           attributes: ["views"],
@@ -202,26 +202,26 @@ export function DatabasesPage() {
       )) as { id: string };
 
       const serverDoc = (await step("server.createDocument", () =>
-        fleet.server.databases.createDocument(testDbId, testCollId, {
+        orionid.server.databases.createDocument(testDbId, testCollId, {
           data: { title: "Server doc", views: 1 },
         })
       )) as { id: string };
       serverDocId = serverDoc.id;
 
       await step("server.listDocuments", () =>
-        fleet.server.databases.listDocuments(testDbId, testCollId)
+        orionid.server.databases.listDocuments(testDbId, testCollId)
       );
       await step("server.getDocument", () =>
-        fleet.server.databases.getDocument(testDbId, testCollId, serverDocId)
+        orionid.server.databases.getDocument(testDbId, testCollId, serverDocId)
       );
       await step("server.updateDocument", () =>
-        fleet.server.databases.updateDocument(testDbId, testCollId, serverDocId, {
+        orionid.server.databases.updateDocument(testDbId, testCollId, serverDocId, {
           data: { title: "Server doc updated" },
           increment: { views: 2 },
         })
       );
       await step("server.countDocuments", () =>
-        fleet.server.databases.countDocuments(testDbId, testCollId)
+        orionid.server.databases.countDocuments(testDbId, testCollId)
       );
 
       const clientDoc = (await step("client.createDocument", () =>
@@ -255,33 +255,33 @@ export function DatabasesPage() {
       );
 
       await step("server.bulkUpdateDocuments", () =>
-        fleet.server.databases.bulkUpdateDocuments(testDbId, testCollId, {
+        orionid.server.databases.bulkUpdateDocuments(testDbId, testCollId, {
           document_ids: [extraDocId],
           data: { title: "Bulk updated" },
         })
       );
       await step("server.bulkDeleteDocuments", () =>
-        fleet.server.databases.bulkDeleteDocuments(testDbId, testCollId, [extraDocId])
+        orionid.server.databases.bulkDeleteDocuments(testDbId, testCollId, [extraDocId])
       );
 
       await step("client.deleteDocument", () =>
         client.databases.deleteDocument(testDbId, testCollId, clientDocId)
       );
       await step("server.deleteDocument", () =>
-        fleet.server.databases.deleteDocument(testDbId, testCollId, serverDocId)
+        orionid.server.databases.deleteDocument(testDbId, testCollId, serverDocId)
       );
 
       await step("server.deleteAttribute(views)", () =>
-        fleet.server.databases.deleteAttribute(testDbId, testCollId, "views")
+        orionid.server.databases.deleteAttribute(testDbId, testCollId, "views")
       );
       await step("server.deleteIndex", () =>
-        fleet.server.databases.deleteIndex(testDbId, testCollId, index.id)
+        orionid.server.databases.deleteIndex(testDbId, testCollId, index.id)
       );
       await step("server.deleteCollection", () =>
-        fleet.server.databases.deleteCollection(testDbId, testCollId)
+        orionid.server.databases.deleteCollection(testDbId, testCollId)
       );
       await step("server.deleteDatabase", () =>
-        fleet.server.databases.deleteDatabase(testDbId)
+        orionid.server.databases.deleteDatabase(testDbId)
       );
 
       setResult({
@@ -326,28 +326,28 @@ export function DatabasesPage() {
       {!hasApiKey ? (
         <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
           Server API 需要 API Key。请先到{" "}
-          <Link className="text-fleet-accent underline" to="/app/settings">
+          <Link className="text-orionid-accent underline" to="/app/settings">
             设置
           </Link>{" "}
           填写。
         </div>
       ) : null}
 
-      <div className="mb-4 grid gap-3 rounded-xl border border-fleet-border bg-fleet-panel/50 p-4 text-sm md:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-4 grid gap-3 rounded-xl border border-orionid-border bg-orionid-panel/50 p-4 text-sm md:grid-cols-2 lg:grid-cols-4">
         <div>
-          <div className="text-fleet-muted">databaseId</div>
+          <div className="text-orionid-muted">databaseId</div>
           <div className="truncate font-mono text-cyan-100">{dbId || "（未初始化）"}</div>
         </div>
         <div>
-          <div className="text-fleet-muted">collectionId</div>
+          <div className="text-orionid-muted">collectionId</div>
           <div className="font-mono text-cyan-100">{collId}</div>
         </div>
         <div>
-          <div className="text-fleet-muted">documentId</div>
+          <div className="text-orionid-muted">documentId</div>
           <div className="truncate font-mono text-cyan-100">{docId || "—"}</div>
         </div>
         <div>
-          <div className="text-fleet-muted">indexId</div>
+          <div className="text-orionid-muted">indexId</div>
           <div className="font-mono text-cyan-100">{indexId || "—"}</div>
         </div>
       </div>
@@ -365,11 +365,11 @@ export function DatabasesPage() {
 
       <div className="mb-4 grid gap-3 md:grid-cols-2">
         <label className="block space-y-1">
-          <span className="text-xs text-fleet-muted">data.title</span>
+          <span className="text-xs text-orionid-muted">data.title</span>
           <input className="field" value={title} onChange={(e) => setTitle(e.target.value)} />
         </label>
         <label className="block space-y-1">
-          <span className="text-xs text-fleet-muted">data.views</span>
+          <span className="text-xs text-orionid-muted">data.views</span>
           <input
             className="field"
             type="number"
@@ -387,7 +387,7 @@ export function DatabasesPage() {
           onClick={() => {
             const id = `sdk_db_${suffix()}`;
             exec("server.databases.createDatabase()", async () => {
-              const db = await serverFleet().server.databases.createDatabase({
+              const db = await serverClient().server.databases.createDatabase({
                 id,
                 name: `DB ${suffix()}`,
               });
@@ -400,13 +400,13 @@ export function DatabasesPage() {
           label="listDatabases()"
           method="GET"
           disabled={serverDisabled}
-          onClick={() => exec("server.databases.listDatabases()", () => serverFleet().server.databases.listDatabases())}
+          onClick={() => exec("server.databases.listDatabases()", () => serverClient().server.databases.listDatabases())}
         />
         <ActionButton
           label="getDatabase()"
           method="GET"
           disabled={serverDisabled || !dbId}
-          onClick={() => exec("server.databases.getDatabase()", () => serverFleet().server.databases.getDatabase(dbId))}
+          onClick={() => exec("server.databases.getDatabase()", () => serverClient().server.databases.getDatabase(dbId))}
         />
         <ActionButton
           label="deleteDatabase()"
@@ -414,7 +414,7 @@ export function DatabasesPage() {
           disabled={serverDisabled || !dbId}
           onClick={() =>
             exec("server.databases.deleteDatabase()", async () => {
-              await serverFleet().server.databases.deleteDatabase(dbId);
+              await serverClient().server.databases.deleteDatabase(dbId);
               updateSettings({ ...settings, demoDbId: "", demoCollId: "posts", demoDocId: "", demoIndexId: "" });
             })
           }
@@ -429,7 +429,7 @@ export function DatabasesPage() {
           onClick={() =>
             exec("server.databases.createCollection()", async () => {
               const id = `coll_${suffix()}`;
-              const coll = await serverFleet().server.databases.createCollection(dbId, {
+              const coll = await serverClient().server.databases.createCollection(dbId, {
                 id,
                 name: "Collection",
                 permissions: [...DEFAULT_COLL_PERMS],
@@ -443,13 +443,13 @@ export function DatabasesPage() {
           label="listCollections()"
           method="GET"
           disabled={serverDisabled || !dbId}
-          onClick={() => exec("server.databases.listCollections()", () => serverFleet().server.databases.listCollections(dbId))}
+          onClick={() => exec("server.databases.listCollections()", () => serverClient().server.databases.listCollections(dbId))}
         />
         <ActionButton
           label="getCollection()"
           method="GET"
           disabled={disabled}
-          onClick={() => exec("server.databases.getCollection()", () => serverFleet().server.databases.getCollection(dbId, collId))}
+          onClick={() => exec("server.databases.getCollection()", () => serverClient().server.databases.getCollection(dbId, collId))}
         />
         <ActionButton
           label="updateCollection()"
@@ -457,7 +457,7 @@ export function DatabasesPage() {
           disabled={disabled}
           onClick={() =>
             exec("server.databases.updateCollection()", () =>
-              serverFleet().server.databases.updateCollection(dbId, collId, { name: `Updated ${suffix()}` })
+              serverClient().server.databases.updateCollection(dbId, collId, { name: `Updated ${suffix()}` })
             )
           }
         />
@@ -467,7 +467,7 @@ export function DatabasesPage() {
           disabled={disabled}
           onClick={() =>
             exec("server.databases.deleteCollection()", async () => {
-              await serverFleet().server.databases.deleteCollection(dbId, collId);
+              await serverClient().server.databases.deleteCollection(dbId, collId);
               updateSettings({ ...settings, demoCollId: "posts", demoDocId: "", demoIndexId: "" });
             })
           }
@@ -478,7 +478,7 @@ export function DatabasesPage() {
           disabled={disabled}
           onClick={() =>
             exec("server.databases.createAttribute()", () =>
-              serverFleet().server.databases.createAttribute(dbId, collId, {
+              serverClient().server.databases.createAttribute(dbId, collId, {
                 key: `field_${suffix()}`,
                 type: "string",
                 size: 64,
@@ -492,7 +492,7 @@ export function DatabasesPage() {
           disabled={disabled}
           onClick={() =>
             exec("server.databases.deleteAttribute()", () =>
-              serverFleet().server.databases.deleteAttribute(dbId, collId, "views")
+              serverClient().server.databases.deleteAttribute(dbId, collId, "views")
             )
           }
         />
@@ -502,7 +502,7 @@ export function DatabasesPage() {
           disabled={disabled}
           onClick={() =>
             exec("server.databases.createIndex()", async () => {
-              const idx = await serverFleet().server.databases.createIndex(dbId, collId, {
+              const idx = await serverClient().server.databases.createIndex(dbId, collId, {
                 id: `idx_${suffix()}`,
                 type: "key",
                 attributes: ["title"],
@@ -518,7 +518,7 @@ export function DatabasesPage() {
           disabled={disabled || !indexId}
           onClick={() =>
             exec("server.databases.deleteIndex()", async () => {
-              await serverFleet().server.databases.deleteIndex(dbId, collId, indexId);
+              await serverClient().server.databases.deleteIndex(dbId, collId, indexId);
               updateSettings({ ...settings, demoIndexId: "" });
             })
           }
@@ -532,7 +532,7 @@ export function DatabasesPage() {
           disabled={disabled}
           onClick={() =>
             exec("server.databases.createDocument()", async () => {
-              const doc = await serverFleet().server.databases.createDocument(dbId, collId, {
+              const doc = await serverClient().server.databases.createDocument(dbId, collId, {
                 data: { title, views: Number(views) },
               });
               updateSettings({ ...settings, demoDocId: doc.id });
@@ -544,13 +544,13 @@ export function DatabasesPage() {
           label="listDocuments()"
           method="GET"
           disabled={disabled}
-          onClick={() => exec("server.databases.listDocuments()", () => serverFleet().server.databases.listDocuments(dbId, collId))}
+          onClick={() => exec("server.databases.listDocuments()", () => serverClient().server.databases.listDocuments(dbId, collId))}
         />
         <ActionButton
           label="getDocument()"
           method="GET"
           disabled={disabled || !docId}
-          onClick={() => exec("server.databases.getDocument()", () => serverFleet().server.databases.getDocument(dbId, collId, docId))}
+          onClick={() => exec("server.databases.getDocument()", () => serverClient().server.databases.getDocument(dbId, collId, docId))}
         />
         <ActionButton
           label="updateDocument()"
@@ -558,7 +558,7 @@ export function DatabasesPage() {
           disabled={disabled || !docId}
           onClick={() =>
             exec("server.databases.updateDocument()", () =>
-              serverFleet().server.databases.updateDocument(dbId, collId, docId, {
+              serverClient().server.databases.updateDocument(dbId, collId, docId, {
                 data: { title: `${title} (server)` },
                 increment: { views: 1 },
               })
@@ -571,7 +571,7 @@ export function DatabasesPage() {
           disabled={disabled || !docId}
           onClick={() =>
             exec("server.databases.deleteDocument()", async () => {
-              await serverFleet().server.databases.deleteDocument(dbId, collId, docId);
+              await serverClient().server.databases.deleteDocument(dbId, collId, docId);
               updateSettings({ ...settings, demoDocId: "" });
             })
           }
@@ -580,7 +580,7 @@ export function DatabasesPage() {
           label="countDocuments()"
           method="GET"
           disabled={disabled}
-          onClick={() => exec("server.databases.countDocuments()", () => serverFleet().server.databases.countDocuments(dbId, collId))}
+          onClick={() => exec("server.databases.countDocuments()", () => serverClient().server.databases.countDocuments(dbId, collId))}
         />
         <ActionButton
           label="bulkUpdateDocuments()"
@@ -588,7 +588,7 @@ export function DatabasesPage() {
           disabled={disabled || !docId}
           onClick={() =>
             exec("server.databases.bulkUpdateDocuments()", () =>
-              serverFleet().server.databases.bulkUpdateDocuments(dbId, collId, {
+              serverClient().server.databases.bulkUpdateDocuments(dbId, collId, {
                 document_ids: [docId],
                 data: { title: "Bulk updated" },
               })
@@ -601,7 +601,7 @@ export function DatabasesPage() {
           disabled={disabled || !docId}
           onClick={() =>
             exec("server.databases.bulkDeleteDocuments()", async () => {
-              const res = await serverFleet().server.databases.bulkDeleteDocuments(dbId, collId, [docId]);
+              const res = await serverClient().server.databases.bulkDeleteDocuments(dbId, collId, [docId]);
               updateSettings({ ...settings, demoDocId: "" });
               return res;
             })

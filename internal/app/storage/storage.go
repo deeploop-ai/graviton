@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/deeploop-ai/fleet/internal/domain/databases"
-	"github.com/deeploop-ai/fleet/internal/domain/projects"
-	"github.com/deeploop-ai/fleet/internal/domain/storage"
-	"github.com/deeploop-ai/fleet/internal/pkg/config"
-	"github.com/deeploop-ai/fleet/pkg/idgen"
+	"github.com/deeploop-ai/orionid/internal/domain/databases"
+	"github.com/deeploop-ai/orionid/internal/domain/projects"
+	"github.com/deeploop-ai/orionid/internal/domain/storage"
+	"github.com/deeploop-ai/orionid/internal/pkg/config"
+	"github.com/deeploop-ai/orionid/pkg/idgen"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -259,7 +259,7 @@ func (s *Storage) resolveProject(ctx context.Context, projectID string) (*projec
 func defaultBucketName(cfg *config.AppConfig) string {
 	b := cfg.GetStorage().GetS3().GetBucket()
 	if b == "" {
-		return "fleet-files"
+		return "orionid-files"
 	}
 	return b
 }

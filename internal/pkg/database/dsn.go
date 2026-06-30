@@ -6,18 +6,18 @@ import (
 )
 
 // SourceFromEnv resolves the Postgres DSN from environment variables.
-// It prefers FLEET_DATA_DATABASE_SOURCE and falls back to POSTGRES_* compose vars.
+// It prefers ORIONID_DATA_DATABASE_SOURCE and falls back to POSTGRES_* compose vars.
 func SourceFromEnv() string {
-	if dsn := os.Getenv("FLEET_DATA_DATABASE_SOURCE"); dsn != "" {
+	if dsn := os.Getenv("ORIONID_DATA_DATABASE_SOURCE"); dsn != "" {
 		return dsn
 	}
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		envOr("POSTGRES_USER", "fleet"),
-		envOr("POSTGRES_PASSWORD", "fleet"),
+		envOr("POSTGRES_USER", "orionid"),
+		envOr("POSTGRES_PASSWORD", "orionid"),
 		envOr("POSTGRES_HOST", "127.0.0.1"),
 		envOr("POSTGRES_PORT", "5432"),
-		envOr("POSTGRES_DB", "fleet"),
+		envOr("POSTGRES_DB", "orionid"),
 	)
 }
 

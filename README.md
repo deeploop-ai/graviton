@@ -1,6 +1,6 @@
-# Fleet
+# Orionid
 
-Fleet 是一个受 Appwrite 启发的后端即服务（BaaS）平台，使用 Go + PostgreSQL + gRPC/grpc-gateway 构建，提供用户认证、动态文档数据库、文件存储、函数执行、Admin Console 等核心能力。
+Orionid 是一个受 Appwrite 启发的后端即服务（BaaS）平台，使用 Go + PostgreSQL + gRPC/grpc-gateway 构建，提供用户认证、动态文档数据库、文件存储、函数执行、Admin Console 等核心能力。
 
 ## 功能特性
 
@@ -63,12 +63,12 @@ cp .env.example .env
 关键变量：
 
 ```env
-FLEET_DATA_DATABASE_SOURCE=postgres://fleet:fleet@127.0.0.1:5433/fleet?sslmode=disable
-FLEET_DATA_REDIS_ADDR=127.0.0.1:6380
-FLEET_SECURITY_JWT_SECRET=change-me-in-production
-FLEET_STORAGE_S3_ENDPOINT=http://127.0.0.1:9000
-FLEET_STORAGE_S3_ACCESS_KEY_ID=minioadmin
-FLEET_STORAGE_S3_SECRET_ACCESS_KEY=minioadmin
+ORIONID_DATA_DATABASE_SOURCE=postgres://orionid:orionid@127.0.0.1 :5433/orionid?sslmode=disable
+ORIONID_DATA_REDIS_ADDR=127.0.0.1:6380
+ORIONID_SECURITY_JWT_SECRET=change-me-in-production
+ORIONID_STORAGE_S3_ENDPOINT=http://127.0.0.1:9000
+ORIONID_STORAGE_S3_ACCESS_KEY_ID=minioadmin
+ORIONID_STORAGE_S3_SECRET_ACCESS_KEY=minioadmin
 ```
 
 ### 3. 运行数据库迁移
@@ -93,7 +93,7 @@ task generate-all
 go run ./cmd/seed
 ```
 
-默认管理员：`admin@fleet.local / Admin@123`。
+默认管理员：`admin@orionid.local / Admin@123`。
 
 ### 5. 构建并运行
 
@@ -110,7 +110,7 @@ task dev-server
 
 访问：
 
-- Admin Console：`http://fleet.local:9099/console/`
+- Admin Console：`http://orionid.local:9099/console/`
 - HTTP/gRPC-gateway API：`http://127.0.0.1:9099/v1/...`
 - Metrics：`http://127.0.0.1:9100/metrics`
 
@@ -200,7 +200,7 @@ task build             # 构建完整二进制（含 console）
 
 - **Clean Architecture / DDD**：domain 定义端口，infra 提供实现，app 编排用例，api 负责传输。
 - **动态文档数据库**：每个 database 对应一个 PostgreSQL schema；集合是真实表；`_tenant` 用于项目隔离；`_perms` 表实现基于角色的文档权限。
-- **认证**：支持 end-user JWT、session Cookie、API Key、console admin JWT。API Key 不绕过 `_perms`，以 `keys` 角色参与权限检查；admin 可带 `X-Fleet-Project` header 操作指定项目。
+- **认证**：支持 end-user JWT、session Cookie、API Key、console admin JWT。API Key 不绕过 `_perms`，以 `keys` 角色参与权限检查；admin 可带 `X-Orionid-Project` header 操作指定项目。
 - **REST API**：gRPC 方法通过 grpc-gateway 暴露为 JSON REST；文件上传/下载使用自定义 HTTP handler。
 - **Console**：React SPA 通过 `//go:embed dist` 打包进 Go 二进制，由 `/console/` 路径 serve。
 
@@ -216,7 +216,7 @@ task test
 - `internal/infra/documentdb/postgres_test.go`
 - `internal/app/client/account_test.go`
 
-测试会自动创建并销毁 `fleet_test` 数据库。
+测试会自动创建并销毁 `ORIONID_test` 数据库。
 
 ## 设计文档
 

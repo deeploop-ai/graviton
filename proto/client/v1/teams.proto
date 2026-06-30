@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package fleet.client.v1;
+package orionid.client.v1;
 
-option go_package = "github.com/deeploop-ai/fleet/genproto/client/v1;clientv1";
+option go_package = "github.com/deeploop-ai/orionid/genproto/client/v1;clientv1";
 
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
@@ -10,7 +10,7 @@ import "shared/v1/authz.proto";
 import "shared/v1/common.proto";
 
 service TeamsService {
-  option (fleet.shared.v1.service_auth) = { default_access: ACCESS_AUTHENTICATED };
+  option (orionid.shared.v1.service_auth) = { default_access: ACCESS_AUTHENTICATED };
 
   rpc CreateTeam(CreateTeamRequest) returns (Team) {
     option (google.api.http) = { post: "/v1/teams", body: "*" };

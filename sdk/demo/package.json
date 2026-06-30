@@ -1,5 +1,5 @@
 {
-  "name": "@fleet/demo",
+  "name": "@orionid/demo",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fleet/sdk": "file:../typescript",
+    "@orionid/sdk": "file:../typescript",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.18.0"

@@ -6,9 +6,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/deeploop-ai/fleet/internal/domain/projects"
-	"github.com/deeploop-ai/fleet/internal/infra/bun/model"
-	"github.com/deeploop-ai/fleet/internal/infra/clients"
+	"github.com/deeploop-ai/orionid/internal/domain/projects"
+	"github.com/deeploop-ai/orionid/internal/infra/bun/model"
+	"github.com/deeploop-ai/orionid/internal/infra/clients"
 )
 
 type consoleAdminProjectRepo struct {

@@ -23,7 +23,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1ListTeamsResponse"
+              "$ref": "#/definitions/orionidserverv1ListTeamsResponse"
             }
           },
           "default": {
@@ -80,7 +80,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1Team"
+              "$ref": "#/definitions/orionidserverv1Team"
             }
           },
           "default": {
@@ -96,7 +96,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/fleetserverv1CreateTeamRequest"
+              "$ref": "#/definitions/orionidserverv1CreateTeamRequest"
             }
           }
         ],
@@ -112,7 +112,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1Team"
+              "$ref": "#/definitions/orionidserverv1Team"
             }
           },
           "default": {
@@ -170,7 +170,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1ListMembershipsResponse"
+              "$ref": "#/definitions/orionidserverv1ListMembershipsResponse"
             }
           },
           "default": {
@@ -221,7 +221,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1Membership"
+              "$ref": "#/definitions/orionidserverv1Membership"
             }
           },
           "default": {
@@ -243,7 +243,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/fleetserverv1TeamsServiceCreateMembershipBody"
+              "$ref": "#/definitions/orionidserverv1TeamsServiceCreateMembershipBody"
             }
           }
         ],
@@ -259,7 +259,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1Membership"
+              "$ref": "#/definitions/orionidserverv1Membership"
             }
           },
           "default": {
@@ -327,7 +327,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1Membership"
+              "$ref": "#/definitions/orionidserverv1Membership"
             }
           },
           "default": {
@@ -371,7 +371,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1Membership"
+              "$ref": "#/definitions/orionidserverv1Membership"
             }
           },
           "default": {
@@ -399,7 +399,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/fleetserverv1TeamsServiceUpdateMembershipStatusBody"
+              "$ref": "#/definitions/orionidserverv1TeamsServiceUpdateMembershipStatusBody"
             }
           }
         ],
@@ -421,7 +421,7 @@
         }
       }
     },
-    "fleetserverv1CreateTeamRequest": {
+    "orionidserverv1CreateTeamRequest": {
       "type": "object",
       "properties": {
         "name": {
@@ -435,14 +435,14 @@
         }
       }
     },
-    "fleetserverv1ListMembershipsResponse": {
+    "orionidserverv1ListMembershipsResponse": {
       "type": "object",
       "properties": {
         "memberships": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/fleetserverv1Membership"
+            "$ref": "#/definitions/orionidserverv1Membership"
           }
         },
         "meta": {
@@ -450,14 +450,14 @@
         }
       }
     },
-    "fleetserverv1ListTeamsResponse": {
+    "orionidserverv1ListTeamsResponse": {
       "type": "object",
       "properties": {
         "teams": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/fleetserverv1Team"
+            "$ref": "#/definitions/orionidserverv1Team"
           }
         },
         "meta": {
@@ -465,7 +465,7 @@
         }
       }
     },
-    "fleetserverv1Membership": {
+    "orionidserverv1Membership": {
       "type": "object",
       "properties": {
         "id": {
@@ -510,7 +510,7 @@
         }
       }
     },
-    "fleetserverv1Team": {
+    "orionidserverv1Team": {
       "type": "object",
       "properties": {
         "id": {
@@ -539,7 +539,7 @@
         }
       }
     },
-    "fleetserverv1TeamsServiceCreateMembershipBody": {
+    "orionidserverv1TeamsServiceCreateMembershipBody": {
       "type": "object",
       "properties": {
         "userId": {
@@ -562,7 +562,7 @@
         }
       }
     },
-    "fleetserverv1TeamsServiceUpdateMembershipStatusBody": {
+    "orionidserverv1TeamsServiceUpdateMembershipStatusBody": {
       "type": "object",
       "properties": {
         "status": {

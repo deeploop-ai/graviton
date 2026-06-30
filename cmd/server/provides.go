@@ -3,12 +3,12 @@ package main
 import (
 	"errors"
 
-	"github.com/deeploop-ai/fleet/internal/api"
-	"github.com/deeploop-ai/fleet/internal/app"
-	"github.com/deeploop-ai/fleet/internal/domain"
-	"github.com/deeploop-ai/fleet/internal/infra"
-	"github.com/deeploop-ai/fleet/internal/infra/server"
-	config "github.com/deeploop-ai/fleet/internal/pkg/config"
+	"github.com/deeploop-ai/orionid/internal/api"
+	"github.com/deeploop-ai/orionid/internal/app"
+	"github.com/deeploop-ai/orionid/internal/domain"
+	"github.com/deeploop-ai/orionid/internal/infra"
+	"github.com/deeploop-ai/orionid/internal/infra/server"
+	config "github.com/deeploop-ai/orionid/internal/pkg/config"
 	"github.com/google/wire"
 	"github.com/lynx-go/lynx"
 	"github.com/lynx-go/lynx/boot"
@@ -38,7 +38,7 @@ func NewAppConfig(app lynx.Lynx) (*config.AppConfig, error) {
 		return nil, err
 	}
 	if secret := c.GetSecurity().GetJwt().GetSecret(); secret == "" {
-		return nil, errors.New("security.jwt.secret must be set (env FLEET_SECURITY_JWT_SECRET)")
+		return nil, errors.New("security.jwt.secret must be set (env ORIONID_SECURITY_JWT_SECRET)")
 	}
 	return &c, nil
 }

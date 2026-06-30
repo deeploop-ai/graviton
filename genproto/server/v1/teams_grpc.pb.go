@@ -8,7 +8,7 @@ package serverv1
 
 import (
 	context "context"
-	v1 "github.com/deeploop-ai/fleet/genproto/shared/v1"
+	v1 "github.com/deeploop-ai/orionid/genproto/shared/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,16 +20,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TeamsService_CreateTeam_FullMethodName             = "/fleet.server.v1.TeamsService/CreateTeam"
-	TeamsService_ListTeams_FullMethodName              = "/fleet.server.v1.TeamsService/ListTeams"
-	TeamsService_GetTeam_FullMethodName                = "/fleet.server.v1.TeamsService/GetTeam"
-	TeamsService_DeleteTeam_FullMethodName             = "/fleet.server.v1.TeamsService/DeleteTeam"
-	TeamsService_CreateMembership_FullMethodName       = "/fleet.server.v1.TeamsService/CreateMembership"
-	TeamsService_ListMemberships_FullMethodName        = "/fleet.server.v1.TeamsService/ListMemberships"
-	TeamsService_GetMembership_FullMethodName          = "/fleet.server.v1.TeamsService/GetMembership"
-	TeamsService_UpdateMembership_FullMethodName       = "/fleet.server.v1.TeamsService/UpdateMembership"
-	TeamsService_UpdateMembershipStatus_FullMethodName = "/fleet.server.v1.TeamsService/UpdateMembershipStatus"
-	TeamsService_DeleteMembership_FullMethodName       = "/fleet.server.v1.TeamsService/DeleteMembership"
+	TeamsService_CreateTeam_FullMethodName             = "/orionid.server.v1.TeamsService/CreateTeam"
+	TeamsService_ListTeams_FullMethodName              = "/orionid.server.v1.TeamsService/ListTeams"
+	TeamsService_GetTeam_FullMethodName                = "/orionid.server.v1.TeamsService/GetTeam"
+	TeamsService_DeleteTeam_FullMethodName             = "/orionid.server.v1.TeamsService/DeleteTeam"
+	TeamsService_CreateMembership_FullMethodName       = "/orionid.server.v1.TeamsService/CreateMembership"
+	TeamsService_ListMemberships_FullMethodName        = "/orionid.server.v1.TeamsService/ListMemberships"
+	TeamsService_GetMembership_FullMethodName          = "/orionid.server.v1.TeamsService/GetMembership"
+	TeamsService_UpdateMembership_FullMethodName       = "/orionid.server.v1.TeamsService/UpdateMembership"
+	TeamsService_UpdateMembershipStatus_FullMethodName = "/orionid.server.v1.TeamsService/UpdateMembershipStatus"
+	TeamsService_DeleteMembership_FullMethodName       = "/orionid.server.v1.TeamsService/DeleteMembership"
 )
 
 // TeamsServiceClient is the client API for TeamsService service.
@@ -415,7 +415,7 @@ func _TeamsService_DeleteMembership_Handler(srv interface{}, ctx context.Context
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var TeamsService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "fleet.server.v1.TeamsService",
+	ServiceName: "orionid.server.v1.TeamsService",
 	HandlerType: (*TeamsServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

@@ -3,8 +3,8 @@ package consolegrpc
 import (
 	"context"
 
-	consolev1 "github.com/deeploop-ai/fleet/genproto/console/v1"
-	"github.com/deeploop-ai/fleet/internal/app/console"
+	consolev1 "github.com/deeploop-ai/orionid/genproto/console/v1"
+	"github.com/deeploop-ai/orionid/internal/app/console"
 )
 
 type AuthService struct {

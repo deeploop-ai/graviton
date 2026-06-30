@@ -360,7 +360,7 @@ func RegisterAccountServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.client.v1.AccountService/SignUp", runtime.WithHTTPPathPattern("/v1/account/sign-up"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.client.v1.AccountService/SignUp", runtime.WithHTTPPathPattern("/v1/account/sign-up"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -380,7 +380,7 @@ func RegisterAccountServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.client.v1.AccountService/SignIn", runtime.WithHTTPPathPattern("/v1/account/sign-in"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.client.v1.AccountService/SignIn", runtime.WithHTTPPathPattern("/v1/account/sign-in"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -400,7 +400,7 @@ func RegisterAccountServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.client.v1.AccountService/SignOut", runtime.WithHTTPPathPattern("/v1/account/sign-out"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.client.v1.AccountService/SignOut", runtime.WithHTTPPathPattern("/v1/account/sign-out"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -420,7 +420,7 @@ func RegisterAccountServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.client.v1.AccountService/RefreshToken", runtime.WithHTTPPathPattern("/v1/account/refresh"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.client.v1.AccountService/RefreshToken", runtime.WithHTTPPathPattern("/v1/account/refresh"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -440,7 +440,7 @@ func RegisterAccountServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.client.v1.AccountService/Me", runtime.WithHTTPPathPattern("/v1/account/me"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.client.v1.AccountService/Me", runtime.WithHTTPPathPattern("/v1/account/me"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -460,7 +460,7 @@ func RegisterAccountServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.client.v1.AccountService/UpdateAccount", runtime.WithHTTPPathPattern("/v1/account"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.client.v1.AccountService/UpdateAccount", runtime.WithHTTPPathPattern("/v1/account"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -480,7 +480,7 @@ func RegisterAccountServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.client.v1.AccountService/ListSessions", runtime.WithHTTPPathPattern("/v1/account/sessions"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.client.v1.AccountService/ListSessions", runtime.WithHTTPPathPattern("/v1/account/sessions"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -500,7 +500,7 @@ func RegisterAccountServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.client.v1.AccountService/DeleteSession", runtime.WithHTTPPathPattern("/v1/account/sessions/{session_id}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.client.v1.AccountService/DeleteSession", runtime.WithHTTPPathPattern("/v1/account/sessions/{session_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -520,7 +520,7 @@ func RegisterAccountServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.client.v1.AccountService/DeleteSessions", runtime.WithHTTPPathPattern("/v1/account/sessions"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.client.v1.AccountService/DeleteSessions", runtime.WithHTTPPathPattern("/v1/account/sessions"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -540,7 +540,7 @@ func RegisterAccountServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.client.v1.AccountService/GetPrefs", runtime.WithHTTPPathPattern("/v1/account/prefs"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.client.v1.AccountService/GetPrefs", runtime.WithHTTPPathPattern("/v1/account/prefs"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -560,7 +560,7 @@ func RegisterAccountServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.client.v1.AccountService/UpdatePrefs", runtime.WithHTTPPathPattern("/v1/account/prefs"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.client.v1.AccountService/UpdatePrefs", runtime.WithHTTPPathPattern("/v1/account/prefs"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -618,7 +618,7 @@ func RegisterAccountServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.client.v1.AccountService/SignUp", runtime.WithHTTPPathPattern("/v1/account/sign-up"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.client.v1.AccountService/SignUp", runtime.WithHTTPPathPattern("/v1/account/sign-up"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -635,7 +635,7 @@ func RegisterAccountServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.client.v1.AccountService/SignIn", runtime.WithHTTPPathPattern("/v1/account/sign-in"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.client.v1.AccountService/SignIn", runtime.WithHTTPPathPattern("/v1/account/sign-in"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -652,7 +652,7 @@ func RegisterAccountServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.client.v1.AccountService/SignOut", runtime.WithHTTPPathPattern("/v1/account/sign-out"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.client.v1.AccountService/SignOut", runtime.WithHTTPPathPattern("/v1/account/sign-out"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -669,7 +669,7 @@ func RegisterAccountServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.client.v1.AccountService/RefreshToken", runtime.WithHTTPPathPattern("/v1/account/refresh"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.client.v1.AccountService/RefreshToken", runtime.WithHTTPPathPattern("/v1/account/refresh"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -686,7 +686,7 @@ func RegisterAccountServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.client.v1.AccountService/Me", runtime.WithHTTPPathPattern("/v1/account/me"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.client.v1.AccountService/Me", runtime.WithHTTPPathPattern("/v1/account/me"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -703,7 +703,7 @@ func RegisterAccountServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.client.v1.AccountService/UpdateAccount", runtime.WithHTTPPathPattern("/v1/account"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.client.v1.AccountService/UpdateAccount", runtime.WithHTTPPathPattern("/v1/account"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -720,7 +720,7 @@ func RegisterAccountServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.client.v1.AccountService/ListSessions", runtime.WithHTTPPathPattern("/v1/account/sessions"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.client.v1.AccountService/ListSessions", runtime.WithHTTPPathPattern("/v1/account/sessions"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -737,7 +737,7 @@ func RegisterAccountServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.client.v1.AccountService/DeleteSession", runtime.WithHTTPPathPattern("/v1/account/sessions/{session_id}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.client.v1.AccountService/DeleteSession", runtime.WithHTTPPathPattern("/v1/account/sessions/{session_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -754,7 +754,7 @@ func RegisterAccountServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.client.v1.AccountService/DeleteSessions", runtime.WithHTTPPathPattern("/v1/account/sessions"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.client.v1.AccountService/DeleteSessions", runtime.WithHTTPPathPattern("/v1/account/sessions"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -771,7 +771,7 @@ func RegisterAccountServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.client.v1.AccountService/GetPrefs", runtime.WithHTTPPathPattern("/v1/account/prefs"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.client.v1.AccountService/GetPrefs", runtime.WithHTTPPathPattern("/v1/account/prefs"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -788,7 +788,7 @@ func RegisterAccountServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.client.v1.AccountService/UpdatePrefs", runtime.WithHTTPPathPattern("/v1/account/prefs"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.client.v1.AccountService/UpdatePrefs", runtime.WithHTTPPathPattern("/v1/account/prefs"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return

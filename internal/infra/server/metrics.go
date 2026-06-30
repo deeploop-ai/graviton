@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/deeploop-ai/fleet/internal/pkg/config"
+	"github.com/deeploop-ai/orionid/internal/pkg/config"
 	"github.com/lynx-go/lynx"
 	lynxhttp "github.com/lynx-go/lynx/server/http"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

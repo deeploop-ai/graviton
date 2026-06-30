@@ -7,7 +7,7 @@
 package serverv1
 
 import (
-	v1 "github.com/deeploop-ai/fleet/genproto/shared/v1"
+	v1 "github.com/deeploop-ai/orionid/genproto/shared/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -285,17 +285,17 @@ var File_server_v1_users_proto protoreflect.FileDescriptor
 
 const file_server_v1_users_proto_rawDesc = "" +
 	"\n" +
-	"\x15server/v1/users.proto\x12\x0ffleet.server.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\" \n" +
+	"\x15server/v1/users.proto\x12\x11orionid.server.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\" \n" +
 	"\x0eGetUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"\x9b\x01\n" +
 	"\x11UpdateUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12/\n" +
 	"\x06labels\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x06labels\x12-\n" +
-	"\x05prefs\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x05prefs\"w\n" +
-	"\x11ListUsersResponse\x12+\n" +
-	"\x05users\x18\x01 \x03(\v2\x15.fleet.server.v1.UserR\x05users\x125\n" +
-	"\x04meta\x18\x02 \x01(\v2!.fleet.shared.v1.ListResponseMetaR\x04meta\"\xf5\x01\n" +
+	"\x05prefs\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x05prefs\"{\n" +
+	"\x11ListUsersResponse\x12-\n" +
+	"\x05users\x18\x01 \x03(\v2\x17.orionid.server.v1.UserR\x05users\x127\n" +
+	"\x04meta\x18\x02 \x01(\v2#.orionid.shared.v1.ListResponseMetaR\x04meta\"\xf5\x01\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x12\n" +
@@ -305,14 +305,14 @@ const file_server_v1_users_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt2\xb2\x03\n" +
-	"\fUsersService\x12g\n" +
-	"\tListUsers\x12\x1c.fleet.shared.v1.ListRequest\x1a\".fleet.server.v1.ListUsersResponse\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/v1/server/users\x12`\n" +
-	"\aGetUser\x12\x1f.fleet.server.v1.GetUserRequest\x1a\x15.fleet.server.v1.User\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/v1/server/users/{id}\x12i\n" +
+	"updated_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt2\xc2\x03\n" +
+	"\fUsersService\x12k\n" +
+	"\tListUsers\x12\x1e.orionid.shared.v1.ListRequest\x1a$.orionid.server.v1.ListUsersResponse\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/v1/server/users\x12d\n" +
+	"\aGetUser\x12!.orionid.server.v1.GetUserRequest\x1a\x17.orionid.server.v1.User\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/v1/server/users/{id}\x12m\n" +
 	"\n" +
-	"UpdateUser\x12\".fleet.server.v1.UpdateUserRequest\x1a\x15.fleet.server.v1.User\" \x82\xd3\xe4\x93\x02\x1a:\x01*2\x15/v1/server/users/{id}\x12d\n" +
+	"UpdateUser\x12$.orionid.server.v1.UpdateUserRequest\x1a\x17.orionid.server.v1.User\" \x82\xd3\xe4\x93\x02\x1a:\x01*2\x15/v1/server/users/{id}\x12h\n" +
 	"\n" +
-	"DeleteUser\x12\x1f.fleet.server.v1.GetUserRequest\x1a\x16.fleet.shared.v1.Empty\"\x1d\x82\xd3\xe4\x93\x02\x17*\x15/v1/server/users/{id}\x1a\x06\x92\xb2\x19\x02\b\x04B:Z8github.com/deeploop-ai/fleet/genproto/server/v1;serverv1b\x06proto3"
+	"DeleteUser\x12!.orionid.server.v1.GetUserRequest\x1a\x18.orionid.shared.v1.Empty\"\x1d\x82\xd3\xe4\x93\x02\x17*\x15/v1/server/users/{id}\x1a\x06\x92\xb2\x19\x02\b\x04B<Z:github.com/deeploop-ai/orionid/genproto/server/v1;serverv1b\x06proto3"
 
 var (
 	file_server_v1_users_proto_rawDescOnce sync.Once
@@ -328,31 +328,31 @@ func file_server_v1_users_proto_rawDescGZIP() []byte {
 
 var file_server_v1_users_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_server_v1_users_proto_goTypes = []any{
-	(*GetUserRequest)(nil),        // 0: fleet.server.v1.GetUserRequest
-	(*UpdateUserRequest)(nil),     // 1: fleet.server.v1.UpdateUserRequest
-	(*ListUsersResponse)(nil),     // 2: fleet.server.v1.ListUsersResponse
-	(*User)(nil),                  // 3: fleet.server.v1.User
+	(*GetUserRequest)(nil),        // 0: orionid.server.v1.GetUserRequest
+	(*UpdateUserRequest)(nil),     // 1: orionid.server.v1.UpdateUserRequest
+	(*ListUsersResponse)(nil),     // 2: orionid.server.v1.ListUsersResponse
+	(*User)(nil),                  // 3: orionid.server.v1.User
 	(*structpb.Struct)(nil),       // 4: google.protobuf.Struct
-	(*v1.ListResponseMeta)(nil),   // 5: fleet.shared.v1.ListResponseMeta
+	(*v1.ListResponseMeta)(nil),   // 5: orionid.shared.v1.ListResponseMeta
 	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
-	(*v1.ListRequest)(nil),        // 7: fleet.shared.v1.ListRequest
-	(*v1.Empty)(nil),              // 8: fleet.shared.v1.Empty
+	(*v1.ListRequest)(nil),        // 7: orionid.shared.v1.ListRequest
+	(*v1.Empty)(nil),              // 8: orionid.shared.v1.Empty
 }
 var file_server_v1_users_proto_depIdxs = []int32{
-	4,  // 0: fleet.server.v1.UpdateUserRequest.labels:type_name -> google.protobuf.Struct
-	4,  // 1: fleet.server.v1.UpdateUserRequest.prefs:type_name -> google.protobuf.Struct
-	3,  // 2: fleet.server.v1.ListUsersResponse.users:type_name -> fleet.server.v1.User
-	5,  // 3: fleet.server.v1.ListUsersResponse.meta:type_name -> fleet.shared.v1.ListResponseMeta
-	6,  // 4: fleet.server.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	6,  // 5: fleet.server.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	7,  // 6: fleet.server.v1.UsersService.ListUsers:input_type -> fleet.shared.v1.ListRequest
-	0,  // 7: fleet.server.v1.UsersService.GetUser:input_type -> fleet.server.v1.GetUserRequest
-	1,  // 8: fleet.server.v1.UsersService.UpdateUser:input_type -> fleet.server.v1.UpdateUserRequest
-	0,  // 9: fleet.server.v1.UsersService.DeleteUser:input_type -> fleet.server.v1.GetUserRequest
-	2,  // 10: fleet.server.v1.UsersService.ListUsers:output_type -> fleet.server.v1.ListUsersResponse
-	3,  // 11: fleet.server.v1.UsersService.GetUser:output_type -> fleet.server.v1.User
-	3,  // 12: fleet.server.v1.UsersService.UpdateUser:output_type -> fleet.server.v1.User
-	8,  // 13: fleet.server.v1.UsersService.DeleteUser:output_type -> fleet.shared.v1.Empty
+	4,  // 0: orionid.server.v1.UpdateUserRequest.labels:type_name -> google.protobuf.Struct
+	4,  // 1: orionid.server.v1.UpdateUserRequest.prefs:type_name -> google.protobuf.Struct
+	3,  // 2: orionid.server.v1.ListUsersResponse.users:type_name -> orionid.server.v1.User
+	5,  // 3: orionid.server.v1.ListUsersResponse.meta:type_name -> orionid.shared.v1.ListResponseMeta
+	6,  // 4: orionid.server.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	6,  // 5: orionid.server.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	7,  // 6: orionid.server.v1.UsersService.ListUsers:input_type -> orionid.shared.v1.ListRequest
+	0,  // 7: orionid.server.v1.UsersService.GetUser:input_type -> orionid.server.v1.GetUserRequest
+	1,  // 8: orionid.server.v1.UsersService.UpdateUser:input_type -> orionid.server.v1.UpdateUserRequest
+	0,  // 9: orionid.server.v1.UsersService.DeleteUser:input_type -> orionid.server.v1.GetUserRequest
+	2,  // 10: orionid.server.v1.UsersService.ListUsers:output_type -> orionid.server.v1.ListUsersResponse
+	3,  // 11: orionid.server.v1.UsersService.GetUser:output_type -> orionid.server.v1.User
+	3,  // 12: orionid.server.v1.UsersService.UpdateUser:output_type -> orionid.server.v1.User
+	8,  // 13: orionid.server.v1.UsersService.DeleteUser:output_type -> orionid.shared.v1.Empty
 	10, // [10:14] is the sub-list for method output_type
 	6,  // [6:10] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name

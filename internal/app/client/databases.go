@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/deeploop-ai/fleet/internal/app/shared"
-	"github.com/deeploop-ai/fleet/internal/domain/databases"
-	"github.com/deeploop-ai/fleet/internal/domain/projects"
-	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
+	"github.com/deeploop-ai/orionid/internal/app/shared"
+	"github.com/deeploop-ai/orionid/internal/domain/databases"
+	"github.com/deeploop-ai/orionid/internal/domain/projects"
+	"github.com/deeploop-ai/orionid/internal/pkg/contexts"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

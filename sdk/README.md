@@ -1,12 +1,12 @@
-# Fleet TypeScript SDK
+# Orionid TypeScript SDK
 
-`@fleet/sdk` 封装 Fleet **Client API**（用户 JWT）与 **Server API**（API Key + `X-Fleet-Project`），便于集成测试与交互演示。
+`@orionid/sdk` 封装 Orionid **Client API**（用户 JWT）与 **Server API**（API Key + `X-Orionid-Project`），便于集成测试与交互演示。
 
 ## 目录
 
 | 路径 | 说明 |
 |------|------|
-| `typescript/` | SDK 包 `@fleet/sdk` |
+| `typescript/` | SDK 包 `@orionid/sdk` |
 | `demo/` | Web 演示站点（注册/登录 + SDK 功能演示） |
 
 ## 快速开始
@@ -16,7 +16,7 @@
 task sdk-install
 task sdk-build
 
-# 启动本地 Fleet（另开终端）
+# 启动本地 Orionid（另开终端）
 task up
 task migrate
 go run ./cmd/seed   # 记下输出的 api_key
@@ -46,14 +46,14 @@ Server API 相关功能需在设置页填写 `go run ./cmd/seed` 输出的 API K
 ## SDK 用法
 
 ```typescript
-import { Fleet } from "@fleet/sdk";
+import { Orionid } from "@orionid/sdk";
 
 // Server API
-const admin = Fleet.withApiKey("http://localhost:9080", "default", apiKey);
+const admin = Orionid.withApiKey("http://localhost:9080", "default", apiKey);
 await admin.server.health.check();
 
 // Client API（注册后自动保存 access token）
-const client = Fleet.create({ endpoint: "http://localhost:9080", projectId: "default" });
+const client = Orionid.create({ endpoint: "http://localhost:9080", projectId: "default" });
 await client.account.signUp({ email: "u@example.com", password: "Pass@123", name: "User" });
 await client.databases.createDocument("app", "notes", { data: { title: "Hi" } });
 ```

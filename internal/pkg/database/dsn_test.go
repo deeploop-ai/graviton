@@ -5,7 +5,7 @@ import (
 )
 
 func TestSourceFromEnv(t *testing.T) {
-	t.Setenv("FLEET_DATA_DATABASE_SOURCE", "")
+	t.Setenv("ORIONID_DATA_DATABASE_SOURCE", "")
 	t.Setenv("POSTGRES_USER", "user")
 	t.Setenv("POSTGRES_PASSWORD", "pass")
 	t.Setenv("POSTGRES_HOST", "db.local")
@@ -20,11 +20,11 @@ func TestSourceFromEnv(t *testing.T) {
 }
 
 func TestSourceFromEnvPrefersFleetDSN(t *testing.T) {
-	t.Setenv("FLEET_DATA_DATABASE_SOURCE", "postgres://fleet:fleet@127.0.0.1:5433/fleet?sslmode=disable")
+	t.Setenv("ORIONID_DATA_DATABASE_SOURCE", "postgres://orionid:orionid@127.0.0.1 :5433/orionid?sslmode=disable")
 	t.Setenv("POSTGRES_PORT", "9999")
 
 	got := SourceFromEnv()
-	want := "postgres://fleet:fleet@127.0.0.1:5433/fleet?sslmode=disable"
+	want := "postgres://orionid:orionid@127.0.0.1 :5433/orionid?sslmode=disable"
 	if got != want {
 		t.Fatalf("SourceFromEnv() = %q, want %q", got, want)
 	}

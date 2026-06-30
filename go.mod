@@ -1,4 +1,4 @@
-module github.com/deeploop-ai/fleet
+module github.com/deeploop-ai/orionid
 
 go 1.25.0
 

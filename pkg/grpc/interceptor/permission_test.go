@@ -3,7 +3,7 @@ package interceptor
 import (
 	"testing"
 
-	"github.com/deeploop-ai/fleet/internal/domain/shared"
+	"github.com/deeploop-ai/orionid/internal/domain/shared"
 )
 
 func TestPrincipalHasAnyPermission(t *testing.T) {

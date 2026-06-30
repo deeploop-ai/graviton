@@ -1,8 +1,8 @@
-import { FleetError, parseErrorResponse } from "./errors.js";
+import { OrionidError, parseErrorResponse } from "./errors.js";
 
 export type AuthMode = "apiKey" | "user" | "none";
 
-export interface FleetConfig {
+export interface OrionidConfig {
   endpoint: string;
   projectId: string;
   apiKey?: string;
@@ -23,7 +23,7 @@ export class HttpTransport {
   private accessToken?: string;
   private fetchImpl: typeof fetch;
 
-  constructor(config: FleetConfig) {
+  constructor(config: OrionidConfig) {
     this.endpoint = config.endpoint.replace(/\/+$/, "");
     this.projectId = config.projectId;
     this.apiKey = config.apiKey;
@@ -72,10 +72,10 @@ export class HttpTransport {
     const auth = options.auth ?? "user";
     if (auth === "apiKey") {
       if (!this.apiKey) {
-        throw new FleetError("API key is required for this request", 0);
+        throw new OrionidError("API key is required for this request", 0);
       }
       headers["X-Api-Key"] = this.apiKey;
-      headers["X-Fleet-Project"] = this.projectId;
+      headers["X-Orionid-Project"] = this.projectId;
     } else if (auth === "user") {
       if (this.accessToken) {
         headers.Authorization = `Bearer ${this.accessToken}`;
@@ -113,10 +113,10 @@ export class HttpTransport {
     const headers: Record<string, string> = {};
     if (auth === "apiKey") {
       if (!this.apiKey) {
-        throw new FleetError("API key is required for this request", 0);
+        throw new OrionidError("API key is required for this request", 0);
       }
       headers["X-Api-Key"] = this.apiKey;
-      headers["X-Fleet-Project"] = this.projectId;
+      headers["X-Orionid-Project"] = this.projectId;
     } else if (auth === "user" && this.accessToken) {
       headers.Authorization = `Bearer ${this.accessToken}`;
     }

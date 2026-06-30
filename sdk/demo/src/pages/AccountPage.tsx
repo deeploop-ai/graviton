@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useFleet } from "@/lib/fleet-context";
+import { useOrionid } from "@/lib/orionid-context";
 import { ErrorBanner, JsonPanel, MethodTag, PageHeader } from "@/components/Ui";
 
 export function AccountPage() {
-  const { client, auth, setAuth, run, lastError } = useFleet();
+  const { client, auth, setAuth, run, lastError } = useOrionid();
   const [result, setResult] = useState<unknown>(null);
   const [loading, setLoading] = useState(false);
   const [theme, setTheme] = useState("sdk-playground");
@@ -88,11 +88,11 @@ export function AccountPage() {
 
       <div className="mb-4 grid gap-3 md:grid-cols-2">
         <label className="block space-y-1">
-          <span className="text-xs text-fleet-muted">prefs.theme</span>
+          <span className="text-xs text-orionid-muted">prefs.theme</span>
           <input className="field" value={theme} onChange={(e) => setTheme(e.target.value)} />
         </label>
         <label className="block space-y-1">
-          <span className="text-xs text-fleet-muted">prefs.lang</span>
+          <span className="text-xs text-orionid-muted">prefs.lang</span>
           <input className="field" value={lang} onChange={(e) => setLang(e.target.value)} />
         </label>
       </div>

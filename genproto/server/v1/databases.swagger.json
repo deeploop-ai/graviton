@@ -399,7 +399,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1ListDocumentsResponse"
+              "$ref": "#/definitions/orionidserverv1ListDocumentsResponse"
             }
           },
           "default": {
@@ -456,7 +456,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1Document"
+              "$ref": "#/definitions/orionidserverv1Document"
             }
           },
           "default": {
@@ -484,7 +484,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/fleetserverv1DatabasesServiceCreateDocumentBody"
+              "$ref": "#/definitions/orionidserverv1DatabasesServiceCreateDocumentBody"
             }
           }
         ],
@@ -588,7 +588,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1CountDocumentsResponse"
+              "$ref": "#/definitions/orionidserverv1CountDocumentsResponse"
             }
           },
           "default": {
@@ -647,7 +647,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1Document"
+              "$ref": "#/definitions/orionidserverv1Document"
             }
           },
           "default": {
@@ -727,7 +727,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/fleetserverv1Document"
+              "$ref": "#/definitions/orionidserverv1Document"
             }
           },
           "default": {
@@ -761,7 +761,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/fleetserverv1DatabasesServiceUpdateDocumentBody"
+              "$ref": "#/definitions/orionidserverv1DatabasesServiceUpdateDocumentBody"
             }
           }
         ],
@@ -1031,7 +1031,7 @@
         }
       }
     },
-    "fleetserverv1CountDocumentsResponse": {
+    "orionidserverv1CountDocumentsResponse": {
       "type": "object",
       "properties": {
         "count": {
@@ -1040,7 +1040,7 @@
         }
       }
     },
-    "fleetserverv1DatabasesServiceCreateDocumentBody": {
+    "orionidserverv1DatabasesServiceCreateDocumentBody": {
       "type": "object",
       "properties": {
         "documentId": {
@@ -1057,7 +1057,7 @@
         }
       }
     },
-    "fleetserverv1DatabasesServiceUpdateDocumentBody": {
+    "orionidserverv1DatabasesServiceUpdateDocumentBody": {
       "type": "object",
       "properties": {
         "data": {
@@ -1078,7 +1078,7 @@
         }
       }
     },
-    "fleetserverv1Document": {
+    "orionidserverv1Document": {
       "type": "object",
       "properties": {
         "id": {
@@ -1103,14 +1103,14 @@
         }
       }
     },
-    "fleetserverv1ListDocumentsResponse": {
+    "orionidserverv1ListDocumentsResponse": {
       "type": "object",
       "properties": {
         "documents": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/fleetserverv1Document"
+            "$ref": "#/definitions/orionidserverv1Document"
           }
         },
         "meta": {

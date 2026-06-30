@@ -1,11 +1,11 @@
 package app
 
 import (
-	"github.com/deeploop-ai/fleet/internal/app/client"
-	"github.com/deeploop-ai/fleet/internal/app/console"
-	"github.com/deeploop-ai/fleet/internal/app/functions"
-	"github.com/deeploop-ai/fleet/internal/app/server"
-	"github.com/deeploop-ai/fleet/internal/app/storage"
+	"github.com/deeploop-ai/orionid/internal/app/client"
+	"github.com/deeploop-ai/orionid/internal/app/console"
+	"github.com/deeploop-ai/orionid/internal/app/functions"
+	"github.com/deeploop-ai/orionid/internal/app/server"
+	"github.com/deeploop-ai/orionid/internal/app/storage"
 	"github.com/google/wire"
 )
 

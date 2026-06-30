@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/deeploop-ai/fleet/internal/domain/storage"
-	"github.com/deeploop-ai/fleet/internal/pkg/config"
+	"github.com/deeploop-ai/orionid/internal/domain/storage"
+	"github.com/deeploop-ai/orionid/internal/pkg/config"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -44,7 +44,7 @@ func NewMinioObjectStore(cfg *config.AppConfig) (storage.ObjectStore, error) {
 
 	bucket := s.GetBucket()
 	if bucket == "" {
-		bucket = "fleet-files"
+		bucket = "orionid-files"
 	}
 
 	return &minioObjectStore{client: client, bucket: bucket}, nil
@@ -96,7 +96,7 @@ func (m *minioObjectStore) bucketName() string {
 	if m.bucket != "" {
 		return m.bucket
 	}
-	return "fleet-files"
+	return "orionid-files"
 }
 
 // DefaultBucket returns the configured default bucket name.

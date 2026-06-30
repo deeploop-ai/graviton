@@ -1,4 +1,4 @@
-import { Fleet, FleetError } from "@fleet/sdk";
+import { Orionid, OrionidError } from "@orionid/sdk";
 import {
   createContext,
   useCallback,
@@ -16,30 +16,29 @@ import {
   type AuthState,
 } from "./storage";
 
-interface FleetContextValue {
+interface OrionidContextValue {
   settings: AppSettings;
   auth: AuthState | null;
-  client: Fleet;
+  client: Orionid;
   updateSettings: (next: AppSettings) => void;
   setAuth: (next: AuthState | null) => void;
-  serverFleet: () => Fleet;
+  serverClient: () => Orionid;
   lastError: string | null;
   setLastError: (msg: string | null) => void;
   run: <T>(fn: () => Promise<T>) => Promise<T>;
 }
 
-const FleetContext = createContext<FleetContextValue | null>(null);
+const OrionidContext = createContext<OrionidContextValue | null>(null);
 
-function buildClient(settings: AppSettings, auth: AuthState | null): Fleet {
-  const fleet = Fleet.create({
+function buildClient(settings: AppSettings, auth: AuthState | null): Orionid {
+  return Orionid.create({
     endpoint: settings.endpoint,
     projectId: settings.projectId,
     accessToken: auth?.accessToken,
   });
-  return fleet;
 }
 
-export function FleetProvider({ children }: { children: ReactNode }) {
+export function OrionidProvider({ children }: { children: ReactNode }) {
   const [settings, setSettingsState] = useState<AppSettings>(() => loadSettings());
   const [auth, setAuthState] = useState<AuthState | null>(() => loadAuth());
   const [lastError, setLastError] = useState<string | null>(null);
@@ -61,11 +60,11 @@ export function FleetProvider({ children }: { children: ReactNode }) {
     }
   }, [client]);
 
-  const serverFleet = useCallback(() => {
+  const serverClient = useCallback(() => {
     if (!settings.apiKey) {
-      throw new FleetError("请先在设置页填写 Server API Key", 0);
+      throw new OrionidError("请先在设置页填写 Server API Key", 0);
     }
-    return Fleet.withApiKey(settings.endpoint, settings.projectId, settings.apiKey);
+    return Orionid.withApiKey(settings.endpoint, settings.projectId, settings.apiKey);
   }, [settings]);
 
   const run = useCallback(async <T,>(fn: () => Promise<T>): Promise<T> => {
@@ -74,7 +73,7 @@ export function FleetProvider({ children }: { children: ReactNode }) {
       return await fn();
     } catch (err) {
       const message =
-        err instanceof FleetError
+        err instanceof OrionidError
           ? `[${err.status}] ${err.message}`
           : err instanceof Error
             ? err.message
@@ -91,19 +90,19 @@ export function FleetProvider({ children }: { children: ReactNode }) {
       client,
       updateSettings,
       setAuth,
-      serverFleet,
+      serverClient,
       lastError,
       setLastError,
       run,
     }),
-    [settings, auth, client, updateSettings, setAuth, serverFleet, lastError, run]
+    [settings, auth, client, updateSettings, setAuth, serverClient, lastError, run]
   );
 
-  return <FleetContext.Provider value={value}>{children}</FleetContext.Provider>;
+  return <OrionidContext.Provider value={value}>{children}</OrionidContext.Provider>;
 }
 
-export function useFleet() {
-  const ctx = useContext(FleetContext);
-  if (!ctx) throw new Error("useFleet must be used within FleetProvider");
+export function useOrionid() {
+  const ctx = useContext(OrionidContext);
+  if (!ctx) throw new Error("useOrionid must be used within OrionidProvider");
   return ctx;
 }

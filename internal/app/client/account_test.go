@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/deeploop-ai/fleet/internal/domain/shared"
-	"github.com/deeploop-ai/fleet/internal/infra/bun/bunrepo"
-	"github.com/deeploop-ai/fleet/internal/infra/documentdb"
-	"github.com/deeploop-ai/fleet/internal/pkg/config"
-	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
-	"github.com/deeploop-ai/fleet/internal/testutil"
+	"github.com/deeploop-ai/orionid/internal/domain/shared"
+	"github.com/deeploop-ai/orionid/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/orionid/internal/infra/documentdb"
+	"github.com/deeploop-ai/orionid/internal/pkg/config"
+	"github.com/deeploop-ai/orionid/internal/pkg/contexts"
+	"github.com/deeploop-ai/orionid/internal/testutil"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -40,7 +40,7 @@ func TestAccount_SignUpSignInMe(t *testing.T) {
 	// Sign up.
 	user, tokens, cookie, err := account.SignUp(ctx, SignUpCommand{
 		ProjectID: projectID,
-		Email:     "account-test@fleet.local",
+		Email:     "account-test@orionid.local",
 		Password:  "User@123",
 		Name:      "Account Test",
 	})
@@ -52,7 +52,7 @@ func TestAccount_SignUpSignInMe(t *testing.T) {
 	// Duplicate email.
 	_, _, _, err = account.SignUp(ctx, SignUpCommand{
 		ProjectID: projectID,
-		Email:     "account-test@fleet.local",
+		Email:     "account-test@orionid.local",
 		Password:  "User@123",
 		Name:      "Account Test 2",
 	})
@@ -63,7 +63,7 @@ func TestAccount_SignUpSignInMe(t *testing.T) {
 	// Sign in.
 	user2, tokens2, _, err := account.SignIn(ctx, SignInCommand{
 		ProjectID: projectID,
-		Email:     "account-test@fleet.local",
+		Email:     "account-test@orionid.local",
 		Password:  "User@123",
 	})
 	require.NoError(t, err)
@@ -80,7 +80,7 @@ func TestAccount_SignUpSignInMe(t *testing.T) {
 	me, err := account.Me(meCtx)
 	require.NoError(t, err)
 	require.Equal(t, user.ID, me.ID)
-	require.Equal(t, "account-test@fleet.local", me.Email)
+	require.Equal(t, "account-test@orionid.local", me.Email)
 
 	// Sign out.
 	require.NoError(t, account.SignOut(meCtx))
@@ -88,7 +88,7 @@ func TestAccount_SignUpSignInMe(t *testing.T) {
 	// Refresh token after sign-in (new session from sign-in above).
 	signInUser, refreshTokens, _, err := account.SignIn(ctx, SignInCommand{
 		ProjectID: projectID,
-		Email:     "account-test@fleet.local",
+		Email:     "account-test@orionid.local",
 		Password:  "User@123",
 	})
 	require.NoError(t, err)

@@ -14,7 +14,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/deeploop-ai/fleet/genproto/shared/v1"
+	"github.com/deeploop-ai/orionid/genproto/shared/v1"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/utilities"
 	"google.golang.org/grpc"
@@ -149,7 +149,7 @@ func RegisterProjectsServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.server.v1.ProjectsService/CreateProject", runtime.WithHTTPPathPattern("/v1/server/projects"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.ProjectsService/CreateProject", runtime.WithHTTPPathPattern("/v1/server/projects"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -169,7 +169,7 @@ func RegisterProjectsServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.server.v1.ProjectsService/ListProjects", runtime.WithHTTPPathPattern("/v1/server/projects"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.ProjectsService/ListProjects", runtime.WithHTTPPathPattern("/v1/server/projects"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -189,7 +189,7 @@ func RegisterProjectsServiceHandlerServer(ctx context.Context, mux *runtime.Serv
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/fleet.server.v1.ProjectsService/GetProject", runtime.WithHTTPPathPattern("/v1/server/projects/{id}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.ProjectsService/GetProject", runtime.WithHTTPPathPattern("/v1/server/projects/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -247,7 +247,7 @@ func RegisterProjectsServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.server.v1.ProjectsService/CreateProject", runtime.WithHTTPPathPattern("/v1/server/projects"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.ProjectsService/CreateProject", runtime.WithHTTPPathPattern("/v1/server/projects"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -264,7 +264,7 @@ func RegisterProjectsServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.server.v1.ProjectsService/ListProjects", runtime.WithHTTPPathPattern("/v1/server/projects"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.ProjectsService/ListProjects", runtime.WithHTTPPathPattern("/v1/server/projects"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -281,7 +281,7 @@ func RegisterProjectsServiceHandlerClient(ctx context.Context, mux *runtime.Serv
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/fleet.server.v1.ProjectsService/GetProject", runtime.WithHTTPPathPattern("/v1/server/projects/{id}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.ProjectsService/GetProject", runtime.WithHTTPPathPattern("/v1/server/projects/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return

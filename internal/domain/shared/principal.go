@@ -1,6 +1,6 @@
 package shared
 
-import "github.com/deeploop-ai/fleet/pkg/idgen"
+import "github.com/deeploop-ai/orionid/pkg/idgen"
 
 type ActorKind string
 

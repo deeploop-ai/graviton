@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/deeploop-ai/fleet/internal/domain/databases"
-	"github.com/deeploop-ai/fleet/internal/infra/bun/bunrepo"
-	"github.com/deeploop-ai/fleet/internal/infra/documentdb"
-	"github.com/deeploop-ai/fleet/internal/testutil"
+	"github.com/deeploop-ai/orionid/internal/domain/databases"
+	"github.com/deeploop-ai/orionid/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/orionid/internal/infra/documentdb"
+	"github.com/deeploop-ai/orionid/internal/testutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -41,12 +41,12 @@ func TestDatabases_DocumentCRUD(t *testing.T) {
 	}, nil, nil, true))
 
 	created, err := uc.CreateDocument(ctx, projectID, dbID, collID, "", map[string]any{
-		"title": "Hello Fleet",
+		"title": "Hello Orionid",
 		"views": 1,
 	}, databases.DefaultCollectionPermissions(), principal)
 	require.NoError(t, err)
 	require.NotEmpty(t, created.ID)
-	require.Equal(t, "Hello Fleet", created.Data["title"])
+	require.Equal(t, "Hello Orionid", created.Data["title"])
 
 	got, err := uc.GetDocument(ctx, projectID, dbID, collID, created.ID, principal)
 	require.NoError(t, err)
@@ -59,13 +59,13 @@ func TestDatabases_DocumentCRUD(t *testing.T) {
 	require.Equal(t, float64(99), updated.Data["views"])
 
 	list, total, _, err := uc.ListDocuments(ctx, projectID, dbID, collID, databases.Query{
-		Queries: []string{`equal("title","Hello Fleet")`, `orderDesc("$createdAt")`},
+		Queries: []string{`equal("title","Hello Orionid")`, `orderDesc("$createdAt")`},
 	}, principal)
 	require.NoError(t, err)
 	require.Equal(t, int64(1), total)
 	require.Len(t, list, 1)
 
-	count, err := uc.CountDocuments(ctx, projectID, dbID, collID, []string{`equal("title","Hello Fleet")`}, principal)
+	count, err := uc.CountDocuments(ctx, projectID, dbID, collID, []string{`equal("title","Hello Orionid")`}, principal)
 	require.NoError(t, err)
 	require.Equal(t, int64(1), count)
 

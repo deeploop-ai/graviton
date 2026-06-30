@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/deeploop-ai/fleet/internal/domain/shared"
-	"github.com/deeploop-ai/fleet/internal/infra/bun/bunrepo"
-	"github.com/deeploop-ai/fleet/internal/infra/documentdb"
-	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
-	"github.com/deeploop-ai/fleet/internal/testutil"
+	"github.com/deeploop-ai/orionid/internal/domain/shared"
+	"github.com/deeploop-ai/orionid/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/orionid/internal/infra/documentdb"
+	"github.com/deeploop-ai/orionid/internal/pkg/contexts"
+	"github.com/deeploop-ai/orionid/internal/testutil"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -34,7 +34,7 @@ func TestAccount_SessionsUpdatePrefs(t *testing.T) {
 	account := NewAccount(cfg, projectRepo, docDB)
 	user, tokens, _, err := account.SignUp(ctx, SignUpCommand{
 		ProjectID: projectID,
-		Email:     "sessions@fleet.local",
+		Email:     "sessions@orionid.local",
 		Password:  "User@123456",
 		Name:      "Sessions User",
 	})
@@ -42,7 +42,7 @@ func TestAccount_SessionsUpdatePrefs(t *testing.T) {
 
 	_, tokens2, _, err := account.SignIn(ctx, SignInCommand{
 		ProjectID: projectID,
-		Email:     "sessions@fleet.local",
+		Email:     "sessions@orionid.local",
 		Password:  "User@123456",
 	})
 	require.NoError(t, err)
@@ -109,7 +109,7 @@ func TestAccount_SessionsUpdatePrefs(t *testing.T) {
 
 	_, newTokens, _, err := account.SignIn(ctx, SignInCommand{
 		ProjectID: projectID,
-		Email:     "sessions@fleet.local",
+		Email:     "sessions@orionid.local",
 		Password:  "NewPass@123",
 	})
 	require.NoError(t, err)

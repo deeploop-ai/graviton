@@ -6,7 +6,7 @@
 - 服务器组件由 `cmd/server/provides.go` 启动，包含 gRPC、grpc-gateway、独立 HTTP handler、metrics、Admin Console SPA。
 - gRPC/API Proto 定义在 `proto/client`、`proto/server`、`proto/console`、`proto/shared`，生成代码位于 `genproto/`。
 - 典型调用链：gRPC handler -> app use-case -> domain repo port -> infra adapter（bun 或 documentdb）。
-- 认证中间件位于 `pkg/grpc/interceptor` 中，使用 Principal 注入；API_KEY 方法同时允许 admin console session（需带 `X-Fleet-Project` header）。
+- 认证中间件位于 `pkg/grpc/interceptor` 中，使用 Principal 注入；API_KEY 方法同时允许 admin console session（需带 `X-Orionid-Project` header）。
 
 ## 项目结构补充
 - `console/`：React + Vite + TanStack Query + shadcn/ui 管理后台前端，通过 `console/embed.go` 嵌入 Go 二进制。
@@ -29,8 +29,8 @@
 
 ## 配置与环境约定
 - 配置 schema 由 `internal/pkg/config/config.proto` 定义，运行时绑定位于 `internal/pkg/config/bind.go`。
-- 环境变量覆盖前缀为 `FLEET_`；键名会从点号路径映射而来，例如 `data.database.source` -> `FLEET_DATA_DATABASE_SOURCE`。
-- MinIO 凭据请使用 `FLEET_STORAGE_S3_ACCESS_KEY_ID` 和 `FLEET_STORAGE_S3_SECRET_ACCESS_KEY`。
+- 环境变量覆盖前缀为 `ORIONID_`；键名会从点号路径映射而来，例如 `data.database.source` -> `ORIONID_DATA_DATABASE_SOURCE`。
+- MinIO 凭据请使用 `ORIONID_STORAGE_S3_ACCESS_KEY_ID` 和 `ORIONID_STORAGE_S3_SECRET_ACCESS_KEY`。
 - `cmd/server/main.go` 会通过 `godotenv` 尝试加载 `.env`，然后默认从 `./configs` 绑定配置。
 - 请使用 `configs/config.yaml.template` 作为基础模板，并将敏感信息保持在环境变量中。
 

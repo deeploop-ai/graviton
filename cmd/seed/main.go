@@ -9,10 +9,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/deeploop-ai/fleet/internal/infra/bun/model"
-	"github.com/deeploop-ai/fleet/internal/pkg/database"
-	"github.com/deeploop-ai/fleet/pkg/idgen"
-	"github.com/deeploop-ai/fleet/pkg/password"
+	"github.com/deeploop-ai/orionid/internal/infra/bun/model"
+	"github.com/deeploop-ai/orionid/internal/pkg/database"
+	"github.com/deeploop-ai/orionid/pkg/idgen"
+	"github.com/deeploop-ai/orionid/pkg/password"
 	"github.com/joho/godotenv"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
@@ -52,7 +52,7 @@ func main() {
 	}
 	admin := &model.ConsoleAdmin{
 		ID:           idgen.UUID().String(),
-		Email:        "admin@fleet.local",
+		Email:        "admin@orionid.local",
 		PasswordHash: hash,
 		Role:         "owner",
 		CreatedAt:    time.Now(),
@@ -74,11 +74,11 @@ func main() {
 		os.Exit(1)
 	}
 	if exists {
-		fmt.Println("seeded project=default admin=admin@fleet.local api_key=(already exists, id=" + apiKeyID + ")")
+		fmt.Println("seeded project=default admin=admin@orionid.local api_key=(already exists, id=" + apiKeyID + ")")
 		return
 	}
 
-	apiSecret := "fleet-default-api-key-" + idgen.UUID().String()
+	apiSecret := "orionid-default-api-key-" + idgen.UUID().String()
 	apiHash := sha256.Sum256([]byte(apiSecret))
 	apiKey := &model.APIKey{
 		ID:         apiKeyID,
@@ -95,5 +95,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("seeded project=default admin=admin@fleet.local api_key=" + apiSecret)
+	fmt.Println("seeded project=default admin=admin@orionid.local api_key=" + apiSecret)
 }

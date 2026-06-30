@@ -1,7 +1,7 @@
 {
-  "name": "@fleet/sdk",
+  "name": "@orionid/sdk",
   "version": "0.1.0",
-  "description": "Fleet Client API and Server API TypeScript SDK",
+  "description": "Orionid Client API and Server API TypeScript SDK",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

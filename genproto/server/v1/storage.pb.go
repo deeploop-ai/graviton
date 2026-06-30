@@ -7,7 +7,7 @@
 package serverv1
 
 import (
-	v1 "github.com/deeploop-ai/fleet/genproto/shared/v1"
+	v1 "github.com/deeploop-ai/orionid/genproto/shared/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -608,15 +608,15 @@ var File_server_v1_storage_proto protoreflect.FileDescriptor
 
 const file_server_v1_storage_proto_rawDesc = "" +
 	"\n" +
-	"\x17server/v1/storage.proto\x12\x0ffleet.server.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\"K\n" +
+	"\x17server/v1/storage.proto\x12\x11orionid.server.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\"K\n" +
 	"\x13CreateBucketRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vpermissions\x18\x02 \x03(\tR\vpermissions\"\"\n" +
 	"\x10GetBucketRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\x7f\n" +
-	"\x13ListBucketsResponse\x121\n" +
-	"\abuckets\x18\x01 \x03(\v2\x17.fleet.server.v1.BucketR\abuckets\x125\n" +
-	"\x04meta\x18\x02 \x01(\v2!.fleet.shared.v1.ListResponseMetaR\x04meta\"\xc4\x01\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x83\x01\n" +
+	"\x13ListBucketsResponse\x123\n" +
+	"\abuckets\x18\x01 \x03(\v2\x19.orionid.server.v1.BucketR\abuckets\x127\n" +
+	"\x04meta\x18\x02 \x01(\v2#.orionid.shared.v1.ListResponseMetaR\x04meta\"\xc4\x01\n" +
 	"\x06Bucket\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -624,13 +624,13 @@ const file_server_v1_storage_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xa2\x02\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xa4\x02\n" +
 	"\x11CreateFileRequest\x12\x1b\n" +
 	"\tbucket_id\x18\x01 \x01(\tR\bbucketId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1b\n" +
 	"\tmime_type\x18\x03 \x01(\tR\bmimeType\x12\x12\n" +
-	"\x04data\x18\x04 \x01(\fR\x04data\x12L\n" +
-	"\bmetadata\x18\x05 \x03(\v20.fleet.server.v1.CreateFileRequest.MetadataEntryR\bmetadata\x12 \n" +
+	"\x04data\x18\x04 \x01(\fR\x04data\x12N\n" +
+	"\bmetadata\x18\x05 \x03(\v22.orionid.server.v1.CreateFileRequest.MetadataEntryR\bmetadata\x12 \n" +
 	"\vpermissions\x18\x06 \x03(\tR\vpermissions\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
@@ -643,35 +643,35 @@ const file_server_v1_storage_proto_rawDesc = "" +
 	"page_token\x18\x04 \x01(\tR\tpageToken\"F\n" +
 	"\x0eGetFileRequest\x12\x1b\n" +
 	"\tbucket_id\x18\x01 \x01(\tR\bbucketId\x12\x17\n" +
-	"\afile_id\x18\x02 \x01(\tR\x06fileId\"w\n" +
-	"\x11ListFilesResponse\x12+\n" +
-	"\x05files\x18\x01 \x03(\v2\x15.fleet.server.v1.FileR\x05files\x125\n" +
-	"\x04meta\x18\x02 \x01(\v2!.fleet.shared.v1.ListResponseMetaR\x04meta\"\xec\x02\n" +
+	"\afile_id\x18\x02 \x01(\tR\x06fileId\"{\n" +
+	"\x11ListFilesResponse\x12-\n" +
+	"\x05files\x18\x01 \x03(\v2\x17.orionid.server.v1.FileR\x05files\x127\n" +
+	"\x04meta\x18\x02 \x01(\v2#.orionid.shared.v1.ListResponseMetaR\x04meta\"\xee\x02\n" +
 	"\x04File\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\tbucket_id\x18\x02 \x01(\tR\bbucketId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12\x1b\n" +
 	"\tmime_type\x18\x04 \x01(\tR\bmimeType\x12\x12\n" +
-	"\x04size\x18\x05 \x01(\x03R\x04size\x12?\n" +
-	"\bmetadata\x18\x06 \x03(\v2#.fleet.server.v1.File.MetadataEntryR\bmetadata\x129\n" +
+	"\x04size\x18\x05 \x01(\x03R\x04size\x12A\n" +
+	"\bmetadata\x18\x06 \x03(\v2%.orionid.server.v1.File.MetadataEntryR\bmetadata\x129\n" +
 	"\n" +
 	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x012\x85\b\n" +
-	"\x0eStorageService\x12t\n" +
-	"\fCreateBucket\x12$.fleet.server.v1.CreateBucketRequest\x1a\x17.fleet.server.v1.Bucket\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\"\x1a/v1/server/storage/buckets\x12u\n" +
-	"\vListBuckets\x12\x1c.fleet.shared.v1.ListRequest\x1a$.fleet.server.v1.ListBucketsResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/v1/server/storage/buckets\x12p\n" +
-	"\tGetBucket\x12!.fleet.server.v1.GetBucketRequest\x1a\x17.fleet.server.v1.Bucket\"'\x82\xd3\xe4\x93\x02!\x12\x1f/v1/server/storage/buckets/{id}\x12r\n" +
-	"\fDeleteBucket\x12!.fleet.server.v1.GetBucketRequest\x1a\x16.fleet.shared.v1.Empty\"'\x82\xd3\xe4\x93\x02!*\x1f/v1/server/storage/buckets/{id}\x12\x80\x01\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x012\xa5\b\n" +
+	"\x0eStorageService\x12x\n" +
+	"\fCreateBucket\x12&.orionid.server.v1.CreateBucketRequest\x1a\x19.orionid.server.v1.Bucket\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\"\x1a/v1/server/storage/buckets\x12y\n" +
+	"\vListBuckets\x12\x1e.orionid.shared.v1.ListRequest\x1a&.orionid.server.v1.ListBucketsResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/v1/server/storage/buckets\x12t\n" +
+	"\tGetBucket\x12#.orionid.server.v1.GetBucketRequest\x1a\x19.orionid.server.v1.Bucket\"'\x82\xd3\xe4\x93\x02!\x12\x1f/v1/server/storage/buckets/{id}\x12v\n" +
+	"\fDeleteBucket\x12#.orionid.server.v1.GetBucketRequest\x1a\x18.orionid.shared.v1.Empty\"'\x82\xd3\xe4\x93\x02!*\x1f/v1/server/storage/buckets/{id}\x12\x84\x01\n" +
 	"\n" +
-	"CreateFile\x12\".fleet.server.v1.CreateFileRequest\x1a\x15.fleet.server.v1.File\"7\x82\xd3\xe4\x93\x021:\x01*\",/v1/server/storage/buckets/{bucket_id}/files\x12\x88\x01\n" +
-	"\tListFiles\x12!.fleet.server.v1.ListFilesRequest\x1a\".fleet.server.v1.ListFilesResponse\"4\x82\xd3\xe4\x93\x02.\x12,/v1/server/storage/buckets/{bucket_id}/files\x12\x81\x01\n" +
-	"\aGetFile\x12\x1f.fleet.server.v1.GetFileRequest\x1a\x15.fleet.server.v1.File\">\x82\xd3\xe4\x93\x028\x126/v1/server/storage/buckets/{bucket_id}/files/{file_id}\x12\x85\x01\n" +
+	"CreateFile\x12$.orionid.server.v1.CreateFileRequest\x1a\x17.orionid.server.v1.File\"7\x82\xd3\xe4\x93\x021:\x01*\",/v1/server/storage/buckets/{bucket_id}/files\x12\x8c\x01\n" +
+	"\tListFiles\x12#.orionid.server.v1.ListFilesRequest\x1a$.orionid.server.v1.ListFilesResponse\"4\x82\xd3\xe4\x93\x02.\x12,/v1/server/storage/buckets/{bucket_id}/files\x12\x85\x01\n" +
+	"\aGetFile\x12!.orionid.server.v1.GetFileRequest\x1a\x17.orionid.server.v1.File\">\x82\xd3\xe4\x93\x028\x126/v1/server/storage/buckets/{bucket_id}/files/{file_id}\x12\x89\x01\n" +
 	"\n" +
-	"DeleteFile\x12\x1f.fleet.server.v1.GetFileRequest\x1a\x16.fleet.shared.v1.Empty\">\x82\xd3\xe4\x93\x028*6/v1/server/storage/buckets/{bucket_id}/files/{file_id}\x1a\x06\x92\xb2\x19\x02\b\x04B:Z8github.com/deeploop-ai/fleet/genproto/server/v1;serverv1b\x06proto3"
+	"DeleteFile\x12!.orionid.server.v1.GetFileRequest\x1a\x18.orionid.shared.v1.Empty\">\x82\xd3\xe4\x93\x028*6/v1/server/storage/buckets/{bucket_id}/files/{file_id}\x1a\x06\x92\xb2\x19\x02\b\x04B<Z:github.com/deeploop-ai/orionid/genproto/server/v1;serverv1b\x06proto3"
 
 var (
 	file_server_v1_storage_proto_rawDescOnce sync.Once
@@ -687,49 +687,49 @@ func file_server_v1_storage_proto_rawDescGZIP() []byte {
 
 var file_server_v1_storage_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_server_v1_storage_proto_goTypes = []any{
-	(*CreateBucketRequest)(nil),   // 0: fleet.server.v1.CreateBucketRequest
-	(*GetBucketRequest)(nil),      // 1: fleet.server.v1.GetBucketRequest
-	(*ListBucketsResponse)(nil),   // 2: fleet.server.v1.ListBucketsResponse
-	(*Bucket)(nil),                // 3: fleet.server.v1.Bucket
-	(*CreateFileRequest)(nil),     // 4: fleet.server.v1.CreateFileRequest
-	(*ListFilesRequest)(nil),      // 5: fleet.server.v1.ListFilesRequest
-	(*GetFileRequest)(nil),        // 6: fleet.server.v1.GetFileRequest
-	(*ListFilesResponse)(nil),     // 7: fleet.server.v1.ListFilesResponse
-	(*File)(nil),                  // 8: fleet.server.v1.File
-	nil,                           // 9: fleet.server.v1.CreateFileRequest.MetadataEntry
-	nil,                           // 10: fleet.server.v1.File.MetadataEntry
-	(*v1.ListResponseMeta)(nil),   // 11: fleet.shared.v1.ListResponseMeta
+	(*CreateBucketRequest)(nil),   // 0: orionid.server.v1.CreateBucketRequest
+	(*GetBucketRequest)(nil),      // 1: orionid.server.v1.GetBucketRequest
+	(*ListBucketsResponse)(nil),   // 2: orionid.server.v1.ListBucketsResponse
+	(*Bucket)(nil),                // 3: orionid.server.v1.Bucket
+	(*CreateFileRequest)(nil),     // 4: orionid.server.v1.CreateFileRequest
+	(*ListFilesRequest)(nil),      // 5: orionid.server.v1.ListFilesRequest
+	(*GetFileRequest)(nil),        // 6: orionid.server.v1.GetFileRequest
+	(*ListFilesResponse)(nil),     // 7: orionid.server.v1.ListFilesResponse
+	(*File)(nil),                  // 8: orionid.server.v1.File
+	nil,                           // 9: orionid.server.v1.CreateFileRequest.MetadataEntry
+	nil,                           // 10: orionid.server.v1.File.MetadataEntry
+	(*v1.ListResponseMeta)(nil),   // 11: orionid.shared.v1.ListResponseMeta
 	(*timestamppb.Timestamp)(nil), // 12: google.protobuf.Timestamp
-	(*v1.ListRequest)(nil),        // 13: fleet.shared.v1.ListRequest
-	(*v1.Empty)(nil),              // 14: fleet.shared.v1.Empty
+	(*v1.ListRequest)(nil),        // 13: orionid.shared.v1.ListRequest
+	(*v1.Empty)(nil),              // 14: orionid.shared.v1.Empty
 }
 var file_server_v1_storage_proto_depIdxs = []int32{
-	3,  // 0: fleet.server.v1.ListBucketsResponse.buckets:type_name -> fleet.server.v1.Bucket
-	11, // 1: fleet.server.v1.ListBucketsResponse.meta:type_name -> fleet.shared.v1.ListResponseMeta
-	12, // 2: fleet.server.v1.Bucket.created_at:type_name -> google.protobuf.Timestamp
-	12, // 3: fleet.server.v1.Bucket.updated_at:type_name -> google.protobuf.Timestamp
-	9,  // 4: fleet.server.v1.CreateFileRequest.metadata:type_name -> fleet.server.v1.CreateFileRequest.MetadataEntry
-	8,  // 5: fleet.server.v1.ListFilesResponse.files:type_name -> fleet.server.v1.File
-	11, // 6: fleet.server.v1.ListFilesResponse.meta:type_name -> fleet.shared.v1.ListResponseMeta
-	10, // 7: fleet.server.v1.File.metadata:type_name -> fleet.server.v1.File.MetadataEntry
-	12, // 8: fleet.server.v1.File.created_at:type_name -> google.protobuf.Timestamp
-	12, // 9: fleet.server.v1.File.updated_at:type_name -> google.protobuf.Timestamp
-	0,  // 10: fleet.server.v1.StorageService.CreateBucket:input_type -> fleet.server.v1.CreateBucketRequest
-	13, // 11: fleet.server.v1.StorageService.ListBuckets:input_type -> fleet.shared.v1.ListRequest
-	1,  // 12: fleet.server.v1.StorageService.GetBucket:input_type -> fleet.server.v1.GetBucketRequest
-	1,  // 13: fleet.server.v1.StorageService.DeleteBucket:input_type -> fleet.server.v1.GetBucketRequest
-	4,  // 14: fleet.server.v1.StorageService.CreateFile:input_type -> fleet.server.v1.CreateFileRequest
-	5,  // 15: fleet.server.v1.StorageService.ListFiles:input_type -> fleet.server.v1.ListFilesRequest
-	6,  // 16: fleet.server.v1.StorageService.GetFile:input_type -> fleet.server.v1.GetFileRequest
-	6,  // 17: fleet.server.v1.StorageService.DeleteFile:input_type -> fleet.server.v1.GetFileRequest
-	3,  // 18: fleet.server.v1.StorageService.CreateBucket:output_type -> fleet.server.v1.Bucket
-	2,  // 19: fleet.server.v1.StorageService.ListBuckets:output_type -> fleet.server.v1.ListBucketsResponse
-	3,  // 20: fleet.server.v1.StorageService.GetBucket:output_type -> fleet.server.v1.Bucket
-	14, // 21: fleet.server.v1.StorageService.DeleteBucket:output_type -> fleet.shared.v1.Empty
-	8,  // 22: fleet.server.v1.StorageService.CreateFile:output_type -> fleet.server.v1.File
-	7,  // 23: fleet.server.v1.StorageService.ListFiles:output_type -> fleet.server.v1.ListFilesResponse
-	8,  // 24: fleet.server.v1.StorageService.GetFile:output_type -> fleet.server.v1.File
-	14, // 25: fleet.server.v1.StorageService.DeleteFile:output_type -> fleet.shared.v1.Empty
+	3,  // 0: orionid.server.v1.ListBucketsResponse.buckets:type_name -> orionid.server.v1.Bucket
+	11, // 1: orionid.server.v1.ListBucketsResponse.meta:type_name -> orionid.shared.v1.ListResponseMeta
+	12, // 2: orionid.server.v1.Bucket.created_at:type_name -> google.protobuf.Timestamp
+	12, // 3: orionid.server.v1.Bucket.updated_at:type_name -> google.protobuf.Timestamp
+	9,  // 4: orionid.server.v1.CreateFileRequest.metadata:type_name -> orionid.server.v1.CreateFileRequest.MetadataEntry
+	8,  // 5: orionid.server.v1.ListFilesResponse.files:type_name -> orionid.server.v1.File
+	11, // 6: orionid.server.v1.ListFilesResponse.meta:type_name -> orionid.shared.v1.ListResponseMeta
+	10, // 7: orionid.server.v1.File.metadata:type_name -> orionid.server.v1.File.MetadataEntry
+	12, // 8: orionid.server.v1.File.created_at:type_name -> google.protobuf.Timestamp
+	12, // 9: orionid.server.v1.File.updated_at:type_name -> google.protobuf.Timestamp
+	0,  // 10: orionid.server.v1.StorageService.CreateBucket:input_type -> orionid.server.v1.CreateBucketRequest
+	13, // 11: orionid.server.v1.StorageService.ListBuckets:input_type -> orionid.shared.v1.ListRequest
+	1,  // 12: orionid.server.v1.StorageService.GetBucket:input_type -> orionid.server.v1.GetBucketRequest
+	1,  // 13: orionid.server.v1.StorageService.DeleteBucket:input_type -> orionid.server.v1.GetBucketRequest
+	4,  // 14: orionid.server.v1.StorageService.CreateFile:input_type -> orionid.server.v1.CreateFileRequest
+	5,  // 15: orionid.server.v1.StorageService.ListFiles:input_type -> orionid.server.v1.ListFilesRequest
+	6,  // 16: orionid.server.v1.StorageService.GetFile:input_type -> orionid.server.v1.GetFileRequest
+	6,  // 17: orionid.server.v1.StorageService.DeleteFile:input_type -> orionid.server.v1.GetFileRequest
+	3,  // 18: orionid.server.v1.StorageService.CreateBucket:output_type -> orionid.server.v1.Bucket
+	2,  // 19: orionid.server.v1.StorageService.ListBuckets:output_type -> orionid.server.v1.ListBucketsResponse
+	3,  // 20: orionid.server.v1.StorageService.GetBucket:output_type -> orionid.server.v1.Bucket
+	14, // 21: orionid.server.v1.StorageService.DeleteBucket:output_type -> orionid.shared.v1.Empty
+	8,  // 22: orionid.server.v1.StorageService.CreateFile:output_type -> orionid.server.v1.File
+	7,  // 23: orionid.server.v1.StorageService.ListFiles:output_type -> orionid.server.v1.ListFilesResponse
+	8,  // 24: orionid.server.v1.StorageService.GetFile:output_type -> orionid.server.v1.File
+	14, // 25: orionid.server.v1.StorageService.DeleteFile:output_type -> orionid.shared.v1.Empty
 	18, // [18:26] is the sub-list for method output_type
 	10, // [10:18] is the sub-list for method input_type
 	10, // [10:10] is the sub-list for extension type_name

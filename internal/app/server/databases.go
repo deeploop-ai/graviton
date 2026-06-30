@@ -6,9 +6,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/deeploop-ai/fleet/internal/app/shared"
-	"github.com/deeploop-ai/fleet/internal/domain/databases"
-	"github.com/deeploop-ai/fleet/internal/domain/projects"
+	"github.com/deeploop-ai/orionid/internal/app/shared"
+	"github.com/deeploop-ai/orionid/internal/domain/databases"
+	"github.com/deeploop-ai/orionid/internal/domain/projects"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

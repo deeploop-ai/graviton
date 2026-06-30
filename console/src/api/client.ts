@@ -10,31 +10,31 @@ export const api = axios.create({
 
 export function setAuthToken(token: string | null) {
   if (token) {
-    localStorage.setItem("fleet_console_token", token);
+    localStorage.setItem("ORIONID_console_token", token);
     authRedirecting = false;
   } else {
-    localStorage.removeItem("fleet_console_token");
+    localStorage.removeItem("ORIONID_console_token");
   }
 }
 
 export function clearAuthToken() {
-  localStorage.removeItem("fleet_console_token");
+  localStorage.removeItem("ORIONID_console_token");
 }
 
 export function getAuthToken(): string | null {
-  return localStorage.getItem("fleet_console_token");
+  return localStorage.getItem("ORIONID_console_token");
 }
 
 export function setProjectID(projectID: string | null) {
   if (projectID) {
-    localStorage.setItem("fleet_console_project", projectID);
+    localStorage.setItem("ORIONID_console_project", projectID);
   } else {
-    localStorage.removeItem("fleet_console_project");
+    localStorage.removeItem("ORIONID_console_project");
   }
 }
 
 export function getProjectID(): string | null {
-  return localStorage.getItem("fleet_console_project");
+  return localStorage.getItem("ORIONID_console_project");
 }
 
 api.interceptors.request.use((config) => {
@@ -44,7 +44,7 @@ api.interceptors.request.use((config) => {
   }
   const projectID = getProjectID();
   if (projectID) {
-    config.headers["X-Fleet-Project"] = projectID;
+    config.headers["X-Orionid-Project"] = projectID;
   }
   return config;
 });

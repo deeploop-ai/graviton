@@ -12,12 +12,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/deeploop-ai/fleet/internal/domain/databases"
-	"github.com/deeploop-ai/fleet/internal/infra/bun/model"
-	"github.com/deeploop-ai/fleet/internal/infra/clients"
-	"github.com/deeploop-ai/fleet/pkg/crud"
-	"github.com/deeploop-ai/fleet/pkg/idgen"
-	"github.com/deeploop-ai/fleet/pkg/query"
+	"github.com/deeploop-ai/orionid/internal/domain/databases"
+	"github.com/deeploop-ai/orionid/internal/infra/bun/model"
+	"github.com/deeploop-ai/orionid/internal/infra/clients"
+	"github.com/deeploop-ai/orionid/pkg/crud"
+	"github.com/deeploop-ai/orionid/pkg/idgen"
+	"github.com/deeploop-ai/orionid/pkg/query"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
@@ -648,7 +648,7 @@ func quoteIdent(name string) string {
 }
 
 func schemaName(internalID int64, databaseID string) string {
-	return fmt.Sprintf("fleet_%d_%s", internalID, databaseID)
+	return fmt.Sprintf("ORIONID_%d_%s", internalID, databaseID)
 }
 
 func tableName(schema, collectionID string) string {
@@ -1057,9 +1057,9 @@ func isUniqueViolation(err error) bool {
 }
 
 func schemaDatabaseID(schema string) string {
-	// schema = "fleet_<n>_<dbID>"; we need the dbID which follows the second "_".
-	// But internalID is numeric, so split on "fleet_" prefix then on first "_".
-	rest := strings.TrimPrefix(schema, "fleet_")
+	// schema = "ORIONID_<n>_<dbID>"; we need the dbID which follows the second "_".
+	// But internalID is numeric, so split on "ORIONID_" prefix then on first "_".
+	rest := strings.TrimPrefix(schema, "ORIONID_")
 	idx := strings.IndexByte(rest, '_')
 	if idx < 0 {
 		return ""

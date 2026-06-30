@@ -3,10 +3,10 @@ package client
 import (
 	"context"
 
-	"github.com/deeploop-ai/fleet/internal/app/server"
-	"github.com/deeploop-ai/fleet/internal/domain/databases"
-	"github.com/deeploop-ai/fleet/internal/domain/teams"
-	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
+	"github.com/deeploop-ai/orionid/internal/app/server"
+	"github.com/deeploop-ai/orionid/internal/domain/databases"
+	"github.com/deeploop-ai/orionid/internal/domain/teams"
+	"github.com/deeploop-ai/orionid/internal/pkg/contexts"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

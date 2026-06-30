@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useFleet } from "@/lib/fleet-context";
+import { useOrionid } from "@/lib/orionid-context";
 import { suffix } from "@/lib/storage";
 import { ErrorBanner, JsonPanel, MethodTag, PageHeader } from "@/components/Ui";
 
 export function ServerPage() {
-  const { settings, serverFleet, run, lastError } = useFleet();
+  const { settings, serverClient, run, lastError } = useOrionid();
   const [result, setResult] = useState<unknown>(null);
   const [loading, setLoading] = useState(false);
 
@@ -35,7 +35,7 @@ export function ServerPage() {
       {!settings.apiKey ? (
         <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
           请先在{" "}
-          <Link className="text-fleet-accent underline" to="/app/settings">
+          <Link className="text-orionid-accent underline" to="/app/settings">
             设置
           </Link>{" "}
           填写 Server API Key（来自 <code className="font-mono">go run ./cmd/seed</code>）。
@@ -48,7 +48,7 @@ export function ServerPage() {
           className="btn-secondary"
           disabled={disabled}
           onClick={() =>
-            exec("server.health.check()", () => serverFleet().server.health.check())
+            exec("server.health.check()", () => serverClient().server.health.check())
           }
         >
           <MethodTag method="GET" /> health.check()
@@ -58,7 +58,7 @@ export function ServerPage() {
           className="btn-secondary"
           disabled={disabled}
           onClick={() =>
-            exec("server.projects.list()", () => serverFleet().server.projects.list())
+            exec("server.projects.list()", () => serverClient().server.projects.list())
           }
         >
           <MethodTag method="GET" /> projects.list()
@@ -69,7 +69,7 @@ export function ServerPage() {
           disabled={disabled}
           onClick={() =>
             exec("server.users.list()", () =>
-              serverFleet().server.users.list({ page_size: 10 })
+              serverClient().server.users.list({ page_size: 10 })
             )
           }
         >
@@ -81,7 +81,7 @@ export function ServerPage() {
           disabled={disabled}
           onClick={() =>
             exec("server.teams.create()", () =>
-              serverFleet().server.teams.create({ name: `Server Team ${suffix()}` })
+              serverClient().server.teams.create({ name: `Server Team ${suffix()}` })
             )
           }
         >
@@ -92,7 +92,7 @@ export function ServerPage() {
           className="btn-secondary"
           disabled={disabled}
           onClick={() =>
-            exec("server.databases.list()", () => serverFleet().server.databases.listDatabases())
+            exec("server.databases.list()", () => serverClient().server.databases.listDatabases())
           }
         >
           <MethodTag method="GET" /> databases.list()

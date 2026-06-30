@@ -7,7 +7,7 @@
 package clientv1
 
 import (
-	v1 "github.com/deeploop-ai/fleet/genproto/shared/v1"
+	v1 "github.com/deeploop-ai/orionid/genproto/shared/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -636,14 +636,14 @@ var File_client_v1_teams_proto protoreflect.FileDescriptor
 
 const file_client_v1_teams_proto_rawDesc = "" +
 	"\n" +
-	"\x15client/v1/teams.proto\x12\x0ffleet.client.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\"'\n" +
+	"\x15client/v1/teams.proto\x12\x11orionid.client.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\"'\n" +
 	"\x11CreateTeamRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\" \n" +
 	"\x0eGetTeamRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"w\n" +
-	"\x11ListTeamsResponse\x12+\n" +
-	"\x05teams\x18\x01 \x03(\v2\x15.fleet.client.v1.TeamR\x05teams\x125\n" +
-	"\x04meta\x18\x02 \x01(\v2!.fleet.shared.v1.ListResponseMetaR\x04meta\"\xb6\x01\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"{\n" +
+	"\x11ListTeamsResponse\x12-\n" +
+	"\x05teams\x18\x01 \x03(\v2\x17.orionid.client.v1.TeamR\x05teams\x127\n" +
+	"\x04meta\x18\x02 \x01(\v2#.orionid.shared.v1.ListResponseMetaR\x04meta\"\xb6\x01\n" +
 	"\x04Team\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x14\n" +
@@ -678,24 +678,24 @@ const file_client_v1_teams_proto_rawDesc = "" +
 	"\ateam_id\x18\x01 \x01(\tR\x06teamId\"T\n" +
 	"\x14GetMembershipRequest\x12\x17\n" +
 	"\ateam_id\x18\x01 \x01(\tR\x06teamId\x12#\n" +
-	"\rmembership_id\x18\x02 \x01(\tR\fmembershipId\"X\n" +
-	"\x17ListMembershipsResponse\x12=\n" +
-	"\vmemberships\x18\x01 \x03(\v2\x1b.fleet.client.v1.MembershipR\vmemberships\"u\n" +
+	"\rmembership_id\x18\x02 \x01(\tR\fmembershipId\"Z\n" +
+	"\x17ListMembershipsResponse\x12?\n" +
+	"\vmemberships\x18\x01 \x03(\v2\x1d.orionid.client.v1.MembershipR\vmemberships\"u\n" +
 	"\x1dUpdateMembershipStatusRequest\x12\x17\n" +
 	"\ateam_id\x18\x01 \x01(\tR\x06teamId\x12#\n" +
 	"\rmembership_id\x18\x02 \x01(\tR\fmembershipId\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status2\xe1\a\n" +
-	"\fTeamsService\x12]\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status2\x81\b\n" +
+	"\fTeamsService\x12a\n" +
 	"\n" +
-	"CreateTeam\x12\".fleet.client.v1.CreateTeamRequest\x1a\x15.fleet.client.v1.Team\"\x14\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/teams\x12`\n" +
-	"\tListTeams\x12\x1c.fleet.shared.v1.ListRequest\x1a\".fleet.client.v1.ListTeamsResponse\"\x11\x82\xd3\xe4\x93\x02\v\x12\t/v1/teams\x12Y\n" +
-	"\aGetTeam\x12\x1f.fleet.client.v1.GetTeamRequest\x1a\x15.fleet.client.v1.Team\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/teams/{id}\x12]\n" +
+	"CreateTeam\x12$.orionid.client.v1.CreateTeamRequest\x1a\x17.orionid.client.v1.Team\"\x14\x82\xd3\xe4\x93\x02\x0e:\x01*\"\t/v1/teams\x12d\n" +
+	"\tListTeams\x12\x1e.orionid.shared.v1.ListRequest\x1a$.orionid.client.v1.ListTeamsResponse\"\x11\x82\xd3\xe4\x93\x02\v\x12\t/v1/teams\x12]\n" +
+	"\aGetTeam\x12!.orionid.client.v1.GetTeamRequest\x1a\x17.orionid.client.v1.Team\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/teams/{id}\x12a\n" +
 	"\n" +
-	"DeleteTeam\x12\x1f.fleet.client.v1.GetTeamRequest\x1a\x16.fleet.shared.v1.Empty\"\x16\x82\xd3\xe4\x93\x02\x10*\x0e/v1/teams/{id}\x12\x85\x01\n" +
-	"\x10CreateMembership\x12(.fleet.client.v1.CreateMembershipRequest\x1a\x1b.fleet.client.v1.Membership\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/v1/teams/{team_id}/memberships\x12\x8d\x01\n" +
-	"\x0fListMemberships\x12'.fleet.client.v1.ListMembershipsRequest\x1a(.fleet.client.v1.ListMembershipsResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/v1/teams/{team_id}/memberships\x12\xa8\x01\n" +
-	"\x16UpdateMembershipStatus\x12..fleet.client.v1.UpdateMembershipStatusRequest\x1a\x1b.fleet.client.v1.Membership\"A\x82\xd3\xe4\x93\x02;:\x01*26/v1/teams/{team_id}/memberships/{membership_id}/status\x12\x8a\x01\n" +
-	"\x10DeleteMembership\x12%.fleet.client.v1.GetMembershipRequest\x1a\x16.fleet.shared.v1.Empty\"7\x82\xd3\xe4\x93\x021*//v1/teams/{team_id}/memberships/{membership_id}\x1a\x06\x92\xb2\x19\x02\b\x02B:Z8github.com/deeploop-ai/fleet/genproto/client/v1;clientv1b\x06proto3"
+	"DeleteTeam\x12!.orionid.client.v1.GetTeamRequest\x1a\x18.orionid.shared.v1.Empty\"\x16\x82\xd3\xe4\x93\x02\x10*\x0e/v1/teams/{id}\x12\x89\x01\n" +
+	"\x10CreateMembership\x12*.orionid.client.v1.CreateMembershipRequest\x1a\x1d.orionid.client.v1.Membership\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/v1/teams/{team_id}/memberships\x12\x91\x01\n" +
+	"\x0fListMemberships\x12).orionid.client.v1.ListMembershipsRequest\x1a*.orionid.client.v1.ListMembershipsResponse\"'\x82\xd3\xe4\x93\x02!\x12\x1f/v1/teams/{team_id}/memberships\x12\xac\x01\n" +
+	"\x16UpdateMembershipStatus\x120.orionid.client.v1.UpdateMembershipStatusRequest\x1a\x1d.orionid.client.v1.Membership\"A\x82\xd3\xe4\x93\x02;:\x01*26/v1/teams/{team_id}/memberships/{membership_id}/status\x12\x8e\x01\n" +
+	"\x10DeleteMembership\x12'.orionid.client.v1.GetMembershipRequest\x1a\x18.orionid.shared.v1.Empty\"7\x82\xd3\xe4\x93\x021*//v1/teams/{team_id}/memberships/{membership_id}\x1a\x06\x92\xb2\x19\x02\b\x02B<Z:github.com/deeploop-ai/orionid/genproto/client/v1;clientv1b\x06proto3"
 
 var (
 	file_client_v1_teams_proto_rawDescOnce sync.Once
@@ -711,47 +711,47 @@ func file_client_v1_teams_proto_rawDescGZIP() []byte {
 
 var file_client_v1_teams_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_client_v1_teams_proto_goTypes = []any{
-	(*CreateTeamRequest)(nil),             // 0: fleet.client.v1.CreateTeamRequest
-	(*GetTeamRequest)(nil),                // 1: fleet.client.v1.GetTeamRequest
-	(*ListTeamsResponse)(nil),             // 2: fleet.client.v1.ListTeamsResponse
-	(*Team)(nil),                          // 3: fleet.client.v1.Team
-	(*Membership)(nil),                    // 4: fleet.client.v1.Membership
-	(*CreateMembershipRequest)(nil),       // 5: fleet.client.v1.CreateMembershipRequest
-	(*ListMembershipsRequest)(nil),        // 6: fleet.client.v1.ListMembershipsRequest
-	(*GetMembershipRequest)(nil),          // 7: fleet.client.v1.GetMembershipRequest
-	(*ListMembershipsResponse)(nil),       // 8: fleet.client.v1.ListMembershipsResponse
-	(*UpdateMembershipStatusRequest)(nil), // 9: fleet.client.v1.UpdateMembershipStatusRequest
-	(*v1.ListResponseMeta)(nil),           // 10: fleet.shared.v1.ListResponseMeta
+	(*CreateTeamRequest)(nil),             // 0: orionid.client.v1.CreateTeamRequest
+	(*GetTeamRequest)(nil),                // 1: orionid.client.v1.GetTeamRequest
+	(*ListTeamsResponse)(nil),             // 2: orionid.client.v1.ListTeamsResponse
+	(*Team)(nil),                          // 3: orionid.client.v1.Team
+	(*Membership)(nil),                    // 4: orionid.client.v1.Membership
+	(*CreateMembershipRequest)(nil),       // 5: orionid.client.v1.CreateMembershipRequest
+	(*ListMembershipsRequest)(nil),        // 6: orionid.client.v1.ListMembershipsRequest
+	(*GetMembershipRequest)(nil),          // 7: orionid.client.v1.GetMembershipRequest
+	(*ListMembershipsResponse)(nil),       // 8: orionid.client.v1.ListMembershipsResponse
+	(*UpdateMembershipStatusRequest)(nil), // 9: orionid.client.v1.UpdateMembershipStatusRequest
+	(*v1.ListResponseMeta)(nil),           // 10: orionid.shared.v1.ListResponseMeta
 	(*timestamppb.Timestamp)(nil),         // 11: google.protobuf.Timestamp
-	(*v1.ListRequest)(nil),                // 12: fleet.shared.v1.ListRequest
-	(*v1.Empty)(nil),                      // 13: fleet.shared.v1.Empty
+	(*v1.ListRequest)(nil),                // 12: orionid.shared.v1.ListRequest
+	(*v1.Empty)(nil),                      // 13: orionid.shared.v1.Empty
 }
 var file_client_v1_teams_proto_depIdxs = []int32{
-	3,  // 0: fleet.client.v1.ListTeamsResponse.teams:type_name -> fleet.client.v1.Team
-	10, // 1: fleet.client.v1.ListTeamsResponse.meta:type_name -> fleet.shared.v1.ListResponseMeta
-	11, // 2: fleet.client.v1.Team.created_at:type_name -> google.protobuf.Timestamp
-	11, // 3: fleet.client.v1.Team.updated_at:type_name -> google.protobuf.Timestamp
-	11, // 4: fleet.client.v1.Membership.invited_at:type_name -> google.protobuf.Timestamp
-	11, // 5: fleet.client.v1.Membership.joined_at:type_name -> google.protobuf.Timestamp
-	11, // 6: fleet.client.v1.Membership.created_at:type_name -> google.protobuf.Timestamp
-	11, // 7: fleet.client.v1.Membership.updated_at:type_name -> google.protobuf.Timestamp
-	4,  // 8: fleet.client.v1.ListMembershipsResponse.memberships:type_name -> fleet.client.v1.Membership
-	0,  // 9: fleet.client.v1.TeamsService.CreateTeam:input_type -> fleet.client.v1.CreateTeamRequest
-	12, // 10: fleet.client.v1.TeamsService.ListTeams:input_type -> fleet.shared.v1.ListRequest
-	1,  // 11: fleet.client.v1.TeamsService.GetTeam:input_type -> fleet.client.v1.GetTeamRequest
-	1,  // 12: fleet.client.v1.TeamsService.DeleteTeam:input_type -> fleet.client.v1.GetTeamRequest
-	5,  // 13: fleet.client.v1.TeamsService.CreateMembership:input_type -> fleet.client.v1.CreateMembershipRequest
-	6,  // 14: fleet.client.v1.TeamsService.ListMemberships:input_type -> fleet.client.v1.ListMembershipsRequest
-	9,  // 15: fleet.client.v1.TeamsService.UpdateMembershipStatus:input_type -> fleet.client.v1.UpdateMembershipStatusRequest
-	7,  // 16: fleet.client.v1.TeamsService.DeleteMembership:input_type -> fleet.client.v1.GetMembershipRequest
-	3,  // 17: fleet.client.v1.TeamsService.CreateTeam:output_type -> fleet.client.v1.Team
-	2,  // 18: fleet.client.v1.TeamsService.ListTeams:output_type -> fleet.client.v1.ListTeamsResponse
-	3,  // 19: fleet.client.v1.TeamsService.GetTeam:output_type -> fleet.client.v1.Team
-	13, // 20: fleet.client.v1.TeamsService.DeleteTeam:output_type -> fleet.shared.v1.Empty
-	4,  // 21: fleet.client.v1.TeamsService.CreateMembership:output_type -> fleet.client.v1.Membership
-	8,  // 22: fleet.client.v1.TeamsService.ListMemberships:output_type -> fleet.client.v1.ListMembershipsResponse
-	4,  // 23: fleet.client.v1.TeamsService.UpdateMembershipStatus:output_type -> fleet.client.v1.Membership
-	13, // 24: fleet.client.v1.TeamsService.DeleteMembership:output_type -> fleet.shared.v1.Empty
+	3,  // 0: orionid.client.v1.ListTeamsResponse.teams:type_name -> orionid.client.v1.Team
+	10, // 1: orionid.client.v1.ListTeamsResponse.meta:type_name -> orionid.shared.v1.ListResponseMeta
+	11, // 2: orionid.client.v1.Team.created_at:type_name -> google.protobuf.Timestamp
+	11, // 3: orionid.client.v1.Team.updated_at:type_name -> google.protobuf.Timestamp
+	11, // 4: orionid.client.v1.Membership.invited_at:type_name -> google.protobuf.Timestamp
+	11, // 5: orionid.client.v1.Membership.joined_at:type_name -> google.protobuf.Timestamp
+	11, // 6: orionid.client.v1.Membership.created_at:type_name -> google.protobuf.Timestamp
+	11, // 7: orionid.client.v1.Membership.updated_at:type_name -> google.protobuf.Timestamp
+	4,  // 8: orionid.client.v1.ListMembershipsResponse.memberships:type_name -> orionid.client.v1.Membership
+	0,  // 9: orionid.client.v1.TeamsService.CreateTeam:input_type -> orionid.client.v1.CreateTeamRequest
+	12, // 10: orionid.client.v1.TeamsService.ListTeams:input_type -> orionid.shared.v1.ListRequest
+	1,  // 11: orionid.client.v1.TeamsService.GetTeam:input_type -> orionid.client.v1.GetTeamRequest
+	1,  // 12: orionid.client.v1.TeamsService.DeleteTeam:input_type -> orionid.client.v1.GetTeamRequest
+	5,  // 13: orionid.client.v1.TeamsService.CreateMembership:input_type -> orionid.client.v1.CreateMembershipRequest
+	6,  // 14: orionid.client.v1.TeamsService.ListMemberships:input_type -> orionid.client.v1.ListMembershipsRequest
+	9,  // 15: orionid.client.v1.TeamsService.UpdateMembershipStatus:input_type -> orionid.client.v1.UpdateMembershipStatusRequest
+	7,  // 16: orionid.client.v1.TeamsService.DeleteMembership:input_type -> orionid.client.v1.GetMembershipRequest
+	3,  // 17: orionid.client.v1.TeamsService.CreateTeam:output_type -> orionid.client.v1.Team
+	2,  // 18: orionid.client.v1.TeamsService.ListTeams:output_type -> orionid.client.v1.ListTeamsResponse
+	3,  // 19: orionid.client.v1.TeamsService.GetTeam:output_type -> orionid.client.v1.Team
+	13, // 20: orionid.client.v1.TeamsService.DeleteTeam:output_type -> orionid.shared.v1.Empty
+	4,  // 21: orionid.client.v1.TeamsService.CreateMembership:output_type -> orionid.client.v1.Membership
+	8,  // 22: orionid.client.v1.TeamsService.ListMemberships:output_type -> orionid.client.v1.ListMembershipsResponse
+	4,  // 23: orionid.client.v1.TeamsService.UpdateMembershipStatus:output_type -> orionid.client.v1.Membership
+	13, // 24: orionid.client.v1.TeamsService.DeleteMembership:output_type -> orionid.shared.v1.Empty
 	17, // [17:25] is the sub-list for method output_type
 	9,  // [9:17] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name

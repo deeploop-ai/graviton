@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/deeploop-ai/fleet/internal/domain/databases"
-	"github.com/deeploop-ai/fleet/internal/infra/bun/bunrepo"
-	"github.com/deeploop-ai/fleet/internal/infra/documentdb"
-	"github.com/deeploop-ai/fleet/internal/testutil"
+	"github.com/deeploop-ai/orionid/internal/domain/databases"
+	"github.com/deeploop-ai/orionid/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/orionid/internal/infra/documentdb"
+	"github.com/deeploop-ai/orionid/internal/testutil"
 	"github.com/stretchr/testify/require"
 )
 

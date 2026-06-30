@@ -3,10 +3,10 @@ package clientgrpc
 import (
 	"context"
 
-	clientv1 "github.com/deeploop-ai/fleet/genproto/client/v1"
-	sharedv1 "github.com/deeploop-ai/fleet/genproto/shared/v1"
-	"github.com/deeploop-ai/fleet/internal/app/client"
-	"github.com/deeploop-ai/fleet/internal/pkg/contexts"
+	clientv1 "github.com/deeploop-ai/orionid/genproto/client/v1"
+	sharedv1 "github.com/deeploop-ai/orionid/genproto/shared/v1"
+	"github.com/deeploop-ai/orionid/internal/app/client"
+	"github.com/deeploop-ai/orionid/internal/pkg/contexts"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"

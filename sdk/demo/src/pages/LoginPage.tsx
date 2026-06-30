@@ -1,9 +1,9 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useFleet } from "@/lib/fleet-context";
+import { useOrionid } from "@/lib/orionid-context";
 
 export function LoginPage() {
-  const { client, setAuth, run } = useFleet();
+  const { client, setAuth, run } = useOrionid();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,7 +40,7 @@ export function LoginPage() {
         </div>
       ) : null}
       <label className="block space-y-1">
-        <span className="text-xs text-fleet-muted">邮箱</span>
+        <span className="text-xs text-orionid-muted">邮箱</span>
         <input
           className="field"
           type="email"
@@ -51,7 +51,7 @@ export function LoginPage() {
         />
       </label>
       <label className="block space-y-1">
-        <span className="text-xs text-fleet-muted">密码</span>
+        <span className="text-xs text-orionid-muted">密码</span>
         <input
           className="field"
           type="password"
@@ -64,9 +64,9 @@ export function LoginPage() {
       <button type="submit" className="btn-primary w-full" disabled={loading}>
         {loading ? "登录中…" : "登录"}
       </button>
-      <p className="text-center text-sm text-fleet-muted">
+      <p className="text-center text-sm text-orionid-muted">
         还没有账号？{" "}
-        <Link className="text-fleet-accent hover:underline" to="/register">
+        <Link className="text-orionid-accent hover:underline" to="/register">
           注册
         </Link>
       </p>

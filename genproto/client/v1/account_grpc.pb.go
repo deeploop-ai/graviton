@@ -8,7 +8,7 @@ package clientv1
 
 import (
 	context "context"
-	v1 "github.com/deeploop-ai/fleet/genproto/shared/v1"
+	v1 "github.com/deeploop-ai/orionid/genproto/shared/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,17 +20,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AccountService_SignUp_FullMethodName         = "/fleet.client.v1.AccountService/SignUp"
-	AccountService_SignIn_FullMethodName         = "/fleet.client.v1.AccountService/SignIn"
-	AccountService_SignOut_FullMethodName        = "/fleet.client.v1.AccountService/SignOut"
-	AccountService_RefreshToken_FullMethodName   = "/fleet.client.v1.AccountService/RefreshToken"
-	AccountService_Me_FullMethodName             = "/fleet.client.v1.AccountService/Me"
-	AccountService_UpdateAccount_FullMethodName  = "/fleet.client.v1.AccountService/UpdateAccount"
-	AccountService_ListSessions_FullMethodName   = "/fleet.client.v1.AccountService/ListSessions"
-	AccountService_DeleteSession_FullMethodName  = "/fleet.client.v1.AccountService/DeleteSession"
-	AccountService_DeleteSessions_FullMethodName = "/fleet.client.v1.AccountService/DeleteSessions"
-	AccountService_GetPrefs_FullMethodName       = "/fleet.client.v1.AccountService/GetPrefs"
-	AccountService_UpdatePrefs_FullMethodName    = "/fleet.client.v1.AccountService/UpdatePrefs"
+	AccountService_SignUp_FullMethodName         = "/orionid.client.v1.AccountService/SignUp"
+	AccountService_SignIn_FullMethodName         = "/orionid.client.v1.AccountService/SignIn"
+	AccountService_SignOut_FullMethodName        = "/orionid.client.v1.AccountService/SignOut"
+	AccountService_RefreshToken_FullMethodName   = "/orionid.client.v1.AccountService/RefreshToken"
+	AccountService_Me_FullMethodName             = "/orionid.client.v1.AccountService/Me"
+	AccountService_UpdateAccount_FullMethodName  = "/orionid.client.v1.AccountService/UpdateAccount"
+	AccountService_ListSessions_FullMethodName   = "/orionid.client.v1.AccountService/ListSessions"
+	AccountService_DeleteSession_FullMethodName  = "/orionid.client.v1.AccountService/DeleteSession"
+	AccountService_DeleteSessions_FullMethodName = "/orionid.client.v1.AccountService/DeleteSessions"
+	AccountService_GetPrefs_FullMethodName       = "/orionid.client.v1.AccountService/GetPrefs"
+	AccountService_UpdatePrefs_FullMethodName    = "/orionid.client.v1.AccountService/UpdatePrefs"
 )
 
 // AccountServiceClient is the client API for AccountService service.
@@ -449,7 +449,7 @@ func _AccountService_UpdatePrefs_Handler(srv interface{}, ctx context.Context, d
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AccountService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "fleet.client.v1.AccountService",
+	ServiceName: "orionid.client.v1.AccountService",
 	HandlerType: (*AccountServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

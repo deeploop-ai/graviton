@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/deeploop-ai/fleet/internal/domain/functions"
-	"github.com/deeploop-ai/fleet/internal/pkg/config"
+	"github.com/deeploop-ai/orionid/internal/domain/functions"
+	"github.com/deeploop-ai/orionid/internal/pkg/config"
 )
 
 // dockerExecutor is a Docker-based functions executor (P0 stub).

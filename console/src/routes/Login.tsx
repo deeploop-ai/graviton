@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function Login() {
-  const [email, setEmail] = useState("admin@fleet.local");
+  const [email, setEmail] = useState("admin@orionid.local");
   const [password, setPassword] = useState("Admin@123");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -37,7 +37,7 @@ export function Login() {
     <div className="flex h-screen items-center justify-center bg-muted/40">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Fleet Console</CardTitle>
+          <CardTitle>Orionid Console</CardTitle>
           <CardDescription>Sign in with your admin account</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>

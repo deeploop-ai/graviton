@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package fleet.client.v1;
+package orionid.client.v1;
 
-option go_package = "github.com/deeploop-ai/fleet/genproto/client/v1;clientv1";
+option go_package = "github.com/deeploop-ai/orionid/genproto/client/v1;clientv1";
 
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
@@ -11,61 +11,61 @@ import "shared/v1/authz.proto";
 import "shared/v1/common.proto";
 
 service AccountService {
-  option (fleet.shared.v1.service_auth) = { default_access: ACCESS_AUTHENTICATED };
+  option (orionid.shared.v1.service_auth) = { default_access: ACCESS_AUTHENTICATED };
 
   rpc SignUp(SignUpRequest) returns (SignUpResponse) {
     option (google.api.http) = { post: "/v1/account/sign-up", body: "*" };
-    option (fleet.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 
   rpc SignIn(SignInRequest) returns (SignInResponse) {
     option (google.api.http) = { post: "/v1/account/sign-in", body: "*" };
-    option (fleet.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 
   rpc SignOut(SignOutRequest) returns (shared.v1.Empty) {
     option (google.api.http) = { post: "/v1/account/sign-out", body: "*" };
-    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 
   rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {
     option (google.api.http) = { post: "/v1/account/refresh", body: "*" };
-    option (fleet.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 
   rpc Me(MeRequest) returns (Account) {
     option (google.api.http) = { get: "/v1/account/me" };
-    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 
   rpc UpdateAccount(UpdateAccountRequest) returns (Account) {
     option (google.api.http) = { patch: "/v1/account", body: "*" };
-    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 
   rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
     option (google.api.http) = { get: "/v1/account/sessions" };
-    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 
   rpc DeleteSession(DeleteSessionRequest) returns (shared.v1.Empty) {
     option (google.api.http) = { delete: "/v1/account/sessions/{session_id}" };
-    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 
   rpc DeleteSessions(DeleteSessionsRequest) returns (shared.v1.Empty) {
     option (google.api.http) = { delete: "/v1/account/sessions" };
-    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 
   rpc GetPrefs(GetPrefsRequest) returns (GetPrefsResponse) {
     option (google.api.http) = { get: "/v1/account/prefs" };
-    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 
   rpc UpdatePrefs(UpdatePrefsRequest) returns (GetPrefsResponse) {
     option (google.api.http) = { put: "/v1/account/prefs", body: "*" };
-    option (fleet.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 }
 

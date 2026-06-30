@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply min-h-screen bg-fleet-bg text-slate-100 antialiased;
+    @apply min-h-screen bg-orionid-bg text-slate-100 antialiased;
     background-image:
       radial-gradient(circle at 20% 0%, rgba(34, 211, 238, 0.08), transparent 35%),
       radial-gradient(circle at 80% 10%, rgba(56, 189, 248, 0.06), transparent 30%);
@@ -19,11 +19,11 @@
 
 @layer components {
   .panel {
-    @apply rounded-xl border border-fleet-border bg-fleet-card shadow-glow;
+    @apply rounded-xl border border-orionid-border bg-orionid-card shadow-glow;
   }
 
   .field {
-    @apply w-full rounded-lg border border-fleet-border bg-fleet-panel px-3 py-2 text-sm text-slate-100 placeholder:text-fleet-muted focus:border-fleet-accent focus:ring-1 focus:ring-fleet-accent;
+    @apply w-full rounded-lg border border-orionid-border bg-orionid-panel px-3 py-2 text-sm text-slate-100 placeholder:text-orionid-muted focus:border-orionid-accent focus:ring-1 focus:ring-orionid-accent;
   }
 
   .btn {
@@ -31,11 +31,11 @@
   }
 
   .btn-primary {
-    @apply btn bg-fleet-accent text-slate-950 hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply btn bg-orionid-accent text-slate-950 hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-secondary {
-    @apply btn border border-fleet-border bg-fleet-panel text-slate-100 hover:border-fleet-accent hover:text-fleet-accent disabled:cursor-not-allowed disabled:opacity-50;
+    @apply btn border border-orionid-border bg-orionid-panel text-slate-100 hover:border-orionid-accent hover:text-orionid-accent disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-danger {
@@ -43,10 +43,10 @@
   }
 
   .nav-link {
-    @apply flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-fleet-muted transition hover:bg-fleet-panel hover:text-slate-100;
+    @apply flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-orionid-muted transition hover:bg-orionid-panel hover:text-slate-100;
   }
 
   .nav-link-active {
-    @apply nav-link bg-fleet-panel text-fleet-accent;
+    @apply nav-link bg-orionid-panel text-orionid-accent;
   }
 }

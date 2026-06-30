@@ -1,24 +1,24 @@
 services:
   postgres:
     image: postgres:18-alpine
-    container_name: fleet-postgres
+    container_name: orionid-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-fleet}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fleet}
-      POSTGRES_DB: ${POSTGRES_DB:-fleet}
+      POSTGRES_USER: ${POSTGRES_USER:-orionid}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-orionid}
+      POSTGRES_DB: ${POSTGRES_DB:-orionid}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fleet} -d ${POSTGRES_DB:-fleet}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-orionid} -d ${POSTGRES_DB:-orionid}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
   redis:
     image: redis:7-alpine
-    container_name: fleet-redis
+    container_name: orionid-redis
     ports:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
@@ -31,7 +31,7 @@ services:
 
   minio:
     image: minio/minio:RELEASE.2024-11-07T00-52-20Z
-    container_name: fleet-minio
+    container_name: orionid-minio
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}

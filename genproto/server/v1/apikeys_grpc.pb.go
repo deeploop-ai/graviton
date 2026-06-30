@@ -8,7 +8,7 @@ package serverv1
 
 import (
 	context "context"
-	v1 "github.com/deeploop-ai/fleet/genproto/shared/v1"
+	v1 "github.com/deeploop-ai/orionid/genproto/shared/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,10 +20,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	APIKeysService_CreateAPIKey_FullMethodName = "/fleet.server.v1.APIKeysService/CreateAPIKey"
-	APIKeysService_ListAPIKeys_FullMethodName  = "/fleet.server.v1.APIKeysService/ListAPIKeys"
-	APIKeysService_GetAPIKey_FullMethodName    = "/fleet.server.v1.APIKeysService/GetAPIKey"
-	APIKeysService_DeleteAPIKey_FullMethodName = "/fleet.server.v1.APIKeysService/DeleteAPIKey"
+	APIKeysService_CreateAPIKey_FullMethodName = "/orionid.server.v1.APIKeysService/CreateAPIKey"
+	APIKeysService_ListAPIKeys_FullMethodName  = "/orionid.server.v1.APIKeysService/ListAPIKeys"
+	APIKeysService_GetAPIKey_FullMethodName    = "/orionid.server.v1.APIKeysService/GetAPIKey"
+	APIKeysService_DeleteAPIKey_FullMethodName = "/orionid.server.v1.APIKeysService/DeleteAPIKey"
 )
 
 // APIKeysServiceClient is the client API for APIKeysService service.
@@ -211,7 +211,7 @@ func _APIKeysService_DeleteAPIKey_Handler(srv interface{}, ctx context.Context, 
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var APIKeysService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "fleet.server.v1.APIKeysService",
+	ServiceName: "orionid.server.v1.APIKeysService",
 	HandlerType: (*APIKeysServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

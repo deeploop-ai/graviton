@@ -38,7 +38,7 @@ tasks:
   migrate:
     dir: '{{.USER_WORKING_DIR}}'
     vars:
-      MIGRATE_DSN: '{{if .FLEET_DATA_DATABASE_SOURCE}}{{.FLEET_DATA_DATABASE_SOURCE}}{{else}}postgres://{{default "fleet" .POSTGRES_USER}}:{{default "fleet" .POSTGRES_PASSWORD}}@{{default "127.0.0.1" .POSTGRES_HOST}}:{{default "5432" .POSTGRES_PORT}}/{{default "fleet" .POSTGRES_DB}}?sslmode=disable{{end}}'
+      MIGRATE_DSN: '{{if .ORIONID_DATA_DATABASE_SOURCE}}{{.ORIONID_DATA_DATABASE_SOURCE}}{{else}}postgres://{{default "orionid" .POSTGRES_USER}}:{{default "orionid" .POSTGRES_PASSWORD}}@{{default "127.0.0.1" .POSTGRES_HOST}}:{{default "5432" .POSTGRES_PORT}}/{{default "orionid" .POSTGRES_DB}}?sslmode=disable{{end}}'
     cmds:
       - migrate -path ./db/migrations -database "{{.MIGRATE_DSN}}" up
 
@@ -128,4 +128,4 @@ tasks:
       VERSION: 1.0.0
       TIMESTAMP:
         sh: '{{if eq .OS "Windows_NT"}}powershell -NoProfile -Command Get-Date -Format "yyyyMMddHHmmss"{{else}}date +%Y%m%d%H%M%S{{end}}'
-      DOCKER_IMAGE: 'fleet:{{.VERSION}}-{{.GIT_VERSION}}-{{.TIMESTAMP}}'
+      DOCKER_IMAGE: 'orionid:{{.VERSION}}-{{.GIT_VERSION}}-{{.TIMESTAMP}}'

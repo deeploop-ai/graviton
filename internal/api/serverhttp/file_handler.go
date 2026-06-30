@@ -9,11 +9,11 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/deeploop-ai/fleet/internal/app/storage"
-	"github.com/deeploop-ai/fleet/internal/domain/databases"
-	"github.com/deeploop-ai/fleet/internal/domain/shared"
-	"github.com/deeploop-ai/fleet/internal/infra/auth"
-	"github.com/deeploop-ai/fleet/internal/pkg/config"
+	"github.com/deeploop-ai/orionid/internal/app/storage"
+	"github.com/deeploop-ai/orionid/internal/domain/databases"
+	"github.com/deeploop-ai/orionid/internal/domain/shared"
+	"github.com/deeploop-ai/orionid/internal/infra/auth"
+	"github.com/deeploop-ai/orionid/internal/pkg/config"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -162,7 +162,7 @@ func (h *FileHandler) authenticate(r *http.Request) (*shared.Principal, error) {
 		return h.validator.ValidateToken(ctx, token)
 	}
 	for _, c := range r.Cookies() {
-		if strings.HasPrefix(c.Name, "fleet_session_") {
+		if strings.HasPrefix(c.Name, "orionid_session_") {
 			return h.validator.ValidateCredential(ctx, c.Value, shared.CredentialTypeSession)
 		}
 	}
@@ -178,7 +178,7 @@ func (h *FileHandler) projectID(r *http.Request, p *shared.Principal) string {
 		return p.ProjectID
 	case shared.CredentialTypeToken, shared.CredentialTypeSession:
 		if p.ActorKind == shared.ActorKindAdmin {
-			if pid := strings.TrimSpace(r.Header.Get("X-Fleet-Project")); pid != "" {
+			if pid := strings.TrimSpace(r.Header.Get("X-Orionid-Project")); pid != "" {
 				return pid
 			}
 		}

@@ -1,8 +1,8 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useFleet } from "@/lib/fleet-context";
+import { useOrionid } from "@/lib/orionid-context";
 
 export function ProtectedRoute() {
-  const { auth } = useFleet();
+  const { auth } = useOrionid();
   if (!auth) {
     return <Navigate to="/login" replace />;
   }
@@ -10,7 +10,7 @@ export function ProtectedRoute() {
 }
 
 export function GuestRoute() {
-  const { auth } = useFleet();
+  const { auth } = useOrionid();
   if (auth) {
     return <Navigate to="/app" replace />;
   }

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package fleet.server.v1;
+package orionid.server.v1;
 
-option go_package = "github.com/deeploop-ai/fleet/genproto/server/v1;serverv1";
+option go_package = "github.com/deeploop-ai/orionid/genproto/server/v1;serverv1";
 
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
@@ -10,7 +10,7 @@ import "shared/v1/authz.proto";
 import "shared/v1/common.proto";
 
 service StorageService {
-  option (fleet.shared.v1.service_auth) = { default_access: ACCESS_API_KEY };
+  option (orionid.shared.v1.service_auth) = { default_access: ACCESS_API_KEY };
 
   rpc CreateBucket(CreateBucketRequest) returns (Bucket) {
     option (google.api.http) = { post: "/v1/server/storage/buckets", body: "*" };

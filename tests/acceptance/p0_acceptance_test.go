@@ -4,15 +4,15 @@ import (
 	"context"
 	"testing"
 
-	"github.com/deeploop-ai/fleet/internal/app/client"
-	appserver "github.com/deeploop-ai/fleet/internal/app/server"
-	"github.com/deeploop-ai/fleet/internal/domain/databases"
-	"github.com/deeploop-ai/fleet/internal/domain/shared"
-	"github.com/deeploop-ai/fleet/internal/infra/bun/bunrepo"
-	"github.com/deeploop-ai/fleet/internal/infra/documentdb"
-	"github.com/deeploop-ai/fleet/internal/pkg/config"
-	"github.com/deeploop-ai/fleet/internal/testutil"
-	"github.com/deeploop-ai/fleet/pkg/grpc/interceptor"
+	"github.com/deeploop-ai/orionid/internal/app/client"
+	appserver "github.com/deeploop-ai/orionid/internal/app/server"
+	"github.com/deeploop-ai/orionid/internal/domain/databases"
+	"github.com/deeploop-ai/orionid/internal/domain/shared"
+	"github.com/deeploop-ai/orionid/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/orionid/internal/infra/documentdb"
+	"github.com/deeploop-ai/orionid/internal/pkg/config"
+	"github.com/deeploop-ai/orionid/internal/testutil"
+	"github.com/deeploop-ai/orionid/pkg/grpc/interceptor"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -50,11 +50,11 @@ func TestP0_Section6_ConsoleAdminProjectAccess(t *testing.T) {
 	adminMD := func(token string) metadata.MD {
 		return metadata.Pairs(
 			"authorization", "Bearer "+token,
-			"x-fleet-project", projectID,
+			"X-Orionid-Project", projectID,
 		)
 	}
 
-	// §6.8 owner with X-Fleet-Project can access Server API.
+	// §6.8 owner with X-Orionid-Project can access Server API.
 	err = env.InvokeUnary(ctx, testutil.MethodListUsers, adminMD(ownerToken))
 	require.NoError(t, err)
 
@@ -112,14 +112,14 @@ func TestP0_Section7_AuditLogs(t *testing.T) {
 	require.NotEmpty(t, log.ActorID)
 	require.NotEmpty(t, log.ActorKind)
 
-	// §7.3 admin request with X-Fleet-Project records project_id.
+	// §7.3 admin request with X-Orionid-Project records project_id.
 	owner, ownerCleanup := testutil.CreateTestConsoleAdmin(ctx, db, "owner")
 	defer ownerCleanup()
 	ownerToken, err := testutil.SignConsoleAdminToken(cfg, owner)
 	require.NoError(t, err)
 	require.NoError(t, env.InvokeUnary(ctx, testutil.MethodListUsers, metadata.Pairs(
 		"authorization", "Bearer "+ownerToken,
-		"x-fleet-project", projectID,
+		"X-Orionid-Project", projectID,
 	)))
 
 	log, err = env.LatestAuditLog(ctx)
@@ -154,7 +154,7 @@ func TestP0_Section8_AccessPermission(t *testing.T) {
 	account := client.NewAccount(cfg, projectRepo, docDB)
 	_, tokens, _, err := account.SignUp(ctx, client.SignUpCommand{
 		ProjectID: projectID,
-		Email:     "access-perm@fleet.local",
+		Email:     "access-perm@orionid.local",
 		Password:  "User@123456",
 		Name:      "Access Perm",
 	})
@@ -217,7 +217,7 @@ func TestP0_Section9_DynamicDocuments(t *testing.T) {
 	account := client.NewAccount(cfg, projectRepo, docDB)
 	usersUC := appserver.NewUsers(projectRepo, docDB)
 
-	const email = "dsl-query@fleet.local"
+	const email = "dsl-query@orionid.local"
 	signedUp, _, _, err := account.SignUp(ctx, client.SignUpCommand{
 		ProjectID: projectID,
 		Email:     email,
@@ -251,7 +251,7 @@ func TestP0_Section9_DynamicDocuments(t *testing.T) {
 	// §9.4 non-admin list returns only documents with matching _perms.
 	privateUser, err := docDB.CreateDocument(ctx, projectID, "default", "users", databases.Document{
 		Data: map[string]any{
-			"email": "private@fleet.local",
+			"email": "private@orionid.local",
 			"name":  "Private",
 		},
 	}, []databases.Permission{

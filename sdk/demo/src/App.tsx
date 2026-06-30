@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { FleetProvider } from "@/lib/fleet-context";
+import { OrionidProvider } from "@/lib/orionid-context";
 import { AppLayout, AuthLayout } from "@/components/Layout";
 import { GuestRoute, ProtectedRoute } from "@/components/RouteGuards";
 import { AccountPage } from "@/pages/AccountPage";
@@ -13,7 +13,7 @@ import { TeamsPage } from "@/pages/TeamsPage";
 
 export default function App() {
   return (
-    <FleetProvider>
+    <OrionidProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Navigate to="/app" replace />} />
@@ -39,6 +39,6 @@ export default function App() {
           <Route path="*" element={<Navigate to="/app" replace />} />
         </Routes>
       </BrowserRouter>
-    </FleetProvider>
+    </OrionidProvider>
   );
 }

@@ -3,22 +3,22 @@ package testutil
 import (
 	"context"
 
-	"github.com/deeploop-ai/fleet/internal/domain/databases"
-	"github.com/deeploop-ai/fleet/internal/infra/auth"
-	"github.com/deeploop-ai/fleet/internal/infra/bun/bunrepo"
-	"github.com/deeploop-ai/fleet/internal/infra/bun/model"
-	"github.com/deeploop-ai/fleet/internal/infra/clients"
-	"github.com/deeploop-ai/fleet/internal/pkg/config"
-	"github.com/deeploop-ai/fleet/pkg/grpc/interceptor"
+	"github.com/deeploop-ai/orionid/internal/domain/databases"
+	"github.com/deeploop-ai/orionid/internal/infra/auth"
+	"github.com/deeploop-ai/orionid/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/orionid/internal/infra/bun/model"
+	"github.com/deeploop-ai/orionid/internal/infra/clients"
+	"github.com/deeploop-ai/orionid/internal/pkg/config"
+	"github.com/deeploop-ai/orionid/pkg/grpc/interceptor"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
 
 const (
-	MethodHealthCheck   = "/fleet.server.v1.HealthService/Check"
-	MethodListUsers     = "/fleet.server.v1.UsersService/ListUsers"
-	MethodAccountMe     = "/fleet.client.v1.AccountService/Me"
-	MethodAccountSignOut = "/fleet.client.v1.AccountService/SignOut"
+	MethodHealthCheck   = "/orionid.server.v1.HealthService/Check"
+	MethodListUsers     = "/orionid.server.v1.UsersService/ListUsers"
+	MethodAccountMe     = "/orionid.client.v1.AccountService/Me"
+	MethodAccountSignOut = "/orionid.client.v1.AccountService/SignOut"
 )
 
 // InterceptorEnv wires auth + audit interceptors the same way production does.
