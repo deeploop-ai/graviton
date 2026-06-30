@@ -4,4 +4,5 @@ export { UsersService } from "./users.js";
 export { ServerTeamsService } from "./teams.js";
 export { ServerDatabasesService } from "./databases.js";
 export { APIKeysService } from "./apikeys.js";
+export { OAuthProvidersService } from "./oauthProviders.js";
 export { StorageService } from "./storage.js";

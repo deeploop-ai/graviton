@@ -134,7 +134,7 @@ func (a *Account) HandleOAuth2Callback(ctx context.Context, provider, code, stat
 			RedirectURL: appendQuery(failureURL, "error", status.Convert(err).Message()),
 		}, err
 	}
-	redirect := appendQuery(result.SuccessURL, "userId", result.User.ID)
+	redirect := appendOAuthSPAFragment(result.SuccessURL, result.User.ID, result.Tokens)
 	return &OAuth2CallbackResult{
 		ProjectID:     result.ProjectID,
 		SuccessURL:    result.SuccessURL,
@@ -324,5 +324,22 @@ func appendQuery(rawURL, key, value string) string {
 	q := u.Query()
 	q.Set(key, value)
 	u.RawQuery = q.Encode()
+	return u.String()
+}
+
+func appendOAuthSPAFragment(rawURL, userID string, tokens *TokenBundle) string {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return rawURL
+	}
+	vals := url.Values{}
+	if userID != "" {
+		vals.Set("userId", userID)
+	}
+	if tokens != nil {
+		vals.Set("access_token", tokens.AccessToken)
+		vals.Set("refresh_token", tokens.RefreshToken)
+	}
+	u.Fragment = vals.Encode()
 	return u.String()
 }

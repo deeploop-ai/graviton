@@ -35,6 +35,7 @@ func NewGRPCServer(
 	storage *servergrpc.StorageService,
 	users *servergrpc.UsersService,
 	apiKeys *servergrpc.APIKeysService,
+	oauthProviders *servergrpc.OAuthProvidersService,
 	teams *servergrpc.TeamsService,
 	databases *servergrpc.DatabasesService,
 	consoleAuth *consolegrpc.AuthService,
@@ -51,6 +52,7 @@ func NewGRPCServer(
 		serverv1.File_server_v1_storage_proto,
 		serverv1.File_server_v1_users_proto,
 		serverv1.File_server_v1_apikeys_proto,
+		serverv1.File_server_v1_oauth_providers_proto,
 		serverv1.File_server_v1_teams_proto,
 		serverv1.File_server_v1_databases_proto,
 		consolev1.File_console_v1_auth_proto,
@@ -86,6 +88,7 @@ func NewGRPCServer(
 	serverv1.RegisterStorageServiceServer(grpcSrv, storage)
 	serverv1.RegisterUsersServiceServer(grpcSrv, users)
 	serverv1.RegisterAPIKeysServiceServer(grpcSrv, apiKeys)
+	serverv1.RegisterOAuthProvidersServiceServer(grpcSrv, oauthProviders)
 	serverv1.RegisterTeamsServiceServer(grpcSrv, teams)
 	serverv1.RegisterDatabasesServiceServer(grpcSrv, databases)
 	consolev1.RegisterConsoleAuthServiceServer(grpcSrv, consoleAuth)

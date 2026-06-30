@@ -17,6 +17,7 @@ var ProviderSet = wire.NewSet(
 	servergrpc.NewStorageService,
 	servergrpc.NewUsersService,
 	servergrpc.NewAPIKeysService,
+	servergrpc.NewOAuthProvidersService,
 	servergrpc.NewTeamsService,
 	servergrpc.NewDatabasesService,
 	serverhttp.NewFileHandler,

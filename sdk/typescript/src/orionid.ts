@@ -4,6 +4,7 @@ import { HttpTransport } from "./http.js";
 import {
   APIKeysService,
   HealthService,
+  OAuthProvidersService,
   ProjectsService,
   ServerDatabasesService,
   ServerTeamsService,
@@ -27,6 +28,7 @@ export class Orionid {
     teams: ServerTeamsService;
     databases: ServerDatabasesService;
     apiKeys: APIKeysService;
+    oauthProviders: OAuthProvidersService;
     storage: StorageService;
   };
 
@@ -44,6 +46,7 @@ export class Orionid {
       teams: new ServerTeamsService(this.transport),
       databases: new ServerDatabasesService(this.transport),
       apiKeys: new APIKeysService(this.transport),
+      oauthProviders: new OAuthProvidersService(this.transport),
       storage: new StorageService(this.transport),
     };
   }

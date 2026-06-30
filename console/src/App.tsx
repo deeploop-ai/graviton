@@ -41,6 +41,7 @@ import {
   DocumentNewPage,
   DocumentDetailPage,
 } from "@/routes/databases/pages";
+import { SettingsPage } from "@/routes/settings/pages";
 import { CollectionLayout } from "@/routes/databases/CollectionLayout";
 
 const queryClient = new QueryClient({
@@ -77,6 +78,8 @@ function AppRoutes() {
         <Route path="projects" element={<ProjectsListPage />} />
         <Route path="projects/new" element={<ProjectNewPage />} />
         <Route path="projects/:id" element={<ProjectDetailPage />} />
+
+        <Route path="settings" element={<SettingsPage />} />
 
         <Route path="api-keys" element={<ApiKeysListPage />} />
         <Route path="api-keys/new" element={<ApiKeyNewPage />} />

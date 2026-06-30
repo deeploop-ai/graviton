@@ -56,6 +56,7 @@ func NewGRPCGatewayServer(
 		serverv1.RegisterStorageServiceHandlerFromEndpoint,
 		serverv1.RegisterUsersServiceHandlerFromEndpoint,
 		serverv1.RegisterAPIKeysServiceHandlerFromEndpoint,
+		serverv1.RegisterOAuthProvidersServiceHandlerFromEndpoint,
 		serverv1.RegisterTeamsServiceHandlerFromEndpoint,
 		serverv1.RegisterDatabasesServiceHandlerFromEndpoint,
 		consolev1.RegisterConsoleAuthServiceHandlerFromEndpoint,

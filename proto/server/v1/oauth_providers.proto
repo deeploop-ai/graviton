@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package orionid.server.v1;
+
+option go_package = "github.com/deeploop-ai/orionid/genproto/server/v1;serverv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "shared/v1/authz.proto";
+import "shared/v1/common.proto";
+
+service OAuthProvidersService {
+  option (orionid.shared.v1.service_auth) = { default_access: ACCESS_API_KEY };
+
+  rpc ListOAuthProviders(shared.v1.ListRequest) returns (ListOAuthProvidersResponse) {
+    option (google.api.http) = { get: "/v1/server/oauth-providers" };
+  }
+
+  rpc UpsertOAuthProvider(UpsertOAuthProviderRequest) returns (OAuthProvider) {
+    option (google.api.http) = {
+      put: "/v1/server/oauth-providers/{provider}"
+      body: "*"
+    };
+  }
+
+  rpc DeleteOAuthProvider(DeleteOAuthProviderRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { delete: "/v1/server/oauth-providers/{provider}" };
+  }
+}
+
+message ListOAuthProvidersResponse {
+  repeated OAuthProvider oauth_providers = 1;
+  shared.v1.ListResponseMeta meta = 2;
+}
+
+message UpsertOAuthProviderRequest {
+  string provider = 1;
+  bool enabled = 2;
+  string client_id = 3;
+  string client_secret = 4;
+  repeated string scopes = 5;
+}
+
+message DeleteOAuthProviderRequest {
+  string provider = 1;
+}
+
+message OAuthProvider {
+  string provider = 1;
+  bool enabled = 2;
+  string client_id = 3;
+  bool has_client_secret = 4;
+  repeated string scopes = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}

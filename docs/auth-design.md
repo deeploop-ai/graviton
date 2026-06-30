@@ -1,7 +1,7 @@
 # Client 认证体系设计
 
 > 最新更新：2026-06-30  
-> 状态：Phase 4（微信 Web + 小程序）已完成
+> 状态：Phase 5（Demo + Console Settings）已完成
 
 ---
 
@@ -298,7 +298,7 @@ messaging:
 | **Phase 2** | OAuth2 Google/GitHub + callback handler | 7-10 天 | ✅ 完成 |
 | **Phase 3** | SMS OTP + Twilio/Dev | 5-7 天 | ✅ 完成 |
 | **Phase 4** | 微信 Web + 小程序 | 10-14 天 | ✅ 扫码登录、code2session |
-| **Phase 5** | SDK / Demo / Console Settings | 5-7 天 | 前端多 Tab 登录；OAuth/SMTP 配置页 |
+| **Phase 5** | SDK / Demo / Console Settings | 5-7 天 | ✅ 多 Tab 登录；OAuth 配置页 |
 
 ---
 
@@ -332,6 +332,12 @@ VALUES (
 ```
 
 回调地址固定为：`{server.http.public_url}/v1/account/oauth2/{provider}/callback`
+
+也可通过 Console **Settings → OAuth Providers** 或 Server API 管理：
+
+- `GET /v1/server/oauth-providers`
+- `PUT /v1/server/oauth-providers/{provider}`
+- `DELETE /v1/server/oauth-providers/{provider}`
 
 微信 provider 示例（`client_id` = AppID，`client_secret` = AppSecret）：
 

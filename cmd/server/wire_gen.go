@@ -76,12 +76,14 @@ func wireBootstrap(app lynx.Lynx) (*boot.Bootstrap, func(), error) {
 	usersService := servergrpc.NewUsersService(users)
 	apiKeys := server.NewAPIKeys(apiKeyRepository)
 	apiKeysService := servergrpc.NewAPIKeysService(apiKeys)
+	oAuthProviders := server.NewOAuthProviders(oAuthProviderRepository)
+	oAuthProvidersService := servergrpc.NewOAuthProvidersService(oAuthProviders)
 	servergrpcTeamsService := servergrpc.NewTeamsService(teams)
 	serverDatabases := server.NewDatabases(projectsRepository, documentDB)
 	servergrpcDatabasesService := servergrpc.NewDatabasesService(serverDatabases)
 	consoleAuth := console.NewAuth(appConfig, consoleAdminRepository)
 	authService := consolegrpc.NewAuthService(consoleAuth)
-	grpcServer, err := server2.NewGRPCServer(app, appConfig, validator, repository, accountService, databasesService, teamsService, healthService, projectsService, storageService, usersService, apiKeysService, servergrpcTeamsService, servergrpcDatabasesService, authService)
+	grpcServer, err := server2.NewGRPCServer(app, appConfig, validator, repository, accountService, databasesService, teamsService, healthService, projectsService, storageService, usersService, apiKeysService, oAuthProvidersService, servergrpcTeamsService, servergrpcDatabasesService, authService)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

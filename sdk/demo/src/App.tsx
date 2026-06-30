@@ -5,7 +5,7 @@ import { GuestRoute, ProtectedRoute } from "@/components/RouteGuards";
 import { AccountPage } from "@/pages/AccountPage";
 import { DatabasesPage } from "@/pages/DatabasesPage";
 import { HomePage } from "@/pages/HomePage";
-import { LoginPage } from "@/pages/LoginPage";
+import { LoginPage, OAuthCallbackPage } from "@/pages/LoginPage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { ServerPage } from "@/pages/ServerPage";
 import { SettingsPage } from "@/pages/SettingsPage";
@@ -21,6 +21,7 @@ export default function App() {
           <Route element={<GuestRoute />}>
             <Route element={<AuthLayout />}>
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/login/oauth/callback" element={<OAuthCallbackPage />} />
               <Route path="/register" element={<RegisterPage />} />
             </Route>
           </Route>
