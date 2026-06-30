@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
 	"github.com/deeploop-ai/orionid/pkg/idgen"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc/codes"
@@ -22,7 +23,9 @@ const (
 
 type otpChallengeRecord struct {
 	ProjectID string `json:"project_id"`
-	Email     string `json:"email"`
+	Channel   string `json:"channel,omitempty"`
+	Target    string `json:"target,omitempty"`
+	Email     string `json:"email,omitempty"`
 	CodeHash  string `json:"code_hash"`
 	Attempts  int    `json:"attempts"`
 }
@@ -36,8 +39,8 @@ func NewRedisOTPChallengeStore(rdb *redis.Client) *RedisOTPChallengeStore {
 	return &RedisOTPChallengeStore{rdb: rdb}
 }
 
-func (s *RedisOTPChallengeStore) CheckSendRateLimit(ctx context.Context, projectID, email, ip string) error {
-	sendKey := fmt.Sprintf("orionid:otp:send:%s:%s", projectID, email)
+func (s *RedisOTPChallengeStore) CheckSendRateLimit(ctx context.Context, projectID, target, ip string) error {
+	sendKey := fmt.Sprintf("orionid:otp:send:%s:%s", projectID, target)
 	ok, err := s.rdb.SetNX(ctx, sendKey, "1", otpSendCooldown).Result()
 	if err != nil {
 		return status.Error(codes.Internal, "otp rate limit check failed")
@@ -66,11 +69,28 @@ func (s *RedisOTPChallengeStore) CheckSendRateLimit(ctx context.Context, project
 }
 
 func (s *RedisOTPChallengeStore) CreateEmailChallenge(ctx context.Context, projectID, email, codeHash string) (string, time.Time, error) {
+	return s.createChallenge(ctx, projectID, domainauth.OTPChannelEmail, email, codeHash)
+}
+
+func (s *RedisOTPChallengeStore) VerifyEmailChallenge(ctx context.Context, projectID, challengeID, email, codeHash string) error {
+	return s.verifyChallenge(ctx, projectID, challengeID, domainauth.OTPChannelEmail, email, codeHash)
+}
+
+func (s *RedisOTPChallengeStore) CreatePhoneChallenge(ctx context.Context, projectID, phone, codeHash string) (string, time.Time, error) {
+	return s.createChallenge(ctx, projectID, domainauth.OTPChannelPhone, phone, codeHash)
+}
+
+func (s *RedisOTPChallengeStore) VerifyPhoneChallenge(ctx context.Context, projectID, challengeID, phone, codeHash string) error {
+	return s.verifyChallenge(ctx, projectID, challengeID, domainauth.OTPChannelPhone, phone, codeHash)
+}
+
+func (s *RedisOTPChallengeStore) createChallenge(ctx context.Context, projectID, channel, target, codeHash string) (string, time.Time, error) {
 	challengeID := newChallengeID()
 	expireAt := time.Now().Add(otpChallengeTTL)
 	record := otpChallengeRecord{
 		ProjectID: projectID,
-		Email:     email,
+		Channel:   channel,
+		Target:    target,
 		CodeHash:  codeHash,
 	}
 	payload, err := json.Marshal(record)
@@ -84,7 +104,7 @@ func (s *RedisOTPChallengeStore) CreateEmailChallenge(ctx context.Context, proje
 	return challengeID, expireAt, nil
 }
 
-func (s *RedisOTPChallengeStore) VerifyEmailChallenge(ctx context.Context, projectID, challengeID, email, codeHash string) error {
+func (s *RedisOTPChallengeStore) verifyChallenge(ctx context.Context, projectID, challengeID, channel, target, codeHash string) error {
 	key := challengeKey(challengeID)
 	raw, err := s.rdb.Get(ctx, key).Bytes()
 	if err == redis.Nil {
@@ -98,7 +118,16 @@ func (s *RedisOTPChallengeStore) VerifyEmailChallenge(ctx context.Context, proje
 	if err := json.Unmarshal(raw, &record); err != nil {
 		return status.Error(codes.Internal, "otp challenge decode failed")
 	}
-	if record.ProjectID != projectID || record.Email != email {
+	// Backward compatibility for email challenges written before channel field existed.
+	recordChannel := record.Channel
+	if recordChannel == "" {
+		recordChannel = domainauth.OTPChannelEmail
+	}
+	recordTarget := record.Target
+	if recordTarget == "" {
+		recordTarget = record.Email
+	}
+	if record.ProjectID != projectID || recordChannel != channel || recordTarget != target {
 		return status.Error(codes.Unauthenticated, "invalid or expired otp challenge")
 	}
 	if record.Attempts >= otpMaxAttempts {

@@ -69,3 +69,10 @@ messaging:
     from: "noreply@orionid.local"
     use_tls: true
   dev_log_otp: true         # log OTP to stdout when SMTP host is empty (dev only)
+  dev_log_sms: true         # log SMS OTP to stdout when SMS provider is empty (dev only)
+  sms:
+    provider: ""            # twilio
+    twilio:
+      account_sid: ""       # env: ORIONID_MESSAGING_SMS_TWILIO_ACCOUNT_SID
+      auth_token: ""        # env: ORIONID_MESSAGING_SMS_TWILIO_AUTH_TOKEN
+      from: ""

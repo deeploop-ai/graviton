@@ -33,6 +33,7 @@ type Account struct {
 	otp            domainauth.OTPChallengeStore
 	oauthState     domainauth.OAuthStateStore
 	mailer         messaging.Mailer
+	sms            messaging.SMSSender
 }
 
 func NewAccount(
@@ -44,6 +45,7 @@ func NewAccount(
 	otp domainauth.OTPChallengeStore,
 	oauthState domainauth.OAuthStateStore,
 	mailer messaging.Mailer,
+	sms messaging.SMSSender,
 ) *Account {
 	return &Account{
 		cfg:            cfg,
@@ -54,6 +56,7 @@ func NewAccount(
 		otp:            otp,
 		oauthState:     oauthState,
 		mailer:         mailer,
+		sms:            sms,
 	}
 }
 

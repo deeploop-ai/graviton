@@ -28,6 +28,7 @@ func systemCollectionSpecs(projectID string) []systemCollectionSpec {
 			},
 			indexes: []databases.Index{
 				{ID: "users_email_unique", Type: "unique", Attributes: []string{"email"}},
+				{ID: "users_phone", Type: "key", Attributes: []string{"phone"}},
 			},
 			permissions: []databases.Permission{
 				{Type: "create", Role: "any"},

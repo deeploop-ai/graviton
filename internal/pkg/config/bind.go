@@ -19,6 +19,8 @@ var envBoundKeys = []string{
 	"storage.s3.secret_access_key",
 	"messaging.smtp.host",
 	"messaging.smtp.password",
+	"messaging.sms.twilio.account_sid",
+	"messaging.sms.twilio.auth_token",
 	"telemetry.otlp_endpoint",
 }
 

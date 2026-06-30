@@ -6,8 +6,14 @@ import "context"
 const (
 	ProviderEmail     = "email"
 	ProviderEmailOTP  = "email_otp"
+	ProviderPhoneOTP  = "phone_otp"
 	ProviderPhone     = "phone"
 	ProviderAnonymous = "anonymous"
+)
+
+const (
+	OTPChannelEmail = "email"
+	OTPChannelPhone = "phone"
 )
 
 // TokenBundle holds JWT access and refresh tokens for an authenticated session.

@@ -183,4 +183,36 @@ export class AccountService {
     this.http.setAccessToken(res.tokens.access_token);
     return res;
   }
+
+  async createPhoneOTP(input: { phone: string }): Promise<{ challenge_id: string; expire_at: number }> {
+    return this.http.request("POST", "/v1/account/sessions/phone-otp", {
+      auth: "none",
+      body: {
+        project_id: this.http.getProjectId(),
+        phone: input.phone,
+      },
+    });
+  }
+
+  async createPhoneOTPSession(input: {
+    phone: string;
+    challenge_id: string;
+    otp: string;
+  }): Promise<{ account: Account; tokens: TokenBundle }> {
+    const res = await this.http.request<{ account: Account; tokens: TokenBundle }>(
+      "POST",
+      "/v1/account/sessions/phone-otp/verify",
+      {
+        auth: "none",
+        body: {
+          project_id: this.http.getProjectId(),
+          phone: input.phone,
+          challenge_id: input.challenge_id,
+          otp: input.otp,
+        },
+      }
+    );
+    this.http.setAccessToken(res.tokens.access_token);
+    return res;
+  }
 }

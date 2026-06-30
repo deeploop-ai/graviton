@@ -14,7 +14,7 @@
 | Email + 密码 | P0 | ✅ 完成 |
 | Email OTP | Phase 1 | ✅ 完成 |
 | OAuth2 Google/GitHub | Phase 2 | ✅ 完成 |
-| SMS OTP | Phase 3 | 待办 |
+| SMS OTP | Phase 3 | ✅ 完成 |
 | OAuth2（Google / GitHub） | Phase 2 | 待办 |
 | 微信（Web / 小程序） | Phase 4 | 待办 |
 
@@ -266,6 +266,19 @@ messaging:
 
 Phase 2 将支持项目级 SMTP（Console Settings）。
 
+SMS（Phase 3）：
+
+```yaml
+messaging:
+  dev_log_sms: false
+  sms:
+    provider: twilio
+    twilio:
+      account_sid: ""
+      auth_token: ""
+      from: "+1234567890"
+```
+
 ---
 
 ## 8. 分阶段计划
@@ -275,7 +288,7 @@ Phase 2 将支持项目级 SMTP（Console Settings）。
 | **Phase 0** | SessionService 抽取、identities 集合、IP/UA 记录 | 3-5 天 | ✅ 已完成 |
 | **Phase 1** | Email OTP API + Redis + SMTP | 5-7 天 | ✅ 完成 |
 | **Phase 2** | OAuth2 Google/GitHub + callback handler | 7-10 天 | ✅ 完成 |
-| **Phase 3** | SMS OTP + 阿里云/Twilio | 5-7 天 | 手机号登录闭环 |
+| **Phase 3** | SMS OTP + Twilio/Dev | 5-7 天 | ✅ 完成 |
 | **Phase 4** | 微信 Web + 小程序 | 10-14 天 | 扫码登录、code2session |
 | **Phase 5** | SDK / Demo / Console Settings | 5-7 天 | 前端多 Tab 登录；OAuth/SMTP 配置页 |
 

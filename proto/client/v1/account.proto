@@ -87,6 +87,16 @@ service AccountService {
     option (google.api.http) = { post: "/v1/account/sessions/oauth2/{provider}/token", body: "*" };
     option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
+
+  rpc CreatePhoneOTP(CreatePhoneOTPRequest) returns (ChallengeResponse) {
+    option (google.api.http) = { post: "/v1/account/sessions/phone-otp", body: "*" };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+  }
+
+  rpc CreatePhoneOTPSession(CreatePhoneOTPSessionRequest) returns (SignInResponse) {
+    option (google.api.http) = { post: "/v1/account/sessions/phone-otp/verify", body: "*" };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+  }
 }
 
 message SignUpRequest {
@@ -222,4 +232,16 @@ message CreateOAuth2TokenSessionRequest {
   string failure = 4;
   string code = 5;
   string state = 6;
+}
+
+message CreatePhoneOTPRequest {
+  string project_id = 1;
+  string phone = 2;
+}
+
+message CreatePhoneOTPSessionRequest {
+  string project_id = 1;
+  string phone = 2;
+  string challenge_id = 3;
+  string otp = 4;
 }

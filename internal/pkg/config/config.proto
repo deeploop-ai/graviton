@@ -122,4 +122,18 @@ message Messaging {
   SMTP smtp = 1;
   // When true and SMTP host is empty, OTP codes are written to the application log (development only).
   bool dev_log_otp = 2;
+  SMS sms = 3;
+  // When true and SMS provider is empty, OTP codes are written to the application log (development only).
+  bool dev_log_sms = 4;
+}
+
+message SMS {
+  string provider = 1; // twilio
+  Twilio twilio = 2;
+}
+
+message Twilio {
+  string account_sid = 1;
+  string auth_token = 2;
+  string from = 3;
 }

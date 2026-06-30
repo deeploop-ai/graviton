@@ -37,6 +37,10 @@ func TestRedisOTPChallengeStore_VerifyFlow(t *testing.T) {
 
 	require.NoError(t, store.VerifyEmailChallenge(ctx, "proj1", challengeID, "user@example.com", auth.HashOTP(code)))
 
+	phoneChallengeID, _, err := store.CreatePhoneChallenge(ctx, "proj1", "+8613812345678", auth.HashOTP("654321"))
+	require.NoError(t, err)
+	require.NoError(t, store.VerifyPhoneChallenge(ctx, "proj1", phoneChallengeID, "+8613812345678", auth.HashOTP("654321")))
+
 	err = store.VerifyEmailChallenge(ctx, "proj1", challengeID, "user@example.com", auth.HashOTP(code))
 	require.Error(t, err)
 	st, _ = status.FromError(err)

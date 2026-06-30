@@ -18,11 +18,11 @@ func NewTestAccount(cfg *config.AppConfig, projectRepo projects.Repository, docD
 }
 
 func NewTestAccountWithRedis(cfg *config.AppConfig, projectRepo projects.Repository, docDB databases.DocumentDB, rdb *redis.Client) *Account {
-	return NewTestAccountWithDeps(cfg, projectRepo, nil, docDB, rdb, nil)
+	return NewTestAccountWithDeps(cfg, projectRepo, nil, docDB, rdb, nil, nil)
 }
 
 func NewTestAccountWithMailer(cfg *config.AppConfig, projectRepo projects.Repository, docDB databases.DocumentDB, rdb *redis.Client, mailer messaging.Mailer) *Account {
-	return NewTestAccountWithDeps(cfg, projectRepo, nil, docDB, rdb, mailer)
+	return NewTestAccountWithDeps(cfg, projectRepo, nil, docDB, rdb, mailer, nil)
 }
 
 func NewTestAccountWithDeps(
@@ -32,6 +32,7 @@ func NewTestAccountWithDeps(
 	docDB databases.DocumentDB,
 	rdb *redis.Client,
 	mailer messaging.Mailer,
+	sms messaging.SMSSender,
 ) *Account {
 	roles := NewUserRoles(docDB)
 	sessions := infraauth.NewSessionService(cfg, docDB, roles)
@@ -44,7 +45,10 @@ func NewTestAccountWithDeps(
 	if mailer == nil {
 		mailer = inframessaging.NewMailer(cfg)
 	}
-	return NewAccount(cfg, projectRepo, oauthProviders, docDB, sessions, otp, oauthState, mailer)
+	if sms == nil {
+		sms = inframessaging.NewSMSService(cfg)
+	}
+	return NewAccount(cfg, projectRepo, oauthProviders, docDB, sessions, otp, oauthState, mailer, sms)
 }
 
 // CaptureMailer records sent messages for tests.
@@ -56,5 +60,17 @@ type CaptureMailer struct {
 func (m *CaptureMailer) Send(_ context.Context, _, subject, body string) error {
 	m.Subjects = append(m.Subjects, subject)
 	m.Bodies = append(m.Bodies, body)
+	return nil
+}
+
+// CaptureSMSSender records sent SMS for tests.
+type CaptureSMSSender struct {
+	To   []string
+	Body []string
+}
+
+func (s *CaptureSMSSender) Send(_ context.Context, to, body string) error {
+	s.To = append(s.To, to)
+	s.Body = append(s.Body, body)
 	return nil
 }

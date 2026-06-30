@@ -209,6 +209,36 @@ func (s *AccountService) CreateOAuth2TokenSession(ctx context.Context, req *clie
 	}, nil
 }
 
+func (s *AccountService) CreatePhoneOTP(ctx context.Context, req *clientv1.CreatePhoneOTPRequest) (*clientv1.ChallengeResponse, error) {
+	challenge, err := s.account.CreatePhoneOTP(ctx, client.CreatePhoneOTPCommand{
+		ProjectID: req.GetProjectId(),
+		Phone:     req.GetPhone(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &clientv1.ChallengeResponse{
+		ChallengeId: challenge.ChallengeID,
+		ExpireAt:    challenge.ExpireAt.Unix(),
+	}, nil
+}
+
+func (s *AccountService) CreatePhoneOTPSession(ctx context.Context, req *clientv1.CreatePhoneOTPSessionRequest) (*clientv1.SignInResponse, error) {
+	user, tokens, _, err := s.account.CreatePhoneOTPSession(ctx, client.CreatePhoneOTPSessionCommand{
+		ProjectID:   req.GetProjectId(),
+		Phone:       req.GetPhone(),
+		ChallengeID: req.GetChallengeId(),
+		OTP:         req.GetOtp(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &clientv1.SignInResponse{
+		Account: mapUser(user),
+		Tokens:  mapTokens(tokens),
+	}, nil
+}
+
 func mapUser(u *client.User) *clientv1.Account {
 	if u == nil {
 		return nil

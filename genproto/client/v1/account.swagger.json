@@ -362,6 +362,70 @@
         ]
       }
     },
+    "/v1/account/sessions/phone-otp": {
+      "post": {
+        "operationId": "AccountService_CreatePhoneOTP",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ChallengeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreatePhoneOTPRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountService"
+        ]
+      }
+    },
+    "/v1/account/sessions/phone-otp/verify": {
+      "post": {
+        "operationId": "AccountService_CreatePhoneOTPSession",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/orionidclientv1SignInResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreatePhoneOTPSessionRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountService"
+        ]
+      }
+    },
     "/v1/account/sessions/{sessionId}": {
       "delete": {
         "operationId": "AccountService_DeleteSession",
@@ -643,6 +707,34 @@
       "type": "object",
       "properties": {
         "redirectUrl": {
+          "type": "string"
+        }
+      }
+    },
+    "v1CreatePhoneOTPRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        }
+      }
+    },
+    "v1CreatePhoneOTPSessionRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "challengeId": {
+          "type": "string"
+        },
+        "otp": {
           "type": "string"
         }
       }
