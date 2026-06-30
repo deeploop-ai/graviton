@@ -601,25 +601,29 @@ func (p *postgresDocumentDB) EnsureSystemCollections(ctx context.Context, projec
 			return err
 		}
 	}
-	if _, ok := p.bootstrapCache.Load(projectID); ok {
-		return nil
-	}
 	dbID := "default"
 	schema := schemaName(internalID, dbID)
-	if err := p.ensureSchemaAndPerms(ctx, schema); err != nil {
-		return err
+
+	schemaBootstrapped := false
+	if _, ok := p.bootstrapCache.Load(projectID); ok {
+		schemaBootstrapped = true
 	}
 
-	// Ensure default database metadata row exists.
-	exists, err := p.conn(ctx).NewSelect().Model((*model.DocumentDatabase)(nil)).
-		Where("id = ? AND project_id = ?", dbID, projectID).Exists(ctx)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		m := &model.DocumentDatabase{ID: dbID, ProjectID: projectID, Name: "default", CreatedAt: time.Now(), UpdatedAt: time.Now()}
-		if _, err := p.conn(ctx).NewInsert().Model(m).Exec(ctx); err != nil {
+	if !schemaBootstrapped {
+		if err := p.ensureSchemaAndPerms(ctx, schema); err != nil {
 			return err
+		}
+		// Ensure default database metadata row exists.
+		exists, err := p.conn(ctx).NewSelect().Model((*model.DocumentDatabase)(nil)).
+			Where("id = ? AND project_id = ?", dbID, projectID).Exists(ctx)
+		if err != nil {
+			return err
+		}
+		if !exists {
+			m := &model.DocumentDatabase{ID: dbID, ProjectID: projectID, Name: "default", CreatedAt: time.Now(), UpdatedAt: time.Now()}
+			if _, err := p.conn(ctx).NewInsert().Model(m).Exec(ctx); err != nil {
+				return err
+			}
 		}
 	}
 

@@ -67,6 +67,16 @@ service AccountService {
     option (google.api.http) = { put: "/v1/account/prefs", body: "*" };
     option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
+
+  rpc CreateEmailOTP(CreateEmailOTPRequest) returns (ChallengeResponse) {
+    option (google.api.http) = { post: "/v1/account/sessions/email-otp", body: "*" };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+  }
+
+  rpc CreateEmailOTPSession(CreateEmailOTPSessionRequest) returns (SignInResponse) {
+    option (google.api.http) = { post: "/v1/account/sessions/email-otp/verify", body: "*" };
+    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+  }
 }
 
 message SignUpRequest {
@@ -165,4 +175,21 @@ message GetPrefsResponse {
 
 message UpdatePrefsRequest {
   google.protobuf.Struct prefs = 1;
+}
+
+message CreateEmailOTPRequest {
+  string project_id = 1;
+  string email = 2;
+}
+
+message CreateEmailOTPSessionRequest {
+  string project_id = 1;
+  string email = 2;
+  string challenge_id = 3;
+  string otp = 4;
+}
+
+message ChallengeResponse {
+  string challenge_id = 1;
+  int64 expire_at = 2;
 }

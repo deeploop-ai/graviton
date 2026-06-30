@@ -64,12 +64,14 @@ func NewGRPCServer(
 		return nil, err
 	}
 	auditInterceptor := interceptor.NewAuditInterceptor(auditRepo)
+	clientInfoInterceptor := interceptor.NewClientInfoInterceptor()
 
 	srv := lynxgrpc.NewServer(
 		lynxgrpc.WithAddr(grpcCfg.GetAddr()),
 		lynxgrpc.WithTimeout(timeout),
 		lynxgrpc.WithLogger(app.Logger()),
 		lynxgrpc.WithInterceptors(
+			clientInfoInterceptor.UnaryMiddleware,
 			authInterceptor.UnaryAuthMiddleware,
 			auditInterceptor.UnaryAuditMiddleware,
 		),

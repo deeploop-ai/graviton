@@ -17,6 +17,8 @@ var envBoundKeys = []string{
 	"data.redis.password",
 	"storage.s3.access_key_id",
 	"storage.s3.secret_access_key",
+	"messaging.smtp.host",
+	"messaging.smtp.password",
 	"telemetry.otlp_endpoint",
 }
 

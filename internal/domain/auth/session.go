@@ -1,0 +1,30 @@
+package auth
+
+import "context"
+
+// Session provider identifiers stored on session documents.
+const (
+	ProviderEmail     = "email"
+	ProviderEmailOTP  = "email_otp"
+	ProviderPhone     = "phone"
+	ProviderAnonymous = "anonymous"
+)
+
+// TokenBundle holds JWT access and refresh tokens for an authenticated session.
+type TokenBundle struct {
+	AccessToken  string
+	RefreshToken string
+	ExpiresAt    int64
+}
+
+// UserRoleResolver loads JWT role claims for a user at token issuance time.
+type UserRoleResolver interface {
+	LoadUserRoles(ctx context.Context, projectID, userID string) ([]string, error)
+}
+
+// SessionService creates sessions and issues JWT tokens for authenticated users.
+type SessionService interface {
+	CreateSessionAndTokens(ctx context.Context, projectID, userID, email, provider string) (*TokenBundle, string, error)
+	IssueTokens(ctx context.Context, projectID, userID, email, sessionID string) (*TokenBundle, string, error)
+	EnsureActiveSession(ctx context.Context, projectID, sessionID, userID string) error
+}

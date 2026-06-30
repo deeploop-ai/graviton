@@ -31,6 +31,7 @@ Client API 是终端用户直接使用的能力。Sprint 1 已补齐会话与 pr
 | 更新账号资料 | 修改 name | `PATCH /v1/account` | ✅ 完成（email/password 待扩展） |
 | 账号偏好 | 读写用户级 `prefs` JSON | `GET/PATCH /v1/account/prefs` | ✅ 完成 |
 | 匿名登录 | 创建无密码匿名用户 | `POST /v1/account/sessions/anonymous` | 待办 |
+| Email OTP | 发送邮箱验证码 + 验证登录 | `POST /v1/account/sessions/email-otp` | ✅ 完成 |
 | Magic URL | 创建确认链接 + 确认登录 | `POST/PUT /v1/account/sessions/magic-url` | 待办 |
 | 邮箱验证 | 发送验证邮件 + 确认 | `POST/PUT /v1/account/verification` | 待办 |
 | 密码找回 | 创建找回链接 + 重置密码 | `POST/PUT /v1/account/recovery` | 待办 |

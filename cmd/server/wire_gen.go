@@ -19,6 +19,7 @@ import (
 	"github.com/deeploop-ai/orionid/internal/infra/bun/bunrepo"
 	"github.com/deeploop-ai/orionid/internal/infra/clients"
 	"github.com/deeploop-ai/orionid/internal/infra/documentdb"
+	"github.com/deeploop-ai/orionid/internal/infra/messaging"
 	server2 "github.com/deeploop-ai/orionid/internal/infra/server"
 	"github.com/deeploop-ai/orionid/internal/infra/storage"
 	"github.com/lynx-go/lynx"
@@ -46,7 +47,12 @@ func wireBootstrap(app lynx.Lynx) (*boot.Bootstrap, func(), error) {
 	validator := auth.NewValidator(appConfig, apiKeyRepository, consoleAdminRepository, consoleAdminProjectRepository, documentDB)
 	repository := bunrepo.NewAuditRepository(database)
 	projectsRepository := bunrepo.NewProjectRepository(database)
-	account := client.NewAccount(appConfig, projectsRepository, documentDB)
+	userRoles := client.NewUserRoles(documentDB)
+	sessionService := auth.NewSessionService(appConfig, documentDB, userRoles)
+	redisClient := clients.NewRedis(dataClients)
+	redisOTPChallengeStore := auth.NewRedisOTPChallengeStore(redisClient)
+	mailerService := messaging.NewMailer(appConfig)
+	account := client.NewAccount(appConfig, projectsRepository, documentDB, sessionService, redisOTPChallengeStore, mailerService)
 	accountService := clientgrpc.NewAccountService(account)
 	databases := client.NewDatabases(projectsRepository, documentDB)
 	databasesService := clientgrpc.NewDatabasesService(databases)

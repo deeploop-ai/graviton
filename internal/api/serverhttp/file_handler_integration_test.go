@@ -178,7 +178,7 @@ func TestFileHandler_UserJWTProjectScope(t *testing.T) {
 	store := testutil.NewMemObjectStore()
 	projectRepo := bunrepo.NewProjectRepository(db)
 	storageUC := appstorage.NewStorage(cfg, projectRepo, docDB, store)
-	account := client.NewAccount(cfg, projectRepo, docDB)
+	account := client.NewTestAccount(cfg, projectRepo, docDB)
 
 	_, tokens, _, err := account.SignUp(ctx, client.SignUpCommand{
 		ProjectID: projectA,

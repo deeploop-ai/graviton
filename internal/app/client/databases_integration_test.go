@@ -31,7 +31,7 @@ func TestClientDatabases_DocumentCRUD(t *testing.T) {
 	require.NoError(t, docDB.EnsureSystemCollections(ctx, projectID, internalID))
 
 	projectRepo := bunrepo.NewProjectRepository(db)
-	account := NewAccount(testConfig(), projectRepo, docDB)
+	account := NewTestAccount(testConfig(), projectRepo, docDB)
 	user, _, _, err := account.SignUp(ctx, SignUpCommand{
 		ProjectID: projectID,
 		Email:     "client-docs@orionid.local",

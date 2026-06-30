@@ -31,7 +31,7 @@ func TestAccount_SessionsUpdatePrefs(t *testing.T) {
 	docDB := documentdb.NewPostgresDocumentDB(db)
 	require.NoError(t, docDB.EnsureSystemCollections(ctx, projectID, internalID))
 
-	account := NewAccount(cfg, projectRepo, docDB)
+	account := NewTestAccount(cfg, projectRepo, docDB)
 	user, tokens, _, err := account.SignUp(ctx, SignUpCommand{
 		ProjectID: projectID,
 		Email:     "sessions@orionid.local",

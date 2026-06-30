@@ -148,6 +148,36 @@ func (s *AccountService) UpdatePrefs(ctx context.Context, req *clientv1.UpdatePr
 	return &clientv1.GetPrefsResponse{Prefs: data}, nil
 }
 
+func (s *AccountService) CreateEmailOTP(ctx context.Context, req *clientv1.CreateEmailOTPRequest) (*clientv1.ChallengeResponse, error) {
+	challenge, err := s.account.CreateEmailOTP(ctx, client.CreateEmailOTPCommand{
+		ProjectID: req.GetProjectId(),
+		Email:     req.GetEmail(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &clientv1.ChallengeResponse{
+		ChallengeId: challenge.ChallengeID,
+		ExpireAt:    challenge.ExpireAt.Unix(),
+	}, nil
+}
+
+func (s *AccountService) CreateEmailOTPSession(ctx context.Context, req *clientv1.CreateEmailOTPSessionRequest) (*clientv1.SignInResponse, error) {
+	user, tokens, _, err := s.account.CreateEmailOTPSession(ctx, client.CreateEmailOTPSessionCommand{
+		ProjectID:   req.GetProjectId(),
+		Email:       req.GetEmail(),
+		ChallengeID: req.GetChallengeId(),
+		OTP:         req.GetOtp(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &clientv1.SignInResponse{
+		Account: mapUser(user),
+		Tokens:  mapTokens(tokens),
+	}, nil
+}
+
 func mapUser(u *client.User) *clientv1.Account {
 	if u == nil {
 		return nil

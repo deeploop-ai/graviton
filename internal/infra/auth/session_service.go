@@ -1,0 +1,162 @@
+package auth
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
+	"github.com/deeploop-ai/orionid/internal/domain/databases"
+	"github.com/deeploop-ai/orionid/internal/pkg/config"
+	"github.com/deeploop-ai/orionid/internal/pkg/contexts"
+	"github.com/deeploop-ai/orionid/pkg/idgen"
+	"github.com/deeploop-ai/orionid/pkg/jwtparser"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+const defaultSessionTTL = 7 * 24 * time.Hour
+
+// SessionService implements domainauth.SessionService.
+type SessionService struct {
+	cfg          *config.AppConfig
+	docDB        databases.DocumentDB
+	sessionCodec *SessionCookieCodec
+	roles        domainauth.UserRoleResolver
+}
+
+func NewSessionService(
+	cfg *config.AppConfig,
+	docDB databases.DocumentDB,
+	roles domainauth.UserRoleResolver,
+) *SessionService {
+	return &SessionService{
+		cfg:          cfg,
+		docDB:        docDB,
+		sessionCodec: NewSessionCookieCodec(cfg.GetSecurity().GetJwt().GetSecret()),
+		roles:        roles,
+	}
+}
+
+func (s *SessionService) CreateSessionAndTokens(ctx context.Context, projectID, userID, email, provider string) (*domainauth.TokenBundle, string, error) {
+	if provider == "" {
+		provider = domainauth.ProviderEmail
+	}
+	client := contexts.ClientInfoFrom(ctx)
+
+	expireAt := time.Now().Add(defaultSessionTTL)
+	sessionID := idgen.UUID().String()
+	sessionSecret := idgen.UUID().String()
+	sessionDoc := databases.Document{
+		ID: sessionID,
+		Data: map[string]any{
+			"user_id":     userID,
+			"secret_hash": sessionSecret,
+			"provider":    provider,
+			"expire_at":   expireAt.Format(time.RFC3339Nano),
+			"user_agent":  client.UserAgent,
+			"ip":          client.IP,
+		},
+	}
+	sessionPerms := sessionPermissions(userID)
+	if _, err := s.docDB.CreateDocument(ctx, projectID, "default", "sessions", sessionDoc, sessionPerms, databases.SystemPrincipal); err != nil {
+		return nil, "", err
+	}
+	return s.IssueTokens(ctx, projectID, userID, email, sessionID)
+}
+
+func (s *SessionService) IssueTokens(ctx context.Context, projectID, userID, email, sessionID string) (*domainauth.TokenBundle, string, error) {
+	accessTTL := 15 * time.Minute
+	if d, err := time.ParseDuration(s.cfg.GetSecurity().GetJwt().GetAccessTtl()); err == nil {
+		accessTTL = d
+	}
+	refreshTTL := defaultSessionTTL
+	if d, err := time.ParseDuration(s.cfg.GetSecurity().GetJwt().GetRefreshTtl()); err == nil {
+		refreshTTL = d
+	}
+
+	now := time.Now()
+	baseRoles, err := s.roles.LoadUserRoles(ctx, projectID, userID)
+	if err != nil {
+		return nil, "", err
+	}
+	accessClaims := jwtparser.Claims{
+		TokenID:   idgen.UUID().String(),
+		UserID:    userID,
+		Username:  email,
+		ActorKind: "end_user",
+		ProjectID: projectID,
+		SessionID: sessionID,
+		TokenType: jwtparser.TokenTypeAccess,
+		Roles:     baseRoles,
+		ExpiresAt: now.Add(accessTTL).Unix(),
+		IssuedAt:  now.Unix(),
+	}
+	accessToken, err := jwtparser.Generate([]byte(s.cfg.GetSecurity().GetJwt().GetSecret()), accessClaims)
+	if err != nil {
+		return nil, "", err
+	}
+	refreshClaims := accessClaims
+	refreshClaims.TokenID = idgen.UUID().String()
+	refreshClaims.TokenType = jwtparser.TokenTypeRefresh
+	refreshClaims.ExpiresAt = now.Add(refreshTTL).Unix()
+	refreshToken, err := jwtparser.Generate([]byte(s.cfg.GetSecurity().GetJwt().GetSecret()), refreshClaims)
+	if err != nil {
+		return nil, "", err
+	}
+
+	cookie := s.sessionCodec.Sign(projectID, sessionID)
+	return &domainauth.TokenBundle{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		ExpiresAt:    accessClaims.ExpiresAt,
+	}, cookie, nil
+}
+
+func (s *SessionService) EnsureActiveSession(ctx context.Context, projectID, sessionID, userID string) error {
+	sessionDoc, err := s.docDB.GetDocument(ctx, projectID, "default", "sessions", sessionID, databases.SystemPrincipal)
+	if err != nil {
+		return status.Error(codes.Unauthenticated, "session lookup failed")
+	}
+	if sessionDoc == nil {
+		return status.Error(codes.Unauthenticated, "session not found or revoked")
+	}
+	if uid, _ := sessionDoc.Data["user_id"].(string); uid != userID {
+		return status.Error(codes.Unauthenticated, "invalid session")
+	}
+	if expireAtRaw, ok := sessionDoc.Data["expire_at"]; ok {
+		if expireAt, err := parseSessionTime(expireAtRaw); err == nil && expireAt.Before(time.Now()) {
+			return status.Error(codes.Unauthenticated, "session expired")
+		}
+	}
+	return nil
+}
+
+func sessionPermissions(userID string) []databases.Permission {
+	return []databases.Permission{
+		{Type: "read", Role: fmt.Sprintf("user:%s", userID)},
+		{Type: "read", Role: "keys"},
+		{Type: "read", Role: "admin"},
+		{Type: "update", Role: fmt.Sprintf("user:%s", userID)},
+		{Type: "update", Role: "keys"},
+		{Type: "update", Role: "admin"},
+		{Type: "delete", Role: fmt.Sprintf("user:%s", userID)},
+		{Type: "delete", Role: "keys"},
+		{Type: "delete", Role: "admin"},
+	}
+}
+
+func parseSessionTime(v any) (time.Time, error) {
+	return ParseSessionTime(v)
+}
+
+// ParseSessionTime decodes session expire_at values from document storage.
+func ParseSessionTime(v any) (time.Time, error) {
+	switch t := v.(type) {
+	case time.Time:
+		return t, nil
+	case string:
+		return time.Parse(time.RFC3339Nano, t)
+	}
+	return time.Time{}, fmt.Errorf("unsupported time type")
+}

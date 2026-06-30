@@ -1,0 +1,11 @@
+package messaging
+
+import (
+	domainmessaging "github.com/deeploop-ai/orionid/internal/domain/messaging"
+	"github.com/google/wire"
+)
+
+var ProviderSet = wire.NewSet(
+	NewMailer,
+	wire.Bind(new(domainmessaging.Mailer), new(*MailerService)),
+)

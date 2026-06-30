@@ -11,6 +11,7 @@ message AppConfig {
   Storage storage = 4;
   Functions functions = 5;
   Telemetry telemetry = 6;
+  Messaging messaging = 7;
 }
 
 message Server {
@@ -105,4 +106,18 @@ message Telemetry {
   bool enabled = 1;
   string otlp_endpoint = 2;
   string service_name = 3;
+}
+
+message Messaging {
+  message SMTP {
+    string host = 1;
+    int32 port = 2;
+    string username = 3;
+    string password = 4;
+    string from = 5;
+    bool use_tls = 6;
+  }
+  SMTP smtp = 1;
+  // When true and SMTP host is empty, OTP codes are written to the application log (development only).
+  bool dev_log_otp = 2;
 }

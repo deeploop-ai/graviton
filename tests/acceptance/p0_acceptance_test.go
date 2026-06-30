@@ -151,7 +151,7 @@ func TestP0_Section8_AccessPermission(t *testing.T) {
 	require.NoError(t, err)
 
 	projectRepo := bunrepo.NewProjectRepository(db)
-	account := client.NewAccount(cfg, projectRepo, docDB)
+	account := client.NewTestAccount(cfg, projectRepo, docDB)
 	_, tokens, _, err := account.SignUp(ctx, client.SignUpCommand{
 		ProjectID: projectID,
 		Email:     "access-perm@orionid.local",
@@ -162,7 +162,7 @@ func TestP0_Section8_AccessPermission(t *testing.T) {
 
 	userMD := metadata.Pairs("authorization", "Bearer "+tokens.AccessToken)
 
-	// ยง8.1 Me requires users role โ€” end-user token passes auth interceptor.
+	// ยง8.1 Me requires users role โÿÿ end-user token passes auth interceptor.
 	err = env.InvokeUnary(ctx, testutil.MethodAccountMe, userMD)
 	require.NoError(t, err)
 
@@ -214,7 +214,7 @@ func TestP0_Section9_DynamicDocuments(t *testing.T) {
 
 	cfg := &config.AppConfig{}
 	projectRepo := bunrepo.NewProjectRepository(db)
-	account := client.NewAccount(cfg, projectRepo, docDB)
+	account := client.NewTestAccount(cfg, projectRepo, docDB)
 	usersUC := appserver.NewUsers(projectRepo, docDB)
 
 	const email = "dsl-query@orionid.local"

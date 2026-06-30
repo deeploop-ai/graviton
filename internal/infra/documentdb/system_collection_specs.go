@@ -74,6 +74,34 @@ func systemCollectionSpecs(projectID string) []systemCollectionSpec {
 			},
 		},
 		{
+			id:   "identities",
+			name: "identities",
+			attrs: []databases.Attribute{
+				{ID: "identities_user_id", Key: "user_id", Type: "string", Size: 64, Required: true},
+				{ID: "identities_provider", Key: "provider", Type: "string", Size: 64, Required: true},
+				{ID: "identities_provider_uid", Key: "provider_uid", Type: "string", Size: 256, Required: true},
+				{ID: "identities_provider_email", Key: "provider_email", Type: "email", Size: 320},
+				{ID: "identities_provider_data", Key: "provider_data", Type: "json"},
+				{ID: "identities_expire_at", Key: "expire_at", Type: "datetime"},
+			},
+			indexes: []databases.Index{
+				{ID: "identities_user_id", Type: "key", Attributes: []string{"user_id"}},
+				{ID: "identities_provider_uid_unique", Type: "unique", Attributes: []string{"provider", "provider_uid"}},
+			},
+			permissions: []databases.Permission{
+				{Type: "create", Role: "keys"},
+				{Type: "create", Role: "admin"},
+				{Type: "read", Role: "user:{id}"},
+				{Type: "read", Role: "keys"},
+				{Type: "read", Role: "admin"},
+				{Type: "update", Role: "keys"},
+				{Type: "update", Role: "admin"},
+				{Type: "delete", Role: "user:{id}"},
+				{Type: "delete", Role: "keys"},
+				{Type: "delete", Role: "admin"},
+			},
+		},
+		{
 			id:   "buckets",
 			name: "buckets",
 			attrs: []databases.Attribute{

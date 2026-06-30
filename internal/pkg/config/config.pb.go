@@ -29,6 +29,7 @@ type AppConfig struct {
 	Storage       *Storage               `protobuf:"bytes,4,opt,name=storage,proto3" json:"storage,omitempty"`
 	Functions     *Functions             `protobuf:"bytes,5,opt,name=functions,proto3" json:"functions,omitempty"`
 	Telemetry     *Telemetry             `protobuf:"bytes,6,opt,name=telemetry,proto3" json:"telemetry,omitempty"`
+	Messaging     *Messaging             `protobuf:"bytes,7,opt,name=messaging,proto3" json:"messaging,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -101,6 +102,13 @@ func (x *AppConfig) GetFunctions() *Functions {
 func (x *AppConfig) GetTelemetry() *Telemetry {
 	if x != nil {
 		return x.Telemetry
+	}
+	return nil
+}
+
+func (x *AppConfig) GetMessaging() *Messaging {
+	if x != nil {
+		return x.Messaging
 	}
 	return nil
 }
@@ -673,6 +681,59 @@ func (x *Telemetry) GetServiceName() string {
 	return ""
 }
 
+type Messaging struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Smtp  *Messaging_SMTP        `protobuf:"bytes,1,opt,name=smtp,proto3" json:"smtp,omitempty"`
+	// When true and SMTP host is empty, OTP codes are written to the application log (development only).
+	DevLogOtp     bool `protobuf:"varint,2,opt,name=dev_log_otp,json=devLogOtp,proto3" json:"dev_log_otp,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Messaging) Reset() {
+	*x = Messaging{}
+	mi := &file_config_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Messaging) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Messaging) ProtoMessage() {}
+
+func (x *Messaging) ProtoReflect() protoreflect.Message {
+	mi := &file_config_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Messaging.ProtoReflect.Descriptor instead.
+func (*Messaging) Descriptor() ([]byte, []int) {
+	return file_config_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *Messaging) GetSmtp() *Messaging_SMTP {
+	if x != nil {
+		return x.Smtp
+	}
+	return nil
+}
+
+func (x *Messaging) GetDevLogOtp() bool {
+	if x != nil {
+		return x.DevLogOtp
+	}
+	return false
+}
+
 type Http_Cors struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	AllowOrigins     []string               `protobuf:"bytes,1,rep,name=allow_origins,json=allowOrigins,proto3" json:"allow_origins,omitempty"`
@@ -687,7 +748,7 @@ type Http_Cors struct {
 
 func (x *Http_Cors) Reset() {
 	*x = Http_Cors{}
-	mi := &file_config_proto_msgTypes[11]
+	mi := &file_config_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -699,7 +760,7 @@ func (x *Http_Cors) String() string {
 func (*Http_Cors) ProtoMessage() {}
 
 func (x *Http_Cors) ProtoReflect() protoreflect.Message {
-	mi := &file_config_proto_msgTypes[11]
+	mi := &file_config_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -768,7 +829,7 @@ type Security_Jwt struct {
 
 func (x *Security_Jwt) Reset() {
 	*x = Security_Jwt{}
-	mi := &file_config_proto_msgTypes[12]
+	mi := &file_config_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -780,7 +841,7 @@ func (x *Security_Jwt) String() string {
 func (*Security_Jwt) ProtoMessage() {}
 
 func (x *Security_Jwt) ProtoReflect() protoreflect.Message {
-	mi := &file_config_proto_msgTypes[12]
+	mi := &file_config_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -826,7 +887,7 @@ type Security_ApiKey struct {
 
 func (x *Security_ApiKey) Reset() {
 	*x = Security_ApiKey{}
-	mi := &file_config_proto_msgTypes[13]
+	mi := &file_config_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -838,7 +899,7 @@ func (x *Security_ApiKey) String() string {
 func (*Security_ApiKey) ProtoMessage() {}
 
 func (x *Security_ApiKey) ProtoReflect() protoreflect.Message {
-	mi := &file_config_proto_msgTypes[13]
+	mi := &file_config_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -873,7 +934,7 @@ type Database_Pool struct {
 
 func (x *Database_Pool) Reset() {
 	*x = Database_Pool{}
-	mi := &file_config_proto_msgTypes[14]
+	mi := &file_config_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -885,7 +946,7 @@ func (x *Database_Pool) String() string {
 func (*Database_Pool) ProtoMessage() {}
 
 func (x *Database_Pool) ProtoReflect() protoreflect.Message {
-	mi := &file_config_proto_msgTypes[14]
+	mi := &file_config_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -943,7 +1004,7 @@ type Storage_S3 struct {
 
 func (x *Storage_S3) Reset() {
 	*x = Storage_S3{}
-	mi := &file_config_proto_msgTypes[15]
+	mi := &file_config_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -955,7 +1016,7 @@ func (x *Storage_S3) String() string {
 func (*Storage_S3) ProtoMessage() {}
 
 func (x *Storage_S3) ProtoReflect() protoreflect.Message {
-	mi := &file_config_proto_msgTypes[15]
+	mi := &file_config_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1022,7 +1083,7 @@ type Storage_Local struct {
 
 func (x *Storage_Local) Reset() {
 	*x = Storage_Local{}
-	mi := &file_config_proto_msgTypes[16]
+	mi := &file_config_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1034,7 +1095,7 @@ func (x *Storage_Local) String() string {
 func (*Storage_Local) ProtoMessage() {}
 
 func (x *Storage_Local) ProtoReflect() protoreflect.Message {
-	mi := &file_config_proto_msgTypes[16]
+	mi := &file_config_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1068,7 +1129,7 @@ type Functions_Docker struct {
 
 func (x *Functions_Docker) Reset() {
 	*x = Functions_Docker{}
-	mi := &file_config_proto_msgTypes[17]
+	mi := &file_config_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1080,7 +1141,7 @@ func (x *Functions_Docker) String() string {
 func (*Functions_Docker) ProtoMessage() {}
 
 func (x *Functions_Docker) ProtoReflect() protoreflect.Message {
-	mi := &file_config_proto_msgTypes[17]
+	mi := &file_config_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1117,18 +1178,103 @@ func (x *Functions_Docker) GetRegistry() string {
 	return ""
 }
 
+type Messaging_SMTP struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Host          string                 `protobuf:"bytes,1,opt,name=host,proto3" json:"host,omitempty"`
+	Port          int32                  `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
+	Username      string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
+	Password      string                 `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
+	From          string                 `protobuf:"bytes,5,opt,name=from,proto3" json:"from,omitempty"`
+	UseTls        bool                   `protobuf:"varint,6,opt,name=use_tls,json=useTls,proto3" json:"use_tls,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Messaging_SMTP) Reset() {
+	*x = Messaging_SMTP{}
+	mi := &file_config_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Messaging_SMTP) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Messaging_SMTP) ProtoMessage() {}
+
+func (x *Messaging_SMTP) ProtoReflect() protoreflect.Message {
+	mi := &file_config_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Messaging_SMTP.ProtoReflect.Descriptor instead.
+func (*Messaging_SMTP) Descriptor() ([]byte, []int) {
+	return file_config_proto_rawDescGZIP(), []int{11, 0}
+}
+
+func (x *Messaging_SMTP) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *Messaging_SMTP) GetPort() int32 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
+func (x *Messaging_SMTP) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *Messaging_SMTP) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *Messaging_SMTP) GetFrom() string {
+	if x != nil {
+		return x.From
+	}
+	return ""
+}
+
+func (x *Messaging_SMTP) GetUseTls() bool {
+	if x != nil {
+		return x.UseTls
+	}
+	return false
+}
+
 var File_config_proto protoreflect.FileDescriptor
 
 const file_config_proto_rawDesc = "" +
 	"\n" +
-	"\fconfig.proto\x12\x12orionid.api.config\"\xd8\x02\n" +
+	"\fconfig.proto\x12\x12orionid.api.config\"\x95\x03\n" +
 	"\tAppConfig\x122\n" +
 	"\x06server\x18\x01 \x01(\v2\x1a.orionid.api.config.ServerR\x06server\x128\n" +
 	"\bsecurity\x18\x02 \x01(\v2\x1c.orionid.api.config.SecurityR\bsecurity\x12,\n" +
 	"\x04data\x18\x03 \x01(\v2\x18.orionid.api.config.DataR\x04data\x125\n" +
 	"\astorage\x18\x04 \x01(\v2\x1b.orionid.api.config.StorageR\astorage\x12;\n" +
 	"\tfunctions\x18\x05 \x01(\v2\x1d.orionid.api.config.FunctionsR\tfunctions\x12;\n" +
-	"\ttelemetry\x18\x06 \x01(\v2\x1d.orionid.api.config.TelemetryR\ttelemetry\"\x98\x01\n" +
+	"\ttelemetry\x18\x06 \x01(\v2\x1d.orionid.api.config.TelemetryR\ttelemetry\x12;\n" +
+	"\tmessaging\x18\a \x01(\v2\x1d.orionid.api.config.MessagingR\tmessaging\"\x98\x01\n" +
 	"\x06Server\x12,\n" +
 	"\x04grpc\x18\x01 \x01(\v2\x18.orionid.api.config.GRPCR\x04grpc\x12,\n" +
 	"\x04http\x18\x02 \x01(\v2\x18.orionid.api.config.HttpR\x04http\x122\n" +
@@ -1197,7 +1343,17 @@ const file_config_proto_rawDesc = "" +
 	"\tTelemetry\x12\x18\n" +
 	"\aenabled\x18\x01 \x01(\bR\aenabled\x12#\n" +
 	"\rotlp_endpoint\x18\x02 \x01(\tR\fotlpEndpoint\x12!\n" +
-	"\fservice_name\x18\x03 \x01(\tR\vserviceNameB4Z2github.com/deeploop-ai/orionid/internal/pkg/configb\x06proto3"
+	"\fservice_name\x18\x03 \x01(\tR\vserviceName\"\xf9\x01\n" +
+	"\tMessaging\x126\n" +
+	"\x04smtp\x18\x01 \x01(\v2\".orionid.api.config.Messaging.SMTPR\x04smtp\x12\x1e\n" +
+	"\vdev_log_otp\x18\x02 \x01(\bR\tdevLogOtp\x1a\x93\x01\n" +
+	"\x04SMTP\x12\x12\n" +
+	"\x04host\x18\x01 \x01(\tR\x04host\x12\x12\n" +
+	"\x04port\x18\x02 \x01(\x05R\x04port\x12\x1a\n" +
+	"\busername\x18\x03 \x01(\tR\busername\x12\x1a\n" +
+	"\bpassword\x18\x04 \x01(\tR\bpassword\x12\x12\n" +
+	"\x04from\x18\x05 \x01(\tR\x04from\x12\x17\n" +
+	"\ause_tls\x18\x06 \x01(\bR\x06useTlsB4Z2github.com/deeploop-ai/orionid/internal/pkg/configb\x06proto3"
 
 var (
 	file_config_proto_rawDescOnce sync.Once
@@ -1211,7 +1367,7 @@ func file_config_proto_rawDescGZIP() []byte {
 	return file_config_proto_rawDescData
 }
 
-var file_config_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_config_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_config_proto_goTypes = []any{
 	(*AppConfig)(nil),        // 0: orionid.api.config.AppConfig
 	(*Server)(nil),           // 1: orionid.api.config.Server
@@ -1224,13 +1380,15 @@ var file_config_proto_goTypes = []any{
 	(*Storage)(nil),          // 8: orionid.api.config.Storage
 	(*Functions)(nil),        // 9: orionid.api.config.Functions
 	(*Telemetry)(nil),        // 10: orionid.api.config.Telemetry
-	(*Http_Cors)(nil),        // 11: orionid.api.config.Http.Cors
-	(*Security_Jwt)(nil),     // 12: orionid.api.config.Security.Jwt
-	(*Security_ApiKey)(nil),  // 13: orionid.api.config.Security.ApiKey
-	(*Database_Pool)(nil),    // 14: orionid.api.config.Database.Pool
-	(*Storage_S3)(nil),       // 15: orionid.api.config.Storage.S3
-	(*Storage_Local)(nil),    // 16: orionid.api.config.Storage.Local
-	(*Functions_Docker)(nil), // 17: orionid.api.config.Functions.Docker
+	(*Messaging)(nil),        // 11: orionid.api.config.Messaging
+	(*Http_Cors)(nil),        // 12: orionid.api.config.Http.Cors
+	(*Security_Jwt)(nil),     // 13: orionid.api.config.Security.Jwt
+	(*Security_ApiKey)(nil),  // 14: orionid.api.config.Security.ApiKey
+	(*Database_Pool)(nil),    // 15: orionid.api.config.Database.Pool
+	(*Storage_S3)(nil),       // 16: orionid.api.config.Storage.S3
+	(*Storage_Local)(nil),    // 17: orionid.api.config.Storage.Local
+	(*Functions_Docker)(nil), // 18: orionid.api.config.Functions.Docker
+	(*Messaging_SMTP)(nil),   // 19: orionid.api.config.Messaging.SMTP
 }
 var file_config_proto_depIdxs = []int32{
 	1,  // 0: orionid.api.config.AppConfig.server:type_name -> orionid.api.config.Server
@@ -1239,23 +1397,25 @@ var file_config_proto_depIdxs = []int32{
 	8,  // 3: orionid.api.config.AppConfig.storage:type_name -> orionid.api.config.Storage
 	9,  // 4: orionid.api.config.AppConfig.functions:type_name -> orionid.api.config.Functions
 	10, // 5: orionid.api.config.AppConfig.telemetry:type_name -> orionid.api.config.Telemetry
-	2,  // 6: orionid.api.config.Server.grpc:type_name -> orionid.api.config.GRPC
-	3,  // 7: orionid.api.config.Server.http:type_name -> orionid.api.config.Http
-	3,  // 8: orionid.api.config.Server.metrics:type_name -> orionid.api.config.Http
-	11, // 9: orionid.api.config.Http.cors:type_name -> orionid.api.config.Http.Cors
-	12, // 10: orionid.api.config.Security.jwt:type_name -> orionid.api.config.Security.Jwt
-	13, // 11: orionid.api.config.Security.api_key:type_name -> orionid.api.config.Security.ApiKey
-	14, // 12: orionid.api.config.Database.pool:type_name -> orionid.api.config.Database.Pool
-	5,  // 13: orionid.api.config.Data.database:type_name -> orionid.api.config.Database
-	6,  // 14: orionid.api.config.Data.redis:type_name -> orionid.api.config.Redis
-	15, // 15: orionid.api.config.Storage.s3:type_name -> orionid.api.config.Storage.S3
-	16, // 16: orionid.api.config.Storage.local:type_name -> orionid.api.config.Storage.Local
-	17, // 17: orionid.api.config.Functions.docker:type_name -> orionid.api.config.Functions.Docker
-	18, // [18:18] is the sub-list for method output_type
-	18, // [18:18] is the sub-list for method input_type
-	18, // [18:18] is the sub-list for extension type_name
-	18, // [18:18] is the sub-list for extension extendee
-	0,  // [0:18] is the sub-list for field type_name
+	11, // 6: orionid.api.config.AppConfig.messaging:type_name -> orionid.api.config.Messaging
+	2,  // 7: orionid.api.config.Server.grpc:type_name -> orionid.api.config.GRPC
+	3,  // 8: orionid.api.config.Server.http:type_name -> orionid.api.config.Http
+	3,  // 9: orionid.api.config.Server.metrics:type_name -> orionid.api.config.Http
+	12, // 10: orionid.api.config.Http.cors:type_name -> orionid.api.config.Http.Cors
+	13, // 11: orionid.api.config.Security.jwt:type_name -> orionid.api.config.Security.Jwt
+	14, // 12: orionid.api.config.Security.api_key:type_name -> orionid.api.config.Security.ApiKey
+	15, // 13: orionid.api.config.Database.pool:type_name -> orionid.api.config.Database.Pool
+	5,  // 14: orionid.api.config.Data.database:type_name -> orionid.api.config.Database
+	6,  // 15: orionid.api.config.Data.redis:type_name -> orionid.api.config.Redis
+	16, // 16: orionid.api.config.Storage.s3:type_name -> orionid.api.config.Storage.S3
+	17, // 17: orionid.api.config.Storage.local:type_name -> orionid.api.config.Storage.Local
+	18, // 18: orionid.api.config.Functions.docker:type_name -> orionid.api.config.Functions.Docker
+	19, // 19: orionid.api.config.Messaging.smtp:type_name -> orionid.api.config.Messaging.SMTP
+	20, // [20:20] is the sub-list for method output_type
+	20, // [20:20] is the sub-list for method input_type
+	20, // [20:20] is the sub-list for extension type_name
+	20, // [20:20] is the sub-list for extension extendee
+	0,  // [0:20] is the sub-list for field type_name
 }
 
 func init() { file_config_proto_init() }
@@ -1269,7 +1429,7 @@ func file_config_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_config_proto_rawDesc), len(file_config_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

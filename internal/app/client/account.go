@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"time"
 
+	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
 	"github.com/deeploop-ai/orionid/internal/domain/databases"
+	"github.com/deeploop-ai/orionid/internal/domain/messaging"
 	"github.com/deeploop-ai/orionid/internal/domain/projects"
 	"github.com/deeploop-ai/orionid/internal/domain/shared"
-	"github.com/deeploop-ai/orionid/internal/domain/teams"
 	"github.com/deeploop-ai/orionid/internal/domain/users"
 	"github.com/deeploop-ai/orionid/internal/infra/auth"
 	"github.com/deeploop-ai/orionid/internal/infra/documentdb"
@@ -24,22 +25,29 @@ import (
 )
 
 type Account struct {
-	cfg          *config.AppConfig
-	projectRepo  projects.Repository
-	docDB        databases.DocumentDB
-	sessionCodec *auth.SessionCookieCodec
+	cfg         *config.AppConfig
+	projectRepo projects.Repository
+	docDB       databases.DocumentDB
+	sessions    domainauth.SessionService
+	otp         domainauth.OTPChallengeStore
+	mailer      messaging.Mailer
 }
 
 func NewAccount(
 	cfg *config.AppConfig,
 	projectRepo projects.Repository,
 	docDB databases.DocumentDB,
+	sessions domainauth.SessionService,
+	otp domainauth.OTPChallengeStore,
+	mailer messaging.Mailer,
 ) *Account {
 	return &Account{
-		cfg:          cfg,
-		projectRepo:  projectRepo,
-		docDB:        docDB,
-		sessionCodec: auth.NewSessionCookieCodec(cfg.GetSecurity().GetJwt().GetSecret()),
+		cfg:         cfg,
+		projectRepo: projectRepo,
+		docDB:       docDB,
+		sessions:    sessions,
+		otp:         otp,
+		mailer:      mailer,
 	}
 }
 
@@ -71,11 +79,7 @@ type User struct {
 	UpdatedAt     time.Time
 }
 
-type TokenBundle struct {
-	AccessToken  string
-	RefreshToken string
-	ExpiresAt    int64
-}
+type TokenBundle = domainauth.TokenBundle
 
 type Session struct {
 	ID        string
@@ -165,7 +169,11 @@ func (a *Account) SignUp(ctx context.Context, cmd SignUpCommand) (*User, *TokenB
 	}
 
 	user := mapUserDoc(&userDoc)
-	return a.createSessionAndTokens(ctx, project.ID, user.ID, user.Email)
+	return a.finishSignIn(ctx, project.ID, user)
+}
+
+func (a *Account) finishSignIn(ctx context.Context, projectID string, user *User) (*User, *TokenBundle, string, error) {
+	return a.finishSignInWithProvider(ctx, projectID, user, domainauth.ProviderEmail)
 }
 
 func (a *Account) SignIn(ctx context.Context, cmd SignInCommand) (*User, *TokenBundle, string, error) {
@@ -209,7 +217,7 @@ func (a *Account) SignIn(ctx context.Context, cmd SignInCommand) (*User, *TokenB
 	if !users.CanAuthenticate(user.Status) {
 		return nil, nil, "", status.Error(codes.Unauthenticated, "user account is not active")
 	}
-	return a.createSessionAndTokens(ctx, project.ID, user.ID, user.Email)
+	return a.finishSignIn(ctx, project.ID, user)
 }
 
 func (a *Account) Me(ctx context.Context) (*User, error) {
@@ -253,96 +261,13 @@ func (a *Account) RefreshToken(ctx context.Context, cmd RefreshTokenCommand) (*T
 	if claims.SessionID == "" || claims.UserID == "" {
 		return nil, "", status.Error(codes.Unauthenticated, "invalid refresh token")
 	}
-	if err := a.ensureActiveSession(ctx, projectID, claims.SessionID, claims.UserID); err != nil {
+	if err := a.sessions.EnsureActiveSession(ctx, projectID, claims.SessionID, claims.UserID); err != nil {
 		return nil, "", err
 	}
 	if err := a.ensureUserCanAuthenticate(ctx, projectID, claims.UserID); err != nil {
 		return nil, "", err
 	}
-	return a.issueTokens(ctx, projectID, claims.UserID, claims.Username, claims.SessionID)
-}
-
-func (a *Account) loadTeamRoles(ctx context.Context, projectID, userID string) ([]string, error) {
-	if userID == "" {
-		return nil, nil
-	}
-	list, err := a.docDB.ListDocuments(ctx, projectID, "default", "memberships", databases.Query{
-		Queries: []string{
-			query.BuildEqual("user_id", userID),
-			query.BuildEqual("status", teams.StatusAccepted),
-		},
-	}, databases.SystemPrincipal)
-	if err != nil {
-		return nil, err
-	}
-	out := make([]string, 0, len(list.Documents)*3)
-	for _, doc := range list.Documents {
-		teamID, _ := doc.Data["team_id"].(string)
-		if teamID == "" {
-			continue
-		}
-		out = append(out, fmt.Sprintf("team:%s", teamID), fmt.Sprintf("member:%s", doc.ID))
-		for _, role := range membershipRoles(doc.Data["roles"]) {
-			out = append(out, fmt.Sprintf("team:%s/%s", teamID, role))
-		}
-	}
-	return out, nil
-}
-
-func membershipRoles(raw any) []string {
-	switch v := raw.(type) {
-	case []any:
-		out := make([]string, 0, len(v))
-		for _, item := range v {
-			if s, ok := item.(string); ok && s != "" {
-				out = append(out, s)
-			}
-		}
-		return out
-	case []string:
-		return v
-	default:
-		return nil
-	}
-}
-
-func (a *Account) loadUserRoles(ctx context.Context, projectID, userID string) ([]string, error) {
-	baseRoles := []string{"users", fmt.Sprintf("user:%s", userID)}
-	doc, err := a.docDB.GetDocument(ctx, projectID, "default", "users", userID, databases.SystemPrincipal)
-	if err != nil {
-		return baseRoles, err
-	}
-	if doc == nil {
-		return baseRoles, nil
-	}
-	if emailVerified, _ := doc.Data["email_verified"].(bool); emailVerified {
-		baseRoles = append(baseRoles, fmt.Sprintf("user:%s/verified", userID))
-	}
-	for _, label := range userLabels(doc.Data["labels"]) {
-		baseRoles = append(baseRoles, "label:"+label)
-	}
-	teamRoles, err := a.loadTeamRoles(ctx, projectID, userID)
-	if err != nil {
-		return baseRoles, err
-	}
-	return append(baseRoles, teamRoles...), nil
-}
-
-func userLabels(raw any) []string {
-	switch v := raw.(type) {
-	case []any:
-		out := make([]string, 0, len(v))
-		for _, item := range v {
-			if s, ok := item.(string); ok && s != "" {
-				out = append(out, s)
-			}
-		}
-		return out
-	case []string:
-		return v
-	default:
-		return nil
-	}
+	return a.sessions.IssueTokens(ctx, projectID, claims.UserID, claims.Username, claims.SessionID)
 }
 
 func (a *Account) UpdateAccount(ctx context.Context, cmd UpdateAccountCommand) (*User, error) {
@@ -522,92 +447,6 @@ func (a *Account) requireUser(ctx context.Context) (*shared.Principal, error) {
 	return p, nil
 }
 
-func (a *Account) createSessionAndTokens(ctx context.Context, projectID, userID, email string) (*User, *TokenBundle, string, error) {
-	expireAt := time.Now().Add(7 * 24 * time.Hour)
-	sessionID := idgen.UUID().String()
-	sessionSecret := idgen.UUID().String()
-	sessionDoc := databases.Document{
-		ID: sessionID,
-		Data: map[string]any{
-			"user_id":     userID,
-			"secret_hash": sessionSecret,
-			"provider":    "email",
-			"expire_at":   expireAt.Format(time.RFC3339Nano),
-			"user_agent":  "",
-			"ip":          "",
-		},
-	}
-	sessionPerms := []databases.Permission{
-		{Type: "read", Role: fmt.Sprintf("user:%s", userID)},
-		{Type: "read", Role: "keys"},
-		{Type: "read", Role: "admin"},
-		{Type: "update", Role: fmt.Sprintf("user:%s", userID)},
-		{Type: "update", Role: "keys"},
-		{Type: "update", Role: "admin"},
-		{Type: "delete", Role: fmt.Sprintf("user:%s", userID)},
-		{Type: "delete", Role: "keys"},
-		{Type: "delete", Role: "admin"},
-	}
-	if _, err := a.docDB.CreateDocument(ctx, projectID, "default", "sessions", sessionDoc, sessionPerms, databases.SystemPrincipal); err != nil {
-		return nil, nil, "", err
-	}
-
-	tokens, cookie, err := a.issueTokens(ctx, projectID, userID, email, sessionID)
-	if err != nil {
-		return nil, nil, "", err
-	}
-	user, _ := a.docDB.GetDocument(ctx, projectID, "default", "users", userID, databases.SystemPrincipal)
-	return mapUserDoc(user), tokens, cookie, nil
-}
-
-func (a *Account) issueTokens(ctx context.Context, projectID, userID, email, sessionID string) (*TokenBundle, string, error) {
-	accessTTL := 15 * time.Minute
-	if d, err := time.ParseDuration(a.cfg.GetSecurity().GetJwt().GetAccessTtl()); err == nil {
-		accessTTL = d
-	}
-	refreshTTL := 7 * 24 * time.Hour
-	if d, err := time.ParseDuration(a.cfg.GetSecurity().GetJwt().GetRefreshTtl()); err == nil {
-		refreshTTL = d
-	}
-
-	now := time.Now()
-	baseRoles, err := a.loadUserRoles(ctx, projectID, userID)
-	if err != nil {
-		return nil, "", err
-	}
-	accessClaims := jwtparser.Claims{
-		TokenID:   idgen.UUID().String(),
-		UserID:    userID,
-		Username:  email,
-		ActorKind: "end_user",
-		ProjectID: projectID,
-		SessionID: sessionID,
-		TokenType: jwtparser.TokenTypeAccess,
-		Roles:     baseRoles,
-		ExpiresAt: now.Add(accessTTL).Unix(),
-		IssuedAt:  now.Unix(),
-	}
-	accessToken, err := jwtparser.Generate([]byte(a.cfg.GetSecurity().GetJwt().GetSecret()), accessClaims)
-	if err != nil {
-		return nil, "", err
-	}
-	refreshClaims := accessClaims
-	refreshClaims.TokenID = idgen.UUID().String()
-	refreshClaims.TokenType = jwtparser.TokenTypeRefresh
-	refreshClaims.ExpiresAt = now.Add(refreshTTL).Unix()
-	refreshToken, err := jwtparser.Generate([]byte(a.cfg.GetSecurity().GetJwt().GetSecret()), refreshClaims)
-	if err != nil {
-		return nil, "", err
-	}
-
-	cookie := a.sessionCodec.Sign(projectID, sessionID)
-	return &TokenBundle{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-		ExpiresAt:    accessClaims.ExpiresAt,
-	}, cookie, nil
-}
-
 func (a *Account) ensureUserCanAuthenticate(ctx context.Context, projectID, userID string) error {
 	doc, err := a.docDB.GetDocument(ctx, projectID, "default", "users", userID, databases.SystemPrincipal)
 	if err != nil {
@@ -620,35 +459,6 @@ func (a *Account) ensureUserCanAuthenticate(ctx context.Context, projectID, user
 		return status.Error(codes.Unauthenticated, "user account is not active")
 	}
 	return nil
-}
-
-func (a *Account) ensureActiveSession(ctx context.Context, projectID, sessionID, userID string) error {
-	sessionDoc, err := a.docDB.GetDocument(ctx, projectID, "default", "sessions", sessionID, databases.SystemPrincipal)
-	if err != nil {
-		return status.Error(codes.Unauthenticated, "session lookup failed")
-	}
-	if sessionDoc == nil {
-		return status.Error(codes.Unauthenticated, "session not found or revoked")
-	}
-	if uid, _ := sessionDoc.Data["user_id"].(string); uid != userID {
-		return status.Error(codes.Unauthenticated, "invalid session")
-	}
-	if expireAtRaw, ok := sessionDoc.Data["expire_at"]; ok {
-		if expireAt, err := parseSessionTime(expireAtRaw); err == nil && expireAt.Before(time.Now()) {
-			return status.Error(codes.Unauthenticated, "session expired")
-		}
-	}
-	return nil
-}
-
-func parseSessionTime(v any) (time.Time, error) {
-	switch t := v.(type) {
-	case time.Time:
-		return t, nil
-	case string:
-		return time.Parse(time.RFC3339Nano, t)
-	}
-	return time.Time{}, fmt.Errorf("unsupported time type")
 }
 
 func mapSessionDoc(doc *databases.Document) Session {
@@ -664,7 +474,7 @@ func mapSessionDoc(doc *databases.Document) Session {
 		CreatedAt: doc.CreatedAt,
 	}
 	if expireAtRaw, ok := doc.Data["expire_at"]; ok {
-		if expireAt, err := parseSessionTime(expireAtRaw); err == nil {
+		if expireAt, err := auth.ParseSessionTime(expireAtRaw); err == nil {
 			s.ExpireAt = expireAt
 		}
 	}

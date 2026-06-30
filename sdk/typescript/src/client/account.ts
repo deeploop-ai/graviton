@@ -111,4 +111,36 @@ export class AccountService {
     );
     return res.prefs ?? {};
   }
+
+  async createEmailOTP(input: { email: string }): Promise<{ challenge_id: string; expire_at: number }> {
+    return this.http.request("POST", "/v1/account/sessions/email-otp", {
+      auth: "none",
+      body: {
+        project_id: this.http.getProjectId(),
+        email: input.email,
+      },
+    });
+  }
+
+  async createEmailOTPSession(input: {
+    email: string;
+    challenge_id: string;
+    otp: string;
+  }): Promise<{ account: Account; tokens: TokenBundle }> {
+    const res = await this.http.request<{ account: Account; tokens: TokenBundle }>(
+      "POST",
+      "/v1/account/sessions/email-otp/verify",
+      {
+        auth: "none",
+        body: {
+          project_id: this.http.getProjectId(),
+          email: input.email,
+          challenge_id: input.challenge_id,
+          otp: input.otp,
+        },
+      }
+    );
+    this.http.setAccessToken(res.tokens.access_token);
+    return res;
+  }
 }

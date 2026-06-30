@@ -58,3 +58,13 @@ telemetry:
   enabled: false
   otlp_endpoint: ""
   service_name: "orionid"
+
+messaging:
+  smtp:
+    host: ""                # env: ORIONID_MESSAGING_SMTP_HOST
+    port: 587
+    username: ""
+    password: ""            # env: ORIONID_MESSAGING_SMTP_PASSWORD
+    from: "noreply@orionid.local"
+    use_tls: true
+  dev_log_otp: true         # log OTP to stdout when SMTP host is empty (dev only)

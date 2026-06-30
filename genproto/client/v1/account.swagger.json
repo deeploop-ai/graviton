@@ -212,6 +212,70 @@
         ]
       }
     },
+    "/v1/account/sessions/email-otp": {
+      "post": {
+        "operationId": "AccountService_CreateEmailOTP",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ChallengeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateEmailOTPRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountService"
+        ]
+      }
+    },
+    "/v1/account/sessions/email-otp/verify": {
+      "post": {
+        "operationId": "AccountService_CreateEmailOTPSession",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/orionidclientv1SignInResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateEmailOTPSessionRequest"
+            }
+          }
+        ],
+        "tags": [
+          "AccountService"
+        ]
+      }
+    },
     "/v1/account/sessions/{sessionId}": {
       "delete": {
         "operationId": "AccountService_DeleteSession",
@@ -426,6 +490,46 @@
         "updatedAt": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "v1ChallengeResponse": {
+      "type": "object",
+      "properties": {
+        "challengeId": {
+          "type": "string"
+        },
+        "expireAt": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1CreateEmailOTPRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "v1CreateEmailOTPSessionRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "challengeId": {
+          "type": "string"
+        },
+        "otp": {
+          "type": "string"
         }
       }
     },
