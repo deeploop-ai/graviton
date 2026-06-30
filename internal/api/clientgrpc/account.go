@@ -178,6 +178,37 @@ func (s *AccountService) CreateEmailOTPSession(ctx context.Context, req *clientv
 	}, nil
 }
 
+func (s *AccountService) CreateOAuth2Session(ctx context.Context, req *clientv1.CreateOAuth2SessionRequest) (*clientv1.CreateOAuth2SessionResponse, error) {
+	redirectURL, err := s.account.CreateOAuth2Session(ctx, client.CreateOAuth2SessionCommand{
+		ProjectID: req.GetProjectId(),
+		Provider:  req.GetProvider(),
+		Success:   req.GetSuccess(),
+		Failure:   req.GetFailure(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &clientv1.CreateOAuth2SessionResponse{RedirectUrl: redirectURL}, nil
+}
+
+func (s *AccountService) CreateOAuth2TokenSession(ctx context.Context, req *clientv1.CreateOAuth2TokenSessionRequest) (*clientv1.SignInResponse, error) {
+	user, tokens, _, err := s.account.CreateOAuth2TokenSession(ctx, client.CreateOAuth2TokenSessionCommand{
+		ProjectID: req.GetProjectId(),
+		Provider:  req.GetProvider(),
+		Success:   req.GetSuccess(),
+		Failure:   req.GetFailure(),
+		Code:      req.GetCode(),
+		State:     req.GetState(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &clientv1.SignInResponse{
+		Account: mapUser(user),
+		Tokens:  mapTokens(tokens),
+	}, nil
+}
+
 func mapUser(u *client.User) *clientv1.Account {
 	if u == nil {
 		return nil

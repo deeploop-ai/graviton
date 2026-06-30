@@ -20,19 +20,21 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AccountService_SignUp_FullMethodName                = "/orionid.client.v1.AccountService/SignUp"
-	AccountService_SignIn_FullMethodName                = "/orionid.client.v1.AccountService/SignIn"
-	AccountService_SignOut_FullMethodName               = "/orionid.client.v1.AccountService/SignOut"
-	AccountService_RefreshToken_FullMethodName          = "/orionid.client.v1.AccountService/RefreshToken"
-	AccountService_Me_FullMethodName                    = "/orionid.client.v1.AccountService/Me"
-	AccountService_UpdateAccount_FullMethodName         = "/orionid.client.v1.AccountService/UpdateAccount"
-	AccountService_ListSessions_FullMethodName          = "/orionid.client.v1.AccountService/ListSessions"
-	AccountService_DeleteSession_FullMethodName         = "/orionid.client.v1.AccountService/DeleteSession"
-	AccountService_DeleteSessions_FullMethodName        = "/orionid.client.v1.AccountService/DeleteSessions"
-	AccountService_GetPrefs_FullMethodName              = "/orionid.client.v1.AccountService/GetPrefs"
-	AccountService_UpdatePrefs_FullMethodName           = "/orionid.client.v1.AccountService/UpdatePrefs"
-	AccountService_CreateEmailOTP_FullMethodName        = "/orionid.client.v1.AccountService/CreateEmailOTP"
-	AccountService_CreateEmailOTPSession_FullMethodName = "/orionid.client.v1.AccountService/CreateEmailOTPSession"
+	AccountService_SignUp_FullMethodName                   = "/orionid.client.v1.AccountService/SignUp"
+	AccountService_SignIn_FullMethodName                   = "/orionid.client.v1.AccountService/SignIn"
+	AccountService_SignOut_FullMethodName                  = "/orionid.client.v1.AccountService/SignOut"
+	AccountService_RefreshToken_FullMethodName             = "/orionid.client.v1.AccountService/RefreshToken"
+	AccountService_Me_FullMethodName                       = "/orionid.client.v1.AccountService/Me"
+	AccountService_UpdateAccount_FullMethodName            = "/orionid.client.v1.AccountService/UpdateAccount"
+	AccountService_ListSessions_FullMethodName             = "/orionid.client.v1.AccountService/ListSessions"
+	AccountService_DeleteSession_FullMethodName            = "/orionid.client.v1.AccountService/DeleteSession"
+	AccountService_DeleteSessions_FullMethodName           = "/orionid.client.v1.AccountService/DeleteSessions"
+	AccountService_GetPrefs_FullMethodName                 = "/orionid.client.v1.AccountService/GetPrefs"
+	AccountService_UpdatePrefs_FullMethodName              = "/orionid.client.v1.AccountService/UpdatePrefs"
+	AccountService_CreateEmailOTP_FullMethodName           = "/orionid.client.v1.AccountService/CreateEmailOTP"
+	AccountService_CreateEmailOTPSession_FullMethodName    = "/orionid.client.v1.AccountService/CreateEmailOTPSession"
+	AccountService_CreateOAuth2Session_FullMethodName      = "/orionid.client.v1.AccountService/CreateOAuth2Session"
+	AccountService_CreateOAuth2TokenSession_FullMethodName = "/orionid.client.v1.AccountService/CreateOAuth2TokenSession"
 )
 
 // AccountServiceClient is the client API for AccountService service.
@@ -52,6 +54,8 @@ type AccountServiceClient interface {
 	UpdatePrefs(ctx context.Context, in *UpdatePrefsRequest, opts ...grpc.CallOption) (*GetPrefsResponse, error)
 	CreateEmailOTP(ctx context.Context, in *CreateEmailOTPRequest, opts ...grpc.CallOption) (*ChallengeResponse, error)
 	CreateEmailOTPSession(ctx context.Context, in *CreateEmailOTPSessionRequest, opts ...grpc.CallOption) (*SignInResponse, error)
+	CreateOAuth2Session(ctx context.Context, in *CreateOAuth2SessionRequest, opts ...grpc.CallOption) (*CreateOAuth2SessionResponse, error)
+	CreateOAuth2TokenSession(ctx context.Context, in *CreateOAuth2TokenSessionRequest, opts ...grpc.CallOption) (*SignInResponse, error)
 }
 
 type accountServiceClient struct {
@@ -192,6 +196,26 @@ func (c *accountServiceClient) CreateEmailOTPSession(ctx context.Context, in *Cr
 	return out, nil
 }
 
+func (c *accountServiceClient) CreateOAuth2Session(ctx context.Context, in *CreateOAuth2SessionRequest, opts ...grpc.CallOption) (*CreateOAuth2SessionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateOAuth2SessionResponse)
+	err := c.cc.Invoke(ctx, AccountService_CreateOAuth2Session_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) CreateOAuth2TokenSession(ctx context.Context, in *CreateOAuth2TokenSessionRequest, opts ...grpc.CallOption) (*SignInResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SignInResponse)
+	err := c.cc.Invoke(ctx, AccountService_CreateOAuth2TokenSession_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AccountServiceServer is the server API for AccountService service.
 // All implementations must embed UnimplementedAccountServiceServer
 // for forward compatibility.
@@ -209,6 +233,8 @@ type AccountServiceServer interface {
 	UpdatePrefs(context.Context, *UpdatePrefsRequest) (*GetPrefsResponse, error)
 	CreateEmailOTP(context.Context, *CreateEmailOTPRequest) (*ChallengeResponse, error)
 	CreateEmailOTPSession(context.Context, *CreateEmailOTPSessionRequest) (*SignInResponse, error)
+	CreateOAuth2Session(context.Context, *CreateOAuth2SessionRequest) (*CreateOAuth2SessionResponse, error)
+	CreateOAuth2TokenSession(context.Context, *CreateOAuth2TokenSessionRequest) (*SignInResponse, error)
 	mustEmbedUnimplementedAccountServiceServer()
 }
 
@@ -257,6 +283,12 @@ func (UnimplementedAccountServiceServer) CreateEmailOTP(context.Context, *Create
 }
 func (UnimplementedAccountServiceServer) CreateEmailOTPSession(context.Context, *CreateEmailOTPSessionRequest) (*SignInResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateEmailOTPSession not implemented")
+}
+func (UnimplementedAccountServiceServer) CreateOAuth2Session(context.Context, *CreateOAuth2SessionRequest) (*CreateOAuth2SessionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateOAuth2Session not implemented")
+}
+func (UnimplementedAccountServiceServer) CreateOAuth2TokenSession(context.Context, *CreateOAuth2TokenSessionRequest) (*SignInResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateOAuth2TokenSession not implemented")
 }
 func (UnimplementedAccountServiceServer) mustEmbedUnimplementedAccountServiceServer() {}
 func (UnimplementedAccountServiceServer) testEmbeddedByValue()                        {}
@@ -513,6 +545,42 @@ func _AccountService_CreateEmailOTPSession_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AccountService_CreateOAuth2Session_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateOAuth2SessionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).CreateOAuth2Session(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_CreateOAuth2Session_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).CreateOAuth2Session(ctx, req.(*CreateOAuth2SessionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_CreateOAuth2TokenSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateOAuth2TokenSessionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).CreateOAuth2TokenSession(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_CreateOAuth2TokenSession_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).CreateOAuth2TokenSession(ctx, req.(*CreateOAuth2TokenSessionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AccountService_ServiceDesc is the grpc.ServiceDesc for AccountService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -571,6 +639,14 @@ var AccountService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateEmailOTPSession",
 			Handler:    _AccountService_CreateEmailOTPSession_Handler,
+		},
+		{
+			MethodName: "CreateOAuth2Session",
+			Handler:    _AccountService_CreateOAuth2Session_Handler,
+		},
+		{
+			MethodName: "CreateOAuth2TokenSession",
+			Handler:    _AccountService_CreateOAuth2TokenSession_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

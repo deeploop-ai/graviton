@@ -47,12 +47,14 @@ func wireBootstrap(app lynx.Lynx) (*boot.Bootstrap, func(), error) {
 	validator := auth.NewValidator(appConfig, apiKeyRepository, consoleAdminRepository, consoleAdminProjectRepository, documentDB)
 	repository := bunrepo.NewAuditRepository(database)
 	projectsRepository := bunrepo.NewProjectRepository(database)
+	oAuthProviderRepository := bunrepo.NewOAuthProviderRepository(database)
 	userRoles := client.NewUserRoles(documentDB)
 	sessionService := auth.NewSessionService(appConfig, documentDB, userRoles)
 	redisClient := clients.NewRedis(dataClients)
 	redisOTPChallengeStore := auth.NewRedisOTPChallengeStore(redisClient)
+	redisOAuthStateStore := auth.NewRedisOAuthStateStore(redisClient)
 	mailerService := messaging.NewMailer(appConfig)
-	account := client.NewAccount(appConfig, projectsRepository, documentDB, sessionService, redisOTPChallengeStore, mailerService)
+	account := client.NewAccount(appConfig, projectsRepository, oAuthProviderRepository, documentDB, sessionService, redisOTPChallengeStore, redisOAuthStateStore, mailerService)
 	accountService := clientgrpc.NewAccountService(account)
 	databases := client.NewDatabases(projectsRepository, documentDB)
 	databasesService := clientgrpc.NewDatabasesService(databases)
@@ -84,7 +86,8 @@ func wireBootstrap(app lynx.Lynx) (*boot.Bootstrap, func(), error) {
 		return nil, nil, err
 	}
 	fileHandler := serverhttp.NewFileHandler(appConfig, validator, storageStorage)
-	grpcGatewayServer, err := server2.NewGRPCGatewayServer(app, appConfig, fileHandler)
+	oAuthHandler := serverhttp.NewOAuthHandler(account)
+	grpcGatewayServer, err := server2.NewGRPCGatewayServer(app, appConfig, fileHandler, oAuthHandler)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

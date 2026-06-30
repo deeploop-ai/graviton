@@ -37,6 +37,8 @@ message Http {
   string addr = 1;
   string timeout = 2;
   Cors cors = 3;
+  // Public base URL used to construct OAuth redirect URIs, e.g. https://api.example.com
+  string public_url = 4;
 }
 
 message Security {

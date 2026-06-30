@@ -112,6 +112,46 @@ export class AccountService {
     return res.prefs ?? {};
   }
 
+  async createOAuth2Session(input: {
+    provider: string;
+    success: string;
+    failure: string;
+  }): Promise<{ redirect_url: string }> {
+    return this.http.request("GET", `/v1/account/sessions/oauth2/${encodeURIComponent(input.provider)}`, {
+      auth: "none",
+      query: {
+        project_id: this.http.getProjectId(),
+        success: input.success,
+        failure: input.failure,
+      },
+    });
+  }
+
+  async createOAuth2TokenSession(input: {
+    provider: string;
+    code: string;
+    state: string;
+    success?: string;
+    failure?: string;
+  }): Promise<{ account: Account; tokens: TokenBundle }> {
+    const res = await this.http.request<{ account: Account; tokens: TokenBundle }>(
+      "POST",
+      `/v1/account/sessions/oauth2/${encodeURIComponent(input.provider)}/token`,
+      {
+        auth: "none",
+        body: {
+          project_id: this.http.getProjectId(),
+          code: input.code,
+          state: input.state,
+          success: input.success,
+          failure: input.failure,
+        },
+      }
+    );
+    this.http.setAccessToken(res.tokens.access_token);
+    return res;
+  }
+
   async createEmailOTP(input: { email: string }): Promise<{ challenge_id: string; expire_at: number }> {
     return this.http.request("POST", "/v1/account/sessions/email-otp", {
       auth: "none",

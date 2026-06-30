@@ -1,0 +1,207 @@
+package auth
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
+
+	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
+	"golang.org/x/oauth2"
+	githuboauth "golang.org/x/oauth2/github"
+	googleoauth "golang.org/x/oauth2/google"
+)
+
+// NewOAuthAuthenticator builds a provider-specific OAuth2 client.
+func NewOAuthAuthenticator(provider, clientID, clientSecret, redirectURL string, scopes []string) (domainauth.OAuthAuthenticator, error) {
+	switch strings.ToLower(provider) {
+	case domainauth.ProviderGoogle:
+		if len(scopes) == 0 {
+			scopes = []string{"openid", "email", "profile"}
+		}
+		cfg := &oauth2.Config{
+			ClientID:     clientID,
+			ClientSecret: clientSecret,
+			RedirectURL:  redirectURL,
+			Scopes:       scopes,
+			Endpoint:     googleoauth.Endpoint,
+		}
+		return &genericOAuthAuthenticator{cfg: cfg, userInfoURL: "https://www.googleapis.com/oauth2/v2/userinfo"}, nil
+	case domainauth.ProviderGitHub:
+		if len(scopes) == 0 {
+			scopes = []string{"read:user", "user:email"}
+		}
+		cfg := &oauth2.Config{
+			ClientID:     clientID,
+			ClientSecret: clientSecret,
+			RedirectURL:  redirectURL,
+			Scopes:       scopes,
+			Endpoint:     githuboauth.Endpoint,
+		}
+		return &githubOAuthAuthenticator{genericOAuthAuthenticator{cfg: cfg}}, nil
+	default:
+		return nil, fmt.Errorf("unsupported oauth provider: %s", provider)
+	}
+}
+
+type genericOAuthAuthenticator struct {
+	cfg         *oauth2.Config
+	userInfoURL string
+}
+
+func (a *genericOAuthAuthenticator) AuthorizeURL(stateID, pkceChallenge string) string {
+	return a.cfg.AuthCodeURL(stateID,
+		oauth2.AccessTypeOffline,
+		oauth2.SetAuthURLParam("code_challenge", pkceChallenge),
+		oauth2.SetAuthURLParam("code_challenge_method", "S256"),
+	)
+}
+
+func (a *genericOAuthAuthenticator) Exchange(ctx context.Context, code, pkceVerifier string) (*domainauth.OAuthUserInfo, error) {
+	token, err := a.cfg.Exchange(ctx, code, oauth2.VerifierOption(pkceVerifier))
+	if err != nil {
+		return nil, err
+	}
+	return a.fetchUserInfo(ctx, token)
+}
+
+func (a *genericOAuthAuthenticator) fetchUserInfo(ctx context.Context, token *oauth2.Token) (*domainauth.OAuthUserInfo, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, a.userInfoURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	token.SetAuthHeader(req)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
+		return nil, fmt.Errorf("userinfo request failed: %s", strings.TrimSpace(string(body)))
+	}
+	var raw map[string]any
+	if err := json.NewDecoder(resp.Body).Decode(&raw); err != nil {
+		return nil, err
+	}
+	info := &domainauth.OAuthUserInfo{Raw: raw}
+	if id, ok := raw["id"].(string); ok {
+		info.ProviderUID = id
+	} else if idNum, ok := raw["id"].(float64); ok {
+		info.ProviderUID = fmt.Sprintf("%.0f", idNum)
+	}
+	if email, ok := raw["email"].(string); ok {
+		info.Email = strings.ToLower(strings.TrimSpace(email))
+	}
+	if name, ok := raw["name"].(string); ok {
+		info.Name = name
+	}
+	if avatar, ok := raw["picture"].(string); ok {
+		info.AvatarURL = avatar
+	}
+	return info, nil
+}
+
+type githubOAuthAuthenticator struct {
+	genericOAuthAuthenticator
+}
+
+func (a *githubOAuthAuthenticator) AuthorizeURL(stateID, pkceChallenge string) string {
+	return a.genericOAuthAuthenticator.AuthorizeURL(stateID, pkceChallenge)
+}
+
+func (a *githubOAuthAuthenticator) Exchange(ctx context.Context, code, pkceVerifier string) (*domainauth.OAuthUserInfo, error) {
+	token, err := a.cfg.Exchange(ctx, code, oauth2.VerifierOption(pkceVerifier))
+	if err != nil {
+		return nil, err
+	}
+	info, err := a.fetchGitHubUser(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+	if info.Email == "" {
+		email, err := a.fetchGitHubPrimaryEmail(ctx, token)
+		if err != nil {
+			return nil, err
+		}
+		info.Email = email
+	}
+	return info, nil
+}
+
+func (a *githubOAuthAuthenticator) fetchGitHubUser(ctx context.Context, token *oauth2.Token) (*domainauth.OAuthUserInfo, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://api.github.com/user", nil)
+	if err != nil {
+		return nil, err
+	}
+	token.SetAuthHeader(req)
+	req.Header.Set("Accept", "application/vnd.github+json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("github user request failed: status %d", resp.StatusCode)
+	}
+	var raw map[string]any
+	if err := json.NewDecoder(resp.Body).Decode(&raw); err != nil {
+		return nil, err
+	}
+	info := &domainauth.OAuthUserInfo{Raw: raw}
+	if idNum, ok := raw["id"].(float64); ok {
+		info.ProviderUID = fmt.Sprintf("%.0f", idNum)
+	}
+	if login, ok := raw["login"].(string); ok && info.Name == "" {
+		info.Name = login
+	}
+	if name, ok := raw["name"].(string); ok && name != "" {
+		info.Name = name
+	}
+	if email, ok := raw["email"].(string); ok {
+		info.Email = strings.ToLower(strings.TrimSpace(email))
+	}
+	if avatar, ok := raw["avatar_url"].(string); ok {
+		info.AvatarURL = avatar
+	}
+	return info, nil
+}
+
+func (a *githubOAuthAuthenticator) fetchGitHubPrimaryEmail(ctx context.Context, token *oauth2.Token) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://api.github.com/user/emails", nil)
+	if err != nil {
+		return "", err
+	}
+	token.SetAuthHeader(req)
+	req.Header.Set("Accept", "application/vnd.github+json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 400 {
+		return "", fmt.Errorf("github emails request failed: status %d", resp.StatusCode)
+	}
+	var emails []map[string]any
+	if err := json.NewDecoder(resp.Body).Decode(&emails); err != nil {
+		return "", err
+	}
+	for _, item := range emails {
+		primary, _ := item["primary"].(bool)
+		verified, _ := item["verified"].(bool)
+		email, _ := item["email"].(string)
+		if primary && verified && email != "" {
+			return strings.ToLower(strings.TrimSpace(email)), nil
+		}
+	}
+	for _, item := range emails {
+		verified, _ := item["verified"].(bool)
+		email, _ := item["email"].(string)
+		if verified && email != "" {
+			return strings.ToLower(strings.TrimSpace(email)), nil
+		}
+	}
+	return "", fmt.Errorf("github account has no verified email")
+}

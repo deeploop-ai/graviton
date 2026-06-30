@@ -276,6 +276,92 @@
         ]
       }
     },
+    "/v1/account/sessions/oauth2/{provider}": {
+      "get": {
+        "operationId": "AccountService_CreateOAuth2Session",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateOAuth2SessionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "success",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "failure",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AccountService"
+        ]
+      }
+    },
+    "/v1/account/sessions/oauth2/{provider}/token": {
+      "post": {
+        "operationId": "AccountService_CreateOAuth2TokenSession",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/orionidclientv1SignInResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AccountServiceCreateOAuth2TokenSessionBody"
+            }
+          }
+        ],
+        "tags": [
+          "AccountService"
+        ]
+      }
+    },
     "/v1/account/sessions/{sessionId}": {
       "delete": {
         "operationId": "AccountService_DeleteSession",
@@ -404,6 +490,26 @@
     }
   },
   "definitions": {
+    "AccountServiceCreateOAuth2TokenSessionBody": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "success": {
+          "type": "string"
+        },
+        "failure": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        }
+      }
+    },
     "orionidclientv1SignInRequest": {
       "type": "object",
       "properties": {
@@ -529,6 +635,14 @@
           "type": "string"
         },
         "otp": {
+          "type": "string"
+        }
+      }
+    },
+    "v1CreateOAuth2SessionResponse": {
+      "type": "object",
+      "properties": {
+        "redirectUrl": {
           "type": "string"
         }
       }

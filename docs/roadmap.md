@@ -36,7 +36,7 @@ Client API 是终端用户直接使用的能力。Sprint 1 已补齐会话与 pr
 | 邮箱验证 | 发送验证邮件 + 确认 | `POST/PUT /v1/account/verification` | 待办 |
 | 密码找回 | 创建找回链接 + 重置密码 | `POST/PUT /v1/account/recovery` | 待办 |
 | JWT 签发 | 用当前会话换取一次性 JWT | `POST /v1/account/jwt` | 待办 |
-| OAuth2（占位） | Google / GitHub 授权与回调 | `/v1/account/sessions/oauth2/*` | 待办 |
+| OAuth2（占位） | Google / GitHub 授权与回调 | `/v1/account/sessions/oauth2/*` | ✅ 完成 |
 | MFA（占位） | factors 列表、TOTP 创建/验证/删除 | `/v1/account/mfa/*` | 待办 |
 | 账号日志 | 列出最近登录/操作记录 | `GET /v1/account/logs` | 待办 |
 

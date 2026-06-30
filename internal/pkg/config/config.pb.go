@@ -226,10 +226,12 @@ func (x *GRPC) GetTimeout() string {
 }
 
 type Http struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Addr          string                 `protobuf:"bytes,1,opt,name=addr,proto3" json:"addr,omitempty"`
-	Timeout       string                 `protobuf:"bytes,2,opt,name=timeout,proto3" json:"timeout,omitempty"`
-	Cors          *Http_Cors             `protobuf:"bytes,3,opt,name=cors,proto3" json:"cors,omitempty"`
+	state   protoimpl.MessageState `protogen:"open.v1"`
+	Addr    string                 `protobuf:"bytes,1,opt,name=addr,proto3" json:"addr,omitempty"`
+	Timeout string                 `protobuf:"bytes,2,opt,name=timeout,proto3" json:"timeout,omitempty"`
+	Cors    *Http_Cors             `protobuf:"bytes,3,opt,name=cors,proto3" json:"cors,omitempty"`
+	// Public base URL used to construct OAuth redirect URIs, e.g. https://api.example.com
+	PublicUrl     string `protobuf:"bytes,4,opt,name=public_url,json=publicUrl,proto3" json:"public_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -283,6 +285,13 @@ func (x *Http) GetCors() *Http_Cors {
 		return x.Cors
 	}
 	return nil
+}
+
+func (x *Http) GetPublicUrl() string {
+	if x != nil {
+		return x.PublicUrl
+	}
+	return ""
 }
 
 type Security struct {
@@ -1281,11 +1290,13 @@ const file_config_proto_rawDesc = "" +
 	"\ametrics\x18\x03 \x01(\v2\x18.orionid.api.config.HttpR\ametrics\"4\n" +
 	"\x04GRPC\x12\x12\n" +
 	"\x04addr\x18\x01 \x01(\tR\x04addr\x12\x18\n" +
-	"\atimeout\x18\x02 \x01(\tR\atimeout\"\xcc\x02\n" +
+	"\atimeout\x18\x02 \x01(\tR\atimeout\"\xeb\x02\n" +
 	"\x04Http\x12\x12\n" +
 	"\x04addr\x18\x01 \x01(\tR\x04addr\x12\x18\n" +
 	"\atimeout\x18\x02 \x01(\tR\atimeout\x121\n" +
-	"\x04cors\x18\x03 \x01(\v2\x1d.orionid.api.config.Http.CorsR\x04cors\x1a\xe2\x01\n" +
+	"\x04cors\x18\x03 \x01(\v2\x1d.orionid.api.config.Http.CorsR\x04cors\x12\x1d\n" +
+	"\n" +
+	"public_url\x18\x04 \x01(\tR\tpublicUrl\x1a\xe2\x01\n" +
 	"\x04Cors\x12#\n" +
 	"\rallow_origins\x18\x01 \x03(\tR\fallowOrigins\x12#\n" +
 	"\rallow_methods\x18\x02 \x03(\tR\fallowMethods\x12#\n" +

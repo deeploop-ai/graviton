@@ -18,14 +18,33 @@ func NewTestAccount(cfg *config.AppConfig, projectRepo projects.Repository, docD
 }
 
 func NewTestAccountWithRedis(cfg *config.AppConfig, projectRepo projects.Repository, docDB databases.DocumentDB, rdb *redis.Client) *Account {
+	return NewTestAccountWithDeps(cfg, projectRepo, nil, docDB, rdb, nil)
+}
+
+func NewTestAccountWithMailer(cfg *config.AppConfig, projectRepo projects.Repository, docDB databases.DocumentDB, rdb *redis.Client, mailer messaging.Mailer) *Account {
+	return NewTestAccountWithDeps(cfg, projectRepo, nil, docDB, rdb, mailer)
+}
+
+func NewTestAccountWithDeps(
+	cfg *config.AppConfig,
+	projectRepo projects.Repository,
+	oauthProviders projects.OAuthProviderRepository,
+	docDB databases.DocumentDB,
+	rdb *redis.Client,
+	mailer messaging.Mailer,
+) *Account {
 	roles := NewUserRoles(docDB)
 	sessions := infraauth.NewSessionService(cfg, docDB, roles)
 	var otp domainauth.OTPChallengeStore
+	var oauthState domainauth.OAuthStateStore
 	if rdb != nil {
 		otp = infraauth.NewRedisOTPChallengeStore(rdb)
+		oauthState = infraauth.NewRedisOAuthStateStore(rdb)
 	}
-	mailer := inframessaging.NewMailer(cfg)
-	return NewAccount(cfg, projectRepo, docDB, sessions, otp, mailer)
+	if mailer == nil {
+		mailer = inframessaging.NewMailer(cfg)
+	}
+	return NewAccount(cfg, projectRepo, oauthProviders, docDB, sessions, otp, oauthState, mailer)
 }
 
 // CaptureMailer records sent messages for tests.
@@ -38,14 +57,4 @@ func (m *CaptureMailer) Send(_ context.Context, _, subject, body string) error {
 	m.Subjects = append(m.Subjects, subject)
 	m.Bodies = append(m.Bodies, body)
 	return nil
-}
-
-func NewTestAccountWithMailer(cfg *config.AppConfig, projectRepo projects.Repository, docDB databases.DocumentDB, rdb *redis.Client, mailer messaging.Mailer) *Account {
-	roles := NewUserRoles(docDB)
-	sessions := infraauth.NewSessionService(cfg, docDB, roles)
-	var otp domainauth.OTPChallengeStore
-	if rdb != nil {
-		otp = infraauth.NewRedisOTPChallengeStore(rdb)
-	}
-	return NewAccount(cfg, projectRepo, docDB, sessions, otp, mailer)
 }

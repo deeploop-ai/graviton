@@ -25,29 +25,35 @@ import (
 )
 
 type Account struct {
-	cfg         *config.AppConfig
-	projectRepo projects.Repository
-	docDB       databases.DocumentDB
-	sessions    domainauth.SessionService
-	otp         domainauth.OTPChallengeStore
-	mailer      messaging.Mailer
+	cfg            *config.AppConfig
+	projectRepo    projects.Repository
+	oauthProviders projects.OAuthProviderRepository
+	docDB          databases.DocumentDB
+	sessions       domainauth.SessionService
+	otp            domainauth.OTPChallengeStore
+	oauthState     domainauth.OAuthStateStore
+	mailer         messaging.Mailer
 }
 
 func NewAccount(
 	cfg *config.AppConfig,
 	projectRepo projects.Repository,
+	oauthProviders projects.OAuthProviderRepository,
 	docDB databases.DocumentDB,
 	sessions domainauth.SessionService,
 	otp domainauth.OTPChallengeStore,
+	oauthState domainauth.OAuthStateStore,
 	mailer messaging.Mailer,
 ) *Account {
 	return &Account{
-		cfg:         cfg,
-		projectRepo: projectRepo,
-		docDB:       docDB,
-		sessions:    sessions,
-		otp:         otp,
-		mailer:      mailer,
+		cfg:            cfg,
+		projectRepo:    projectRepo,
+		oauthProviders: oauthProviders,
+		docDB:          docDB,
+		sessions:       sessions,
+		otp:            otp,
+		oauthState:     oauthState,
+		mailer:         mailer,
 	}
 }
 

@@ -1,0 +1,313 @@
+package client
+
+import (
+	"context"
+	"fmt"
+	"net/url"
+	"strings"
+
+	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
+	"github.com/deeploop-ai/orionid/internal/domain/users"
+	infraauth "github.com/deeploop-ai/orionid/internal/infra/auth"
+	"github.com/deeploop-ai/orionid/pkg/idgen"
+	"golang.org/x/oauth2"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+type CreateOAuth2SessionCommand struct {
+	ProjectID string
+	Provider  string
+	Success   string
+	Failure   string
+}
+
+type CreateOAuth2TokenSessionCommand struct {
+	ProjectID string
+	Provider  string
+	Success   string
+	Failure   string
+	Code      string
+	State     string
+}
+
+type OAuth2CallbackResult struct {
+	ProjectID     string
+	SuccessURL    string
+	FailureURL    string
+	User          *User
+	Tokens        *TokenBundle
+	SessionCookie string
+	RedirectURL   string
+}
+
+func (a *Account) CreateOAuth2Session(ctx context.Context, cmd CreateOAuth2SessionCommand) (string, error) {
+	if a.oauthState == nil {
+		return "", status.Error(codes.Unimplemented, "oauth2 is not configured")
+	}
+	projectID := strings.TrimSpace(cmd.ProjectID)
+	provider := normalizeOAuthProvider(cmd.Provider)
+	if projectID == "" {
+		return "", status.Error(codes.InvalidArgument, "project_id is required")
+	}
+	if provider == "" {
+		return "", status.Error(codes.InvalidArgument, "provider is required")
+	}
+	if err := validateRedirectURL(cmd.Success); err != nil {
+		return "", status.Errorf(codes.InvalidArgument, "invalid success url: %v", err)
+	}
+	if err := validateRedirectURL(cmd.Failure); err != nil {
+		return "", status.Errorf(codes.InvalidArgument, "invalid failure url: %v", err)
+	}
+
+	project, err := a.projectRepo.GetProject(ctx, projectID)
+	if err != nil {
+		return "", err
+	}
+	if project == nil {
+		return "", status.Error(codes.NotFound, "project not found")
+	}
+	if err := a.docDB.EnsureSystemCollections(ctx, project.ID, project.InternalID); err != nil {
+		return "", err
+	}
+
+	oauthCfg, err := a.loadOAuthProvider(ctx, projectID, provider)
+	if err != nil {
+		return "", err
+	}
+
+	verifier := oauth2.GenerateVerifier()
+	challenge := oauth2.S256ChallengeFromVerifier(verifier)
+	stateID := idgen.UUID().String()
+	if err := a.oauthState.Save(ctx, domainauth.OAuthState{
+		StateID:      stateID,
+		ProjectID:    projectID,
+		Provider:     provider,
+		SuccessURL:   cmd.Success,
+		FailureURL:   cmd.Failure,
+		PKCEVerifier: verifier,
+	}, 0); err != nil {
+		return "", err
+	}
+
+	authClient, err := infraauth.NewOAuthAuthenticator(provider, oauthCfg.ClientID, oauthCfg.ClientSecret, a.oauthCallbackURL(provider), oauthCfg.Scopes)
+	if err != nil {
+		return "", status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	return authClient.AuthorizeURL(stateID, challenge), nil
+}
+
+func (a *Account) CreateOAuth2TokenSession(ctx context.Context, cmd CreateOAuth2TokenSessionCommand) (*User, *TokenBundle, string, error) {
+	result, err := a.completeOAuth2Code(ctx, completeOAuth2CodeCommand{
+		ProjectID: cmd.ProjectID,
+		Provider:  cmd.Provider,
+		Code:      cmd.Code,
+		State:     cmd.State,
+	})
+	if err != nil {
+		return nil, nil, "", err
+	}
+	return result.User, result.Tokens, result.SessionCookie, nil
+}
+
+func (a *Account) HandleOAuth2Callback(ctx context.Context, provider, code, state string) (*OAuth2CallbackResult, error) {
+	result, err := a.completeOAuth2Code(ctx, completeOAuth2CodeCommand{
+		Provider: provider,
+		Code:     code,
+		State:    state,
+	})
+	if err != nil {
+		failureURL := result.FailureURL
+		if failureURL == "" {
+			failureURL = "/"
+		}
+		return &OAuth2CallbackResult{
+			SuccessURL:  result.SuccessURL,
+			FailureURL:  failureURL,
+			RedirectURL: appendQuery(failureURL, "error", status.Convert(err).Message()),
+		}, err
+	}
+	redirect := appendQuery(result.SuccessURL, "userId", result.User.ID)
+	return &OAuth2CallbackResult{
+		ProjectID:     result.ProjectID,
+		SuccessURL:    result.SuccessURL,
+		FailureURL:    result.FailureURL,
+		User:          result.User,
+		Tokens:        result.Tokens,
+		SessionCookie: result.SessionCookie,
+		RedirectURL:   redirect,
+	}, nil
+}
+
+type completeOAuth2CodeCommand struct {
+	ProjectID string
+	Provider  string
+	Code      string
+	State     string
+}
+
+type completeOAuth2CodeResult struct {
+	ProjectID     string
+	SuccessURL    string
+	FailureURL    string
+	User          *User
+	Tokens        *TokenBundle
+	SessionCookie string
+}
+
+func (a *Account) completeOAuth2Code(ctx context.Context, cmd completeOAuth2CodeCommand) (*completeOAuth2CodeResult, error) {
+	if a.oauthState == nil {
+		return nil, status.Error(codes.Unimplemented, "oauth2 is not configured")
+	}
+	provider := normalizeOAuthProvider(cmd.Provider)
+	code := strings.TrimSpace(cmd.Code)
+	stateID := strings.TrimSpace(cmd.State)
+	if provider == "" {
+		return nil, status.Error(codes.InvalidArgument, "provider is required")
+	}
+	if code == "" {
+		return nil, status.Error(codes.InvalidArgument, "code is required")
+	}
+	if stateID == "" {
+		return nil, status.Error(codes.InvalidArgument, "state is required")
+	}
+
+	oauthState, err := a.oauthState.Get(ctx, stateID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = a.oauthState.Delete(context.Background(), stateID) }()
+
+	if oauthState.Provider != provider {
+		return nil, status.Error(codes.Unauthenticated, "oauth provider mismatch")
+	}
+	projectID := oauthState.ProjectID
+	if cmd.ProjectID != "" && cmd.ProjectID != projectID {
+		return nil, status.Error(codes.Unauthenticated, "oauth project mismatch")
+	}
+
+	project, err := a.projectRepo.GetProject(ctx, projectID)
+	if err != nil {
+		return nil, err
+	}
+	if project == nil {
+		return nil, status.Error(codes.NotFound, "project not found")
+	}
+	if err := a.docDB.EnsureSystemCollections(ctx, project.ID, project.InternalID); err != nil {
+		return nil, err
+	}
+
+	oauthCfg, err := a.loadOAuthProvider(ctx, projectID, provider)
+	if err != nil {
+		return &completeOAuth2CodeResult{SuccessURL: oauthState.SuccessURL, FailureURL: oauthState.FailureURL}, err
+	}
+
+	authClient, err := infraauth.NewOAuthAuthenticator(provider, oauthCfg.ClientID, oauthCfg.ClientSecret, a.oauthCallbackURL(provider), oauthCfg.Scopes)
+	if err != nil {
+		return &completeOAuth2CodeResult{SuccessURL: oauthState.SuccessURL, FailureURL: oauthState.FailureURL}, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	profile, err := authClient.Exchange(ctx, code, oauthState.PKCEVerifier)
+	if err != nil {
+		return &completeOAuth2CodeResult{SuccessURL: oauthState.SuccessURL, FailureURL: oauthState.FailureURL}, status.Errorf(codes.Unauthenticated, "oauth code exchange failed: %v", err)
+	}
+
+	user, err := a.resolveOAuthUser(ctx, projectID, provider, profile)
+	if err != nil {
+		return &completeOAuth2CodeResult{SuccessURL: oauthState.SuccessURL, FailureURL: oauthState.FailureURL}, err
+	}
+	if !users.CanAuthenticate(user.Status) {
+		return &completeOAuth2CodeResult{SuccessURL: oauthState.SuccessURL, FailureURL: oauthState.FailureURL}, status.Error(codes.Unauthenticated, "user account is not active")
+	}
+
+	user, tokens, cookie, err := a.finishSignInWithProvider(ctx, projectID, user, provider)
+	if err != nil {
+		return &completeOAuth2CodeResult{SuccessURL: oauthState.SuccessURL, FailureURL: oauthState.FailureURL}, err
+	}
+	return &completeOAuth2CodeResult{
+		ProjectID:     projectID,
+		SuccessURL:    oauthState.SuccessURL,
+		FailureURL:    oauthState.FailureURL,
+		User:          user,
+		Tokens:        tokens,
+		SessionCookie: cookie,
+	}, nil
+}
+
+func (a *Account) loadOAuthProvider(ctx context.Context, projectID, provider string) (*domainOAuthProvider, error) {
+	if a.oauthProviders == nil {
+		return nil, status.Error(codes.FailedPrecondition, "oauth provider repository is not configured")
+	}
+	cfg, err := a.oauthProviders.GetOAuthProvider(ctx, projectID, provider)
+	if err != nil {
+		return nil, err
+	}
+	if cfg == nil || !cfg.Enabled {
+		return nil, status.Error(codes.FailedPrecondition, "oauth provider is not enabled for this project")
+	}
+	if cfg.ClientID == "" || cfg.ClientSecret == "" {
+		return nil, status.Error(codes.FailedPrecondition, "oauth provider credentials are missing")
+	}
+	return &domainOAuthProvider{
+		ClientID:     cfg.ClientID,
+		ClientSecret: cfg.ClientSecret,
+		Scopes:       cfg.Scopes,
+	}, nil
+}
+
+type domainOAuthProvider struct {
+	ClientID     string
+	ClientSecret string
+	Scopes       []string
+}
+
+func (a *Account) oauthCallbackURL(provider string) string {
+	base := strings.TrimRight(a.publicBaseURL(), "/")
+	return fmt.Sprintf("%s/v1/account/oauth2/%s/callback", base, provider)
+}
+
+func (a *Account) publicBaseURL() string {
+	if u := strings.TrimSpace(a.cfg.GetServer().GetHttp().GetPublicUrl()); u != "" {
+		return strings.TrimRight(u, "/")
+	}
+	return "http://localhost:9099"
+}
+
+func normalizeOAuthProvider(provider string) string {
+	switch strings.ToLower(strings.TrimSpace(provider)) {
+	case domainauth.ProviderGoogle:
+		return domainauth.ProviderGoogle
+	case domainauth.ProviderGitHub:
+		return domainauth.ProviderGitHub
+	default:
+		return ""
+	}
+}
+
+func validateRedirectURL(raw string) error {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return fmt.Errorf("url is required")
+	}
+	u, err := url.Parse(raw)
+	if err != nil {
+		return err
+	}
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return fmt.Errorf("url must use http or https")
+	}
+	if u.Host == "" {
+		return fmt.Errorf("url host is required")
+	}
+	return nil
+}
+
+func appendQuery(rawURL, key, value string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return rawURL
+	}
+	q := u.Query()
+	q.Set(key, value)
+	u.RawQuery = q.Encode()
+	return u.String()
+}

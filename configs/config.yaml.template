@@ -5,6 +5,7 @@ server:
   http:
     addr: ":9099"
     timeout: "60s"
+    public_url: "http://localhost:9099"
     cors:
       allow_origins: ["http://orionid.local:9099"]  # set explicit origins; "*" is rejected when allow_credentials=true
       allow_methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]

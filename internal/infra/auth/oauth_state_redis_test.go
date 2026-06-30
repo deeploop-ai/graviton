@@ -1,0 +1,49 @@
+package auth_test
+
+import (
+	"context"
+	"testing"
+	"time"
+
+	"github.com/alicebob/miniredis/v2"
+	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
+	"github.com/deeploop-ai/orionid/internal/infra/auth"
+	"github.com/redis/go-redis/v9"
+	"github.com/stretchr/testify/require"
+)
+
+func TestRedisOAuthStateStore(t *testing.T) {
+	t.Parallel()
+
+	mr, err := miniredis.Run()
+	require.NoError(t, err)
+	defer mr.Close()
+
+	store := auth.NewRedisOAuthStateStore(redis.NewClient(&redis.Options{Addr: mr.Addr()}))
+	ctx := context.Background()
+
+	state := domainauth.OAuthState{
+		StateID:      "state-1",
+		ProjectID:    "proj",
+		Provider:     domainauth.ProviderGoogle,
+		SuccessURL:   "https://app.example/success",
+		FailureURL:   "https://app.example/failure",
+		PKCEVerifier: "verifier",
+	}
+	require.NoError(t, store.Save(ctx, state, time.Minute))
+
+	got, err := store.Get(ctx, "state-1")
+	require.NoError(t, err)
+	require.Equal(t, "proj", got.ProjectID)
+	require.Equal(t, domainauth.ProviderGoogle, got.Provider)
+
+	require.NoError(t, store.Delete(ctx, "state-1"))
+	_, err = store.Get(ctx, "state-1")
+	require.Error(t, err)
+}
+
+func TestNewOAuthAuthenticator_Unsupported(t *testing.T) {
+	t.Parallel()
+	_, err := auth.NewOAuthAuthenticator("unknown", "id", "secret", "http://localhost/cb", nil)
+	require.Error(t, err)
+}

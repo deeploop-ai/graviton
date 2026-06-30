@@ -28,6 +28,7 @@ func NewGRPCGatewayServer(
 	app lynx.Lynx,
 	cfg *config.AppConfig,
 	fileHandler *serverhttp.FileHandler,
+	oauthHandler *serverhttp.OAuthHandler,
 ) (*GRPCGatewayServer, error) {
 	httpCfg := cfg.GetServer().GetHttp()
 	timeout := parseDuration(httpCfg.GetTimeout(), 60*time.Second)
@@ -65,8 +66,9 @@ func NewGRPCGatewayServer(
 		}
 	}
 
-	// Custom HTTP handlers for file upload/download.
+	// Custom HTTP handlers for file upload/download and OAuth callbacks.
 	fileHandler.Register(mux)
+	oauthHandler.Register(mux)
 
 	handler := http.Handler(mux)
 
