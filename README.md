@@ -1,69 +1,71 @@
 # Orionid
 
-Orionid 是一个受 Appwrite 启发的后端即服务（BaaS）平台，使用 Go + PostgreSQL + gRPC/grpc-gateway 构建，提供用户认证、动态文档数据库、文件存储、函数执行、Admin Console 等核心能力。
+**English** | [简体中文](README_ZH.md)
 
-## 功能特性
+Orionid is an Appwrite-inspired Backend-as-a-Service (BaaS) platform built with Go, PostgreSQL, and gRPC/grpc-gateway. It provides user authentication, a dynamic document database, file storage, function execution, and an Admin Console.
 
-- **项目管理**：多项目隔离，每个项目拥有独立的数据库 schema。
-- **用户认证**：邮箱注册/登录、JWT access/refresh token、会话 Cookie、API Key 认证。
-- **动态文档数据库**：schema-per-database，支持 `_tenant`、`_perms`、动态属性/索引，查询语言兼容 Appwrite 风格 DSL。
-- **文件存储**：S3/MinIO 兼容的对象存储，支持 multipart 上传/下载，文件元数据以动态文档管理。
-- **函数执行**：Docker 执行器端口与 P0 stub。
-- **Admin Console**：React + Vite + TanStack Query + shadcn/ui 管理后台，嵌入 Go 二进制，路径 `/console/`。
-- **Server API**：Project / API Key / User / Storage / Database / Collection / Attribute / Index 的 CRUD。
+## Features
 
-## 技术栈
+- **Project management**: Multi-project isolation; each project gets its own database schema.
+- **User authentication**: Email sign-up/sign-in, JWT access/refresh tokens, session cookies, and API Key auth.
+- **Dynamic document database**: Schema-per-database with `_tenant`, `_perms`, dynamic attributes/indexes, and an Appwrite-style query DSL.
+- **File storage**: S3/MinIO-compatible object storage with multipart upload/download; file metadata managed as dynamic documents.
+- **Function execution**: Docker executor port and P0 stub.
+- **Admin Console**: React + Vite + TanStack Query + shadcn/ui admin UI, embedded in the Go binary at `/console/`.
+- **Server API**: CRUD for Projects, API Keys, Users, Storage, Databases, Collections, Attributes, and Indexes.
 
-### 后端
+## Tech Stack
+
+### Backend
 
 - Go 1.25
-- [Lynx](https://github.com/lynx-go/lynx) 服务框架
+- [Lynx](https://github.com/lynx-go/lynx) service framework
 - gRPC + grpc-gateway
-- [Wire](https://github.com/google/wire) 依赖注入
-- [bun](https://github.com/uptrace/bun) ORM（元数据表）
-- PostgreSQL（动态文档层）
+- [Wire](https://github.com/google/wire) dependency injection
+- [bun](https://github.com/uptrace/bun) ORM (metadata tables)
+- PostgreSQL (dynamic document layer)
 - Redis
-- MinIO / S3（对象存储）
+- MinIO / S3 (object storage)
 
-### 前端
+### Frontend
 
 - React 19 + TypeScript 6
 - Vite 8
 - React Router 7
 - TanStack Query 5
-- Tailwind CSS 3 + shadcn/ui 风格组件
-- sonner（toast）
+- Tailwind CSS 3 + shadcn/ui-style components
+- sonner (toast)
 - lucide-react
 
-## 快速开始
+## Quick Start
 
-### 前置要求
+### Prerequisites
 
 - Go 1.25+
-- Node.js 22+ + npm
+- Node.js 22+ and npm
 - Docker + Docker Compose
-- Task（`go install github.com/go-task/task/v3/cmd/task@latest`）
+- [Task](https://taskfile.dev/) (`go install github.com/go-task/task/v3/cmd/task@latest`)
 
-### 1. 启动本地基础设施
+### 1. Start local infrastructure
 
 ```bash
 task up
 ```
 
-这会启动 PostgreSQL（5433）、Redis（6380）和 MinIO（9000/9001）。
+This starts PostgreSQL (5433), Redis (6380), and MinIO (9000/9001).
 
-### 2. 配置环境变量
+### 2. Configure environment variables
 
-复制模板并填写必要信息：
+Copy the template and fill in required values:
 
 ```bash
 cp .env.example .env
 ```
 
-关键变量：
+Key variables:
 
 ```env
-ORIONID_DATA_DATABASE_SOURCE=postgres://orionid:orionid@127.0.0.1 :5433/orionid?sslmode=disable
+ORIONID_DATA_DATABASE_SOURCE=postgres://orionid:orionid@127.0.0.1:5433/orionid?sslmode=disable
 ORIONID_DATA_REDIS_ADDR=127.0.0.1:6380
 ORIONID_SECURITY_JWT_SECRET=change-me-in-production
 ORIONID_STORAGE_S3_ENDPOINT=http://127.0.0.1:9000
@@ -71,160 +73,171 @@ ORIONID_STORAGE_S3_ACCESS_KEY_ID=minioadmin
 ORIONID_STORAGE_S3_SECRET_ACCESS_KEY=minioadmin
 ```
 
-### 3. 运行数据库迁移
+### 3. Run database migrations
 
 ```bash
 task migrate
 ```
 
-### 4. 安装依赖并初始化数据
+### 4. Install dependencies and seed data
 
 ```bash
-# 安装工具（首次）
+# Install tools (first time)
 task install-tools
 
-# 安装 Console 依赖
+# Install Console dependencies
 task console-install
 
-# 生成 protobuf、wire 等
+# Generate protobuf, wire, etc.
 task generate-all
 
-# 创建默认项目和 Console 管理员
+# Create default project and Console admin
 go run ./cmd/seed
 ```
 
-默认管理员：`admin@orionid.local / Admin@123`。
+Default admin: `admin@orionid.local / Admin@123`.
 
-### 5. 构建并运行
+### 5. Build and run
 
 ```bash
-task build      # 会先执行 console-build，再编译 Go server
+task build      # runs console-build, then compiles the Go server
 ./bin/server.exe
 ```
 
-或直接开发模式：
+Or use dev mode:
 
 ```bash
 task dev-server
 ```
 
-访问：
+Endpoints:
 
-- Admin Console：`http://orionid.local:9099/console/`
-- HTTP/gRPC-gateway API：`http://127.0.0.1:9099/v1/...`
-- Metrics：`http://127.0.0.1:9100/metrics`
+- Admin Console: `http://orionid.local:9099/console/`
+- HTTP/gRPC-gateway API: `http://127.0.0.1:9099/v1/...`
+- Metrics: `http://127.0.0.1:9100/metrics`
 
-## 常用开发任务
+## Common Development Tasks
 
 ```bash
-# 基础设施
+# Infrastructure
 task up          # docker compose up
 task down        # docker compose down
-task migrate     # 运行数据库迁移
+task migrate     # run database migrations
 
-# 代码生成
+# Code generation
 task generate-proto    # buf generate
-task generate-config   # 生成 Go config
-task wire-all          # 重新生成 Wire
-task generate-all      # 以上全部
+task generate-config   # generate Go config
+task wire-all          # regenerate Wire
+task generate-all      # all of the above
 
-# 前端
+# Frontend
 task console-install   # npm install
 task console-build     # npm run build
 task console-dev       # npm run dev
 
-# 后端
+# Backend
 task dev-server        # go run ./cmd/server
 task test              # go test -v ./... -cover
-task build             # 构建完整二进制（含 console）
+task build             # build full binary (includes console)
 ```
 
-## 项目结构
+## Project Structure
 
 ```
 .
 ├── cmd/
-│   ├── seed/              # 默认项目/管理员/API Key 初始化
-│   └── server/            # 服务入口与 Wire 组装
+│   ├── seed/              # default project / admin / API key bootstrap
+│   └── server/            # server entrypoint and Wire assembly
 ├── console/               # Admin Console React SPA
 │   ├── embed.go           # go:embed dist
 │   └── src/
-├── configs/               # 配置文件模板
-├── db/migrations/         # golang-migrate SQL 迁移
-├── docker/local/          # 本地 Docker Compose
-├── docs/                  # 设计文档
-├── genproto/              # 生成的 protobuf 代码
+├── configs/               # config templates
+├── db/migrations/         # golang-migrate SQL migrations
+├── docker/local/          # local Docker Compose
+├── docs/                  # design documents
+├── genproto/              # generated protobuf code
 ├── internal/
-│   ├── api/               # gRPC handler / 自定义 HTTP handler
+│   ├── api/               # gRPC handlers / custom HTTP handlers
 │   │   ├── clientgrpc/
 │   │   ├── consolegrpc/
 │   │   ├── servergrpc/
 │   │   └── serverhttp/
-│   ├── app/               # 用例层
+│   ├── app/               # use cases
 │   │   ├── client/        # Account sign-up/sign-in
 │   │   ├── console/       # Console auth
-│   │   ├── functions/     # Functions use-case
+│   │   ├── functions/     # Functions use case
 │   │   ├── server/        # Projects / API keys / users / databases
 │   │   └── storage/       # File / bucket metadata
-│   ├── domain/            # 领域模型与端口
+│   ├── domain/            # domain models and ports
 │   │   ├── databases/
 │   │   ├── functions/
 │   │   ├── projects/
 │   │   ├── shared/
 │   │   └── storage/
-│   ├── infra/             # 适配器实现
-│   │   ├── auth/          # Principal/Validator
-│   │   ├── bun/           # 元数据 repositories
-│   │   ├── clients/       # PG/Redis/S3 客户端
-│   │   ├── documentdb/    # PostgreSQL 动态文档适配器
+│   ├── infra/             # adapter implementations
+│   │   ├── auth/          # Principal / Validator
+│   │   ├── bun/           # metadata repositories
+│   │   ├── clients/       # PG / Redis / S3 clients
+│   │   ├── documentdb/    # PostgreSQL dynamic document adapter
 │   │   ├── functions/     # Docker executor stub
-│   │   ├── server/        # gRPC/gateway/metrics/console 服务器
-│   │   └── storage/       # MinIO 对象存储
+│   │   ├── server/        # gRPC / gateway / metrics / console server
+│   │   └── storage/       # MinIO object storage
 │   ├── pkg/config/        # protobuf config schema
-│   └── testutil/          # 集成测试工具
+│   └── testutil/          # integration test helpers
 ├── pkg/
-│   ├── crud/              # 列表/分页/排序工具
-│   ├── grpc/interceptor/  # 认证拦截器
-│   ├── idgen/             # ID 生成
-│   ├── jwtparser/         # JWT 签发/解析
-│   ├── password/          # 密码哈希
-│   └── query/             # Appwrite 风格查询 DSL
-├── proto/                 # protobuf 源文件
+│   ├── crud/              # list / pagination / sort utilities
+│   ├── grpc/interceptor/  # auth interceptors
+│   ├── idgen/             # ID generation
+│   ├── jwtparser/         # JWT issue / parse
+│   ├── password/          # password hashing
+│   └── query/             # Appwrite-style query DSL
+├── proto/                 # protobuf source files
+├── sdk/                   # TypeScript SDK and demo app
 ├── buf.yaml / buf.gen.yaml
 ├── go.mod
 ├── Taskfile.yml
 └── README.md
 ```
 
-## 架构说明
+## Architecture
 
-- **Clean Architecture / DDD**：domain 定义端口，infra 提供实现，app 编排用例，api 负责传输。
-- **动态文档数据库**：每个 database 对应一个 PostgreSQL schema；集合是真实表；`_tenant` 用于项目隔离；`_perms` 表实现基于角色的文档权限。
-- **认证**：支持 end-user JWT、session Cookie、API Key、console admin JWT。API Key 不绕过 `_perms`，以 `keys` 角色参与权限检查；admin 可带 `X-Orionid-Project` header 操作指定项目。
-- **REST API**：gRPC 方法通过 grpc-gateway 暴露为 JSON REST；文件上传/下载使用自定义 HTTP handler。
-- **Console**：React SPA 通过 `//go:embed dist` 打包进 Go 二进制，由 `/console/` 路径 serve。
+- **Clean Architecture / DDD**: domain defines ports, infra provides implementations, app orchestrates use cases, api handles transport.
+- **Dynamic document database**: each database maps to a PostgreSQL schema; collections are real tables; `_tenant` isolates projects; `_perms` implements role-based document permissions.
+- **Authentication**: end-user JWT, session cookies, API Keys, and console admin JWT. API Keys do not bypass `_perms`—they participate as the `keys` role; admins can target a project via the `X-Orionid-Project` header.
+- **REST API**: gRPC methods are exposed as JSON REST via grpc-gateway; file upload/download uses custom HTTP handlers.
+- **Console**: the React SPA is embedded into the Go binary via `//go:embed dist` and served at `/console/`.
 
-## 测试
+## Testing
 
 ```bash
-# 单元/集成测试（需要本地 Postgres）
+# Unit / integration tests (requires local Postgres)
 task test
 ```
 
-集成测试位于：
+Integration tests include:
 
 - `internal/infra/documentdb/postgres_test.go`
 - `internal/app/client/account_test.go`
 
-测试会自动创建并销毁 `ORIONID_test` 数据库。
+Tests automatically create and drop the `ORIONID_test` database.
 
-## 设计文档
+## TypeScript SDK
 
-- `docs/appwrite-go-migration-modules.md`：模块迁移清单
-- `docs/tech-decision.md`：技术栈决策
-- `docs/p0-foundation-design.md`：P0 详细设计
-- `docs/p0-design-review.md`：设计评审与关键决策确认
+See [`sdk/README.md`](sdk/README.md) for the `@orionid/sdk` package and web demo.
 
-## 许可证
+```bash
+task sdk-install
+task sdk-build
+task sdk-demo   # demo at http://localhost:5174
+```
 
-MIT（待定）
+## Design Documents
+
+- `docs/appwrite-go-migration-modules.md` — module migration checklist
+- `docs/tech-decision.md` — technology decisions
+- `docs/p0-foundation-design.md` — P0 detailed design
+- `docs/p0-design-review.md` — design review and key decisions
+
+## License
+
+MIT (TBD)
