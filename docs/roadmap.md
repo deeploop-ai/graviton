@@ -1,7 +1,42 @@
 # Graviton 开发路线图
 
 > 本文档基于已完成 P0 底座，规划 Graviton 的短期、中期、长期开发方向。
-> 最新更新：2026-06-20（P1 Sprint 1 部分落地，见 `docs/completed-tasks.md`）。
+> 最新更新：2026-07-01（补充 AI/Agent-Native 战略与 P1 Sprint 1 部分落地，见 `docs/completed-tasks.md`）。
+
+---
+
+## 0. AI / Agent-Native 战略（贯穿各阶段）
+
+Graviton 将 **AI/Agent-Native** 作为与 BaaS 核心能力并列的产品定位：后端不仅服务人类用户，也原生支持 LLM Agent、自动化脚本与 MCP Tool Server 以可预测、可授权的方式调用。
+
+### 已具备（P0 / P1 部分）
+
+| 能力 | 说明 | 关键组件 |
+|------|------|----------|
+| Protobuf + OpenAPI | API 单一事实来源，自动生成 Swagger | `proto/`、`buf.gen.yaml`、`genproto/**/*.swagger.json` |
+| Server API + 细粒度 Scope | Agent/自动化通过 API Key 调用管理面，按 scope 限权 | `proto/server/v1/*`、`api_keys.scopes`、`pkg/grpc/interceptor` |
+| 结构化鉴权注解 | 每个 gRPC 方法声明 `method_auth`，便于生成工具 schema | `proto/shared/v1/authz.proto` |
+| TypeScript SDK | Client + Server API 封装，便于 Agent 工作流集成 | `sdk/typescript/`、`sdk/demo/` |
+| 动态文档层 | Agent 可运行时建库/集合/文档，无需手工迁移 | `internal/infra/documentdb/`、`pkg/query/` |
+| 文档级权限 | API Key 以 `keys` 角色参与 `_perms`，不默认 bypass | `internal/infra/documentdb/postgres_permissions.go` |
+
+### 规划中
+
+| 任务 | 说明 | 目标阶段 |
+|------|------|----------|
+| MCP Server | 暴露 Graviton Server API 为 MCP Tools（Users/Databases/Storage 等） | P1 |
+| OpenAPI 聚合与 Tool Schema | 合并各服务 Swagger，导出 Agent 可用的 operation 清单 | P1 |
+| Agent 专用 API Key 模板 | Console 一键创建「只读 Agent」「文档读写 Agent」等预设 scope | P1 |
+| Functions Tool 运行时 | Agent 触发函数作为 Tool 执行，返回结构化 JSON | P1 |
+| Realtime 事件订阅 | Agent 订阅文档/用户变更，驱动多步工作流 | P2 |
+| Webhooks 出站 | 业务事件推送到 Agent 编排系统（n8n、Temporal 等） | P2 |
+| 多语言 SDK 生成 | 从 proto 生成 Python/Go SDK，扩大 Agent 生态 | P3 |
+
+**验收标准（Agent-Native MVP）**：
+
+- 仅凭 API Key + OpenAPI/Swagger，外部 Agent 框架可完成：列出用户、CRUD 文档、上传文件。
+- Console 可创建带 scope 限制的 API Key，且越权调用返回明确 `PermissionDenied`。
+- TypeScript SDK 演示站点可端到端验证上述流程。
 
 ---
 

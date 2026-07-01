@@ -2,10 +2,11 @@
 
 [English](README.md) | **简体中文**
 
-Graviton 是一个受 Appwrite 启发的后端即服务（BaaS）平台，使用 Go + PostgreSQL + gRPC/grpc-gateway 构建，提供用户认证、动态文档数据库、文件存储、函数执行、Admin Console 等核心能力。
+Graviton 是一个受 Appwrite 启发、**AI/Agent-Native** 的后端即服务（BaaS）平台，使用 Go + PostgreSQL + gRPC/grpc-gateway 构建，提供用户认证、动态文档数据库、文件存储、函数执行、Admin Console 等核心能力 —— API 与工具链从设计之初即面向 LLM Agent、自动化脚本与 MCP Tool Server。
 
 ## 功能特性
 
+- **AI / Agent-Native**：Protobuf 定义 API，自动生成 OpenAPI/Swagger；细粒度 scope 的 API Key 供 Agent 与自动化调用 Server API；统一 JSON REST 面与结构化错误；TypeScript SDK 便于 Agent 工作流与 Tool 集成。
 - **项目管理**：多项目隔离，每个项目拥有独立的数据库 schema。
 - **用户认证**：邮箱注册/登录、JWT access/refresh token、会话 Cookie、API Key 认证。
 - **动态文档数据库**：schema-per-database，支持 `_tenant`、`_perms`、动态属性/索引，查询语言兼容 Appwrite 风格 DSL。
@@ -203,6 +204,7 @@ task build             # 构建完整二进制（含 console）
 ## 架构说明
 
 - **Clean Architecture / DDD**：domain 定义端口，infra 提供实现，app 编排用例，api 负责传输。
+- **AI / Agent-Native API 设计**：Protobuf 为单一事实来源；`buf generate` 产出 gRPC stub、grpc-gateway handler 及 `genproto/` 下的 OpenAPI 规范。**Server API**（`/v1/server/*`）面向程序化与 Agent 访问，通过 API Key 鉴权；**Client API**（`/v1/account/*`、`/v1/databases/*` 等）服务终端用户流程。详见 [`sdk/README.md`](sdk/README.md)。
 - **动态文档数据库**：每个 database 对应一个 PostgreSQL schema；集合是真实表；`_tenant` 用于项目隔离；`_perms` 表实现基于角色的文档权限。
 - **认证**：支持 end-user JWT、session Cookie、API Key、console admin JWT。API Key 不绕过 `_perms`，以 `keys` 角色参与权限检查；admin 可带 `X-Graviton-Project` header 操作指定项目。
 - **REST API**：gRPC 方法通过 grpc-gateway 暴露为 JSON REST；文件上传/下载使用自定义 HTTP handler。
@@ -234,6 +236,7 @@ task sdk-demo   # 演示站点 http://localhost:5174
 
 ## 设计文档
 
+- `docs/roadmap.md`：开发路线图（含 AI/Agent-Native 战略）
 - `docs/appwrite-go-migration-modules.md`：模块迁移清单
 - `docs/tech-decision.md`：技术栈决策
 - `docs/p0-foundation-design.md`：P0 详细设计

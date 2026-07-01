@@ -2,10 +2,11 @@
 
 **English** | [简体中文](README_ZH.md)
 
-Graviton is an Appwrite-inspired Backend-as-a-Service (BaaS) platform built with Go, PostgreSQL, and gRPC/grpc-gateway. It provides user authentication, a dynamic document database, file storage, function execution, and an Admin Console.
+Graviton is an Appwrite-inspired, **AI/Agent-Native** Backend-as-a-Service (BaaS) platform built with Go, PostgreSQL, and gRPC/grpc-gateway. It provides user authentication, a dynamic document database, file storage, function execution, and an Admin Console — with APIs and tooling designed for LLM agents, automation, and MCP tool servers from day one.
 
 ## Features
 
+- **AI / Agent-Native**: Protobuf-first APIs with auto-generated OpenAPI/Swagger specs; scoped API Keys for autonomous Server-side automation; predictable JSON REST surface and structured errors; TypeScript SDK for agent workflows and tool integration.
 - **Project management**: Multi-project isolation; each project gets its own database schema.
 - **User authentication**: Email sign-up/sign-in, JWT access/refresh tokens, session cookies, and API Key auth.
 - **Dynamic document database**: Schema-per-database with `_tenant`, `_perms`, dynamic attributes/indexes, and an Appwrite-style query DSL.
@@ -202,6 +203,7 @@ task build             # build full binary (includes console)
 ## Architecture
 
 - **Clean Architecture / DDD**: domain defines ports, infra provides implementations, app orchestrates use cases, api handles transport.
+- **AI / Agent-Native API design**: protobuf is the single source of truth; `buf generate` produces gRPC stubs, grpc-gateway handlers, and OpenAPI specs under `genproto/`. The **Server API** (`/v1/server/*`) is scoped for programmatic and agent access via API Keys; the **Client API** (`/v1/account/*`, `/v1/databases/*`, etc.) serves end-user flows. See [`sdk/README.md`](sdk/README.md) for the TypeScript SDK.
 - **Dynamic document database**: each database maps to a PostgreSQL schema; collections are real tables; `_tenant` isolates projects; `_perms` implements role-based document permissions.
 - **Authentication**: end-user JWT, session cookies, API Keys, and console admin JWT. API Keys do not bypass `_perms`—they participate as the `keys` role; admins can target a project via the `X-Graviton-Project` header.
 - **REST API**: gRPC methods are exposed as JSON REST via grpc-gateway; file upload/download uses custom HTTP handlers.
@@ -233,6 +235,7 @@ task sdk-demo   # demo at http://localhost:5174
 
 ## Design Documents
 
+- `docs/roadmap.md` — development roadmap (includes AI/Agent-Native strategy)
 - `docs/appwrite-go-migration-modules.md` — module migration checklist
 - `docs/tech-decision.md` — technology decisions
 - `docs/p0-foundation-design.md` — P0 detailed design

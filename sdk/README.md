@@ -1,6 +1,17 @@
 # Graviton TypeScript SDK
 
-`@graviton/sdk` 封装 Graviton **Client API**（用户 JWT）与 **Server API**（API Key + `X-Graviton-Project`），便于集成测试与交互演示。
+`@graviton/sdk` 封装 Graviton **Client API**（用户 JWT）与 **Server API**（API Key + `X-Graviton-Project`），是 Graviton **AI/Agent-Native** 能力的前端集成层 —— 便于 LLM Agent、自动化脚本与 MCP Tool Server 以类型安全的方式调用后端。
+
+## Agent / 自动化集成要点
+
+| 场景 | 推荐方式 | 说明 |
+|------|----------|------|
+| 管理面自动化（建用户、管文档、Storage） | **Server API** + API Key | 在 Console 或通过 `POST /v1/server/api-keys` 创建带 scope 的 Key |
+| 终端用户身份流（注册/登录/会话） | **Client API** + JWT | SDK 自动持久化 access token |
+| Agent 工具 schema 来源 | **OpenAPI** | `task generate-proto` 后在 `genproto/**/*.swagger.json` 获取 |
+| 快速验证 | **Web 演示** | `task sdk-demo`，设置页填入 seed 输出的 API Key |
+
+典型 Agent 工作流：用 scoped API Key 实例化 `Graviton.withApiKey()` → 读取 OpenAPI 或 SDK 类型 → 调用 Server Databases/Users/Storage API → 将结构化响应回传给 LLM。
 
 ## 目录
 
