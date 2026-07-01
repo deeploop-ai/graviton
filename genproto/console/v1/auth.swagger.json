@@ -23,7 +23,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/orionidconsolev1SignInResponse"
+              "$ref": "#/definitions/gravitonconsolev1SignInResponse"
             }
           },
           "default": {
@@ -39,7 +39,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/orionidconsolev1SignInRequest"
+              "$ref": "#/definitions/gravitonconsolev1SignInRequest"
             }
           }
         ],
@@ -50,7 +50,7 @@
     }
   },
   "definitions": {
-    "orionidconsolev1SignInRequest": {
+    "gravitonconsolev1SignInRequest": {
       "type": "object",
       "properties": {
         "email": {
@@ -61,7 +61,7 @@
         }
       }
     },
-    "orionidconsolev1SignInResponse": {
+    "gravitonconsolev1SignInResponse": {
       "type": "object",
       "properties": {
         "accessToken": {

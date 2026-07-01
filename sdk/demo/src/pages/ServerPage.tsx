@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useOrionid } from "@/lib/orionid-context";
+import { useGraviton } from "@/lib/graviton-context";
 import { suffix } from "@/lib/storage";
 import { ErrorBanner, JsonPanel, MethodTag, PageHeader } from "@/components/Ui";
 
 export function ServerPage() {
-  const { settings, serverClient, run, lastError } = useOrionid();
+  const { settings, serverClient, run, lastError } = useGraviton();
   const [result, setResult] = useState<unknown>(null);
   const [loading, setLoading] = useState(false);
 
@@ -35,7 +35,7 @@ export function ServerPage() {
       {!settings.apiKey ? (
         <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
           请先在{" "}
-          <Link className="text-orionid-accent underline" to="/app/settings">
+          <Link className="text-Graviton-accent underline" to="/app/settings">
             设置
           </Link>{" "}
           填写 Server API Key（来自 <code className="font-mono">go run ./cmd/seed</code>）。

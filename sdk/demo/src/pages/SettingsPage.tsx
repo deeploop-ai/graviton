@@ -1,9 +1,9 @@
 import { FormEvent, useState } from "react";
-import { useOrionid } from "@/lib/orionid-context";
+import { useGraviton } from "@/lib/graviton-context";
 import { PageHeader } from "@/components/Ui";
 
 export function SettingsPage() {
-  const { settings, updateSettings } = useOrionid();
+  const { settings, updateSettings } = useGraviton();
   const [form, setForm] = useState(settings);
   const [saved, setSaved] = useState(false);
 
@@ -18,12 +18,12 @@ export function SettingsPage() {
     <div>
       <PageHeader
         title="连接设置"
-        description="配置 Orionid 服务地址、项目 ID、Server API Key 以及 Documents 演示用的库/集合 ID。"
+        description="配置 Graviton 服务地址、项目 ID、Server API Key 以及 Documents 演示用的库/集合 ID。"
       />
 
       <form className="panel max-w-2xl space-y-4 p-6" onSubmit={onSubmit}>
         <label className="block space-y-1">
-          <span className="text-xs text-orionid-muted">Endpoint</span>
+          <span className="text-xs text-Graviton-muted">Endpoint</span>
           <input
             className="field"
             value={form.endpoint}
@@ -32,7 +32,7 @@ export function SettingsPage() {
           />
         </label>
         <label className="block space-y-1">
-          <span className="text-xs text-orionid-muted">Project ID</span>
+          <span className="text-xs text-Graviton-muted">Project ID</span>
           <input
             className="field"
             value={form.projectId}
@@ -41,17 +41,17 @@ export function SettingsPage() {
           />
         </label>
         <label className="block space-y-1">
-          <span className="text-xs text-orionid-muted">Server API Key</span>
+          <span className="text-xs text-Graviton-muted">Server API Key</span>
           <input
             className="field font-mono"
             type="password"
             value={form.apiKey}
             onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
-            placeholder="orionid-default-api-key-..."
+            placeholder="Graviton-default-api-key-..."
           />
         </label>
         <label className="block space-y-1">
-          <span className="text-xs text-orionid-muted">Documents demoDbId</span>
+          <span className="text-xs text-Graviton-muted">Documents demoDbId</span>
           <input
             className="field font-mono"
             value={form.demoDbId}
@@ -60,7 +60,7 @@ export function SettingsPage() {
           />
         </label>
         <label className="block space-y-1">
-          <span className="text-xs text-orionid-muted">Documents demoCollId</span>
+          <span className="text-xs text-Graviton-muted">Documents demoCollId</span>
           <input
             className="field font-mono"
             value={form.demoCollId}
@@ -72,7 +72,7 @@ export function SettingsPage() {
           <button type="submit" className="btn-primary">
             保存设置
           </button>
-          {saved ? <span className="text-sm text-orionid-success">已保存</span> : null}
+          {saved ? <span className="text-sm text-Graviton-success">已保存</span> : null}
         </div>
       </form>
     </div>

@@ -3,13 +3,13 @@ package client
 import (
 	"context"
 
-	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
-	"github.com/deeploop-ai/orionid/internal/domain/databases"
-	"github.com/deeploop-ai/orionid/internal/domain/messaging"
-	"github.com/deeploop-ai/orionid/internal/domain/projects"
-	infraauth "github.com/deeploop-ai/orionid/internal/infra/auth"
-	inframessaging "github.com/deeploop-ai/orionid/internal/infra/messaging"
-	"github.com/deeploop-ai/orionid/internal/pkg/config"
+	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
+	"github.com/deeploop-ai/graviton/internal/domain/databases"
+	"github.com/deeploop-ai/graviton/internal/domain/messaging"
+	"github.com/deeploop-ai/graviton/internal/domain/projects"
+	infraauth "github.com/deeploop-ai/graviton/internal/infra/auth"
+	inframessaging "github.com/deeploop-ai/graviton/internal/infra/messaging"
+	"github.com/deeploop-ai/graviton/internal/pkg/config"
 	"github.com/redis/go-redis/v9"
 )
 

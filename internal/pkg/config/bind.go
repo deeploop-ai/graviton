@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const EnvPrefix = "ORIONID"
+const EnvPrefix = "GRAVITON"
 
 var envBoundKeys = []string{
 	"security.jwt.secret",

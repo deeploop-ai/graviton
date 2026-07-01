@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
-	"github.com/deeploop-ai/orionid/internal/domain/projects"
+	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
+	"github.com/deeploop-ai/graviton/internal/domain/projects"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

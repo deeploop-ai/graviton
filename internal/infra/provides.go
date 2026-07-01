@@ -1,15 +1,15 @@
 package infra
 
 import (
-	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
-	"github.com/deeploop-ai/orionid/internal/infra/auth"
-	"github.com/deeploop-ai/orionid/internal/infra/bun"
-	"github.com/deeploop-ai/orionid/internal/infra/clients"
-	"github.com/deeploop-ai/orionid/internal/infra/documentdb"
-	infrafunctions "github.com/deeploop-ai/orionid/internal/infra/functions"
-	inframessaging "github.com/deeploop-ai/orionid/internal/infra/messaging"
-	infrastorage "github.com/deeploop-ai/orionid/internal/infra/storage"
-	"github.com/deeploop-ai/orionid/internal/infra/server"
+	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
+	"github.com/deeploop-ai/graviton/internal/infra/auth"
+	"github.com/deeploop-ai/graviton/internal/infra/bun"
+	"github.com/deeploop-ai/graviton/internal/infra/clients"
+	"github.com/deeploop-ai/graviton/internal/infra/documentdb"
+	infrafunctions "github.com/deeploop-ai/graviton/internal/infra/functions"
+	inframessaging "github.com/deeploop-ai/graviton/internal/infra/messaging"
+	infrastorage "github.com/deeploop-ai/graviton/internal/infra/storage"
+	"github.com/deeploop-ai/graviton/internal/infra/server"
 	"github.com/google/wire"
 )
 

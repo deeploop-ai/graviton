@@ -1,3 +1,3 @@
-export { Orionid, OrionidError } from "./orionid.js";
-export type { OrionidConfig } from "./http.js";
+export { Graviton, GravitonError } from "./graviton.js";
+export type { GravitonConfig } from "./http.js";
 export * from "./types.js";

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/deeploop-ai/orionid/internal/domain/databases"
-	"github.com/deeploop-ai/orionid/internal/infra/bun/model"
+	"github.com/deeploop-ai/graviton/internal/domain/databases"
+	"github.com/deeploop-ai/graviton/internal/infra/bun/model"
 )
 
 func (p *postgresDocumentDB) ensureCollectionAccessible(coll *databases.Collection, principal databases.Principal) error {

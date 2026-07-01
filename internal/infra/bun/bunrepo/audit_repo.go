@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/deeploop-ai/orionid/internal/domain/audit"
-	"github.com/deeploop-ai/orionid/internal/infra/bun/model"
-	"github.com/deeploop-ai/orionid/internal/infra/clients"
-	"github.com/deeploop-ai/orionid/pkg/idgen"
+	"github.com/deeploop-ai/graviton/internal/domain/audit"
+	"github.com/deeploop-ai/graviton/internal/infra/bun/model"
+	"github.com/deeploop-ai/graviton/internal/infra/clients"
+	"github.com/deeploop-ai/graviton/pkg/idgen"
 )
 
 type auditRepo struct {

@@ -7,7 +7,7 @@
 package consolev1
 
 import (
-	_ "github.com/deeploop-ai/orionid/genproto/shared/v1"
+	_ "github.com/deeploop-ai/graviton/genproto/shared/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -131,16 +131,16 @@ var File_console_v1_auth_proto protoreflect.FileDescriptor
 
 const file_console_v1_auth_proto_rawDesc = "" +
 	"\n" +
-	"\x15console/v1/auth.proto\x12\x12orionid.console.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x15shared/v1/authz.proto\"A\n" +
+	"\x15console/v1/auth.proto\x12\x13graviton.console.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x15shared/v1/authz.proto\"A\n" +
 	"\rSignInRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"R\n" +
 	"\x0eSignInResponse\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12\x1d\n" +
 	"\n" +
-	"expires_at\x18\x02 \x01(\x03R\texpiresAt2\x92\x01\n" +
-	"\x12ConsoleAuthService\x12t\n" +
-	"\x06SignIn\x12!.orionid.console.v1.SignInRequest\x1a\".orionid.console.v1.SignInResponse\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/v1/console/auth/sign-in\x1a\x06\x92\xb2\x19\x02\b\x01B>Z<github.com/deeploop-ai/orionid/genproto/console/v1;consolev1b\x06proto3"
+	"expires_at\x18\x02 \x01(\x03R\texpiresAt2\x94\x01\n" +
+	"\x12ConsoleAuthService\x12v\n" +
+	"\x06SignIn\x12\".graviton.console.v1.SignInRequest\x1a#.graviton.console.v1.SignInResponse\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/v1/console/auth/sign-in\x1a\x06\x92\xb2\x19\x02\b\x01B?Z=github.com/deeploop-ai/graviton/genproto/console/v1;consolev1b\x06proto3"
 
 var (
 	file_console_v1_auth_proto_rawDescOnce sync.Once
@@ -156,12 +156,12 @@ func file_console_v1_auth_proto_rawDescGZIP() []byte {
 
 var file_console_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_console_v1_auth_proto_goTypes = []any{
-	(*SignInRequest)(nil),  // 0: orionid.console.v1.SignInRequest
-	(*SignInResponse)(nil), // 1: orionid.console.v1.SignInResponse
+	(*SignInRequest)(nil),  // 0: graviton.console.v1.SignInRequest
+	(*SignInResponse)(nil), // 1: graviton.console.v1.SignInResponse
 }
 var file_console_v1_auth_proto_depIdxs = []int32{
-	0, // 0: orionid.console.v1.ConsoleAuthService.SignIn:input_type -> orionid.console.v1.SignInRequest
-	1, // 1: orionid.console.v1.ConsoleAuthService.SignIn:output_type -> orionid.console.v1.SignInResponse
+	0, // 0: graviton.console.v1.ConsoleAuthService.SignIn:input_type -> graviton.console.v1.SignInRequest
+	1, // 1: graviton.console.v1.ConsoleAuthService.SignIn:output_type -> graviton.console.v1.SignInResponse
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/deeploop-ai/orionid/internal/pkg/contexts"
+	"github.com/deeploop-ai/graviton/internal/pkg/contexts"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )

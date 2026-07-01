@@ -3,7 +3,7 @@ package contexts
 import (
 	"context"
 
-	"github.com/deeploop-ai/orionid/internal/domain/shared"
+	"github.com/deeploop-ai/graviton/internal/domain/shared"
 )
 
 func WithPrincipal(ctx context.Context, p *shared.Principal) context.Context {

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/deeploop-ai/orionid/console"
+	"github.com/deeploop-ai/graviton/console"
 )
 
 // NewConsoleHandler serves the embedded Admin Console SPA.

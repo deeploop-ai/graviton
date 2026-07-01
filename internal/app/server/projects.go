@@ -6,12 +6,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/deeploop-ai/orionid/internal/domain/databases"
-	"github.com/deeploop-ai/orionid/internal/domain/projects"
-	"github.com/deeploop-ai/orionid/internal/infra/clients"
-	"github.com/deeploop-ai/orionid/internal/pkg/contexts"
-	"github.com/deeploop-ai/orionid/pkg/crud"
-	"github.com/deeploop-ai/orionid/pkg/idgen"
+	"github.com/deeploop-ai/graviton/internal/domain/databases"
+	"github.com/deeploop-ai/graviton/internal/domain/projects"
+	"github.com/deeploop-ai/graviton/internal/infra/clients"
+	"github.com/deeploop-ai/graviton/internal/pkg/contexts"
+	"github.com/deeploop-ai/graviton/pkg/crud"
+	"github.com/deeploop-ai/graviton/pkg/idgen"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

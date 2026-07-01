@@ -8,7 +8,7 @@ package clientv1
 
 import (
 	context "context"
-	v1 "github.com/deeploop-ai/orionid/genproto/shared/v1"
+	v1 "github.com/deeploop-ai/graviton/genproto/shared/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,12 +20,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DatabasesService_CreateDocument_FullMethodName = "/orionid.client.v1.DatabasesService/CreateDocument"
-	DatabasesService_ListDocuments_FullMethodName  = "/orionid.client.v1.DatabasesService/ListDocuments"
-	DatabasesService_GetDocument_FullMethodName    = "/orionid.client.v1.DatabasesService/GetDocument"
-	DatabasesService_UpdateDocument_FullMethodName = "/orionid.client.v1.DatabasesService/UpdateDocument"
-	DatabasesService_DeleteDocument_FullMethodName = "/orionid.client.v1.DatabasesService/DeleteDocument"
-	DatabasesService_CountDocuments_FullMethodName = "/orionid.client.v1.DatabasesService/CountDocuments"
+	DatabasesService_CreateDocument_FullMethodName = "/graviton.client.v1.DatabasesService/CreateDocument"
+	DatabasesService_ListDocuments_FullMethodName  = "/graviton.client.v1.DatabasesService/ListDocuments"
+	DatabasesService_GetDocument_FullMethodName    = "/graviton.client.v1.DatabasesService/GetDocument"
+	DatabasesService_UpdateDocument_FullMethodName = "/graviton.client.v1.DatabasesService/UpdateDocument"
+	DatabasesService_DeleteDocument_FullMethodName = "/graviton.client.v1.DatabasesService/DeleteDocument"
+	DatabasesService_CountDocuments_FullMethodName = "/graviton.client.v1.DatabasesService/CountDocuments"
 )
 
 // DatabasesServiceClient is the client API for DatabasesService service.
@@ -279,7 +279,7 @@ func _DatabasesService_CountDocuments_Handler(srv interface{}, ctx context.Conte
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var DatabasesService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "orionid.client.v1.DatabasesService",
+	ServiceName: "graviton.client.v1.DatabasesService",
 	HandlerType: (*DatabasesServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

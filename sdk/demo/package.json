@@ -1,5 +1,5 @@
 {
-  "name": "@orionid/demo",
+  "name": "@graviton/demo",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@orionid/sdk": "file:../typescript",
+    "@graviton/sdk": "file:../typescript",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.18.0"

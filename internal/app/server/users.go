@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/deeploop-ai/orionid/internal/domain/databases"
-	"github.com/deeploop-ai/orionid/internal/domain/projects"
-	"github.com/deeploop-ai/orionid/internal/domain/users"
+	"github.com/deeploop-ai/graviton/internal/domain/databases"
+	"github.com/deeploop-ai/graviton/internal/domain/projects"
+	"github.com/deeploop-ai/graviton/internal/domain/users"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

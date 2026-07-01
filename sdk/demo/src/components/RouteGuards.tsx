@@ -1,8 +1,8 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useOrionid } from "@/lib/orionid-context";
+import { useGraviton } from "@/lib/graviton-context";
 
 export function ProtectedRoute() {
-  const { auth } = useOrionid();
+  const { auth } = useGraviton();
   if (!auth) {
     return <Navigate to="/login" replace />;
   }
@@ -10,7 +10,7 @@ export function ProtectedRoute() {
 }
 
 export function GuestRoute() {
-  const { auth } = useOrionid();
+  const { auth } = useGraviton();
   if (auth) {
     return <Navigate to="/app" replace />;
   }

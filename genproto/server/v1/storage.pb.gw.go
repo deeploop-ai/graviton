@@ -14,7 +14,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/deeploop-ai/orionid/genproto/shared/v1"
+	"github.com/deeploop-ai/graviton/genproto/shared/v1"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/utilities"
 	"google.golang.org/grpc"
@@ -396,7 +396,7 @@ func RegisterStorageServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.StorageService/CreateBucket", runtime.WithHTTPPathPattern("/v1/server/storage/buckets"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.server.v1.StorageService/CreateBucket", runtime.WithHTTPPathPattern("/v1/server/storage/buckets"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -416,7 +416,7 @@ func RegisterStorageServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.StorageService/ListBuckets", runtime.WithHTTPPathPattern("/v1/server/storage/buckets"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.server.v1.StorageService/ListBuckets", runtime.WithHTTPPathPattern("/v1/server/storage/buckets"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -436,7 +436,7 @@ func RegisterStorageServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.StorageService/GetBucket", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{id}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.server.v1.StorageService/GetBucket", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -456,7 +456,7 @@ func RegisterStorageServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.StorageService/DeleteBucket", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{id}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.server.v1.StorageService/DeleteBucket", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -476,7 +476,7 @@ func RegisterStorageServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.StorageService/CreateFile", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.server.v1.StorageService/CreateFile", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -496,7 +496,7 @@ func RegisterStorageServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.StorageService/ListFiles", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.server.v1.StorageService/ListFiles", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -516,7 +516,7 @@ func RegisterStorageServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.StorageService/GetFile", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files/{file_id}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.server.v1.StorageService/GetFile", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files/{file_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -536,7 +536,7 @@ func RegisterStorageServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.StorageService/DeleteFile", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files/{file_id}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.server.v1.StorageService/DeleteFile", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files/{file_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -594,7 +594,7 @@ func RegisterStorageServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.StorageService/CreateBucket", runtime.WithHTTPPathPattern("/v1/server/storage/buckets"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.server.v1.StorageService/CreateBucket", runtime.WithHTTPPathPattern("/v1/server/storage/buckets"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -611,7 +611,7 @@ func RegisterStorageServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.StorageService/ListBuckets", runtime.WithHTTPPathPattern("/v1/server/storage/buckets"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.server.v1.StorageService/ListBuckets", runtime.WithHTTPPathPattern("/v1/server/storage/buckets"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -628,7 +628,7 @@ func RegisterStorageServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.StorageService/GetBucket", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{id}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.server.v1.StorageService/GetBucket", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -645,7 +645,7 @@ func RegisterStorageServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.StorageService/DeleteBucket", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{id}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.server.v1.StorageService/DeleteBucket", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -662,7 +662,7 @@ func RegisterStorageServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.StorageService/CreateFile", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.server.v1.StorageService/CreateFile", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -679,7 +679,7 @@ func RegisterStorageServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.StorageService/ListFiles", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.server.v1.StorageService/ListFiles", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -696,7 +696,7 @@ func RegisterStorageServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.StorageService/GetFile", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files/{file_id}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.server.v1.StorageService/GetFile", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files/{file_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -713,7 +713,7 @@ func RegisterStorageServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.StorageService/DeleteFile", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files/{file_id}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.server.v1.StorageService/DeleteFile", runtime.WithHTTPPathPattern("/v1/server/storage/buckets/{bucket_id}/files/{file_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return

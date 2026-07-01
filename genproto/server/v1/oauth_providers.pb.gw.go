@@ -14,7 +14,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/deeploop-ai/orionid/genproto/shared/v1"
+	"github.com/deeploop-ai/graviton/genproto/shared/v1"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/utilities"
 	"google.golang.org/grpc"
@@ -167,7 +167,7 @@ func RegisterOAuthProvidersServiceHandlerServer(ctx context.Context, mux *runtim
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.OAuthProvidersService/ListOAuthProviders", runtime.WithHTTPPathPattern("/v1/server/oauth-providers"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.server.v1.OAuthProvidersService/ListOAuthProviders", runtime.WithHTTPPathPattern("/v1/server/oauth-providers"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -187,7 +187,7 @@ func RegisterOAuthProvidersServiceHandlerServer(ctx context.Context, mux *runtim
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.OAuthProvidersService/UpsertOAuthProvider", runtime.WithHTTPPathPattern("/v1/server/oauth-providers/{provider}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.server.v1.OAuthProvidersService/UpsertOAuthProvider", runtime.WithHTTPPathPattern("/v1/server/oauth-providers/{provider}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -207,7 +207,7 @@ func RegisterOAuthProvidersServiceHandlerServer(ctx context.Context, mux *runtim
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.OAuthProvidersService/DeleteOAuthProvider", runtime.WithHTTPPathPattern("/v1/server/oauth-providers/{provider}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.server.v1.OAuthProvidersService/DeleteOAuthProvider", runtime.WithHTTPPathPattern("/v1/server/oauth-providers/{provider}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -265,7 +265,7 @@ func RegisterOAuthProvidersServiceHandlerClient(ctx context.Context, mux *runtim
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.OAuthProvidersService/ListOAuthProviders", runtime.WithHTTPPathPattern("/v1/server/oauth-providers"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.server.v1.OAuthProvidersService/ListOAuthProviders", runtime.WithHTTPPathPattern("/v1/server/oauth-providers"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -282,7 +282,7 @@ func RegisterOAuthProvidersServiceHandlerClient(ctx context.Context, mux *runtim
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.OAuthProvidersService/UpsertOAuthProvider", runtime.WithHTTPPathPattern("/v1/server/oauth-providers/{provider}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.server.v1.OAuthProvidersService/UpsertOAuthProvider", runtime.WithHTTPPathPattern("/v1/server/oauth-providers/{provider}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -299,7 +299,7 @@ func RegisterOAuthProvidersServiceHandlerClient(ctx context.Context, mux *runtim
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.OAuthProvidersService/DeleteOAuthProvider", runtime.WithHTTPPathPattern("/v1/server/oauth-providers/{provider}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.server.v1.OAuthProvidersService/DeleteOAuthProvider", runtime.WithHTTPPathPattern("/v1/server/oauth-providers/{provider}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return

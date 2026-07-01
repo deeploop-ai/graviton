@@ -10,13 +10,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/deeploop-ai/orionid/internal/app/client"
-	appstorage "github.com/deeploop-ai/orionid/internal/app/storage"
-	"github.com/deeploop-ai/orionid/internal/infra/auth"
-	"github.com/deeploop-ai/orionid/internal/infra/bun/bunrepo"
-	"github.com/deeploop-ai/orionid/internal/infra/documentdb"
-	"github.com/deeploop-ai/orionid/internal/pkg/config"
-	"github.com/deeploop-ai/orionid/internal/testutil"
+	"github.com/deeploop-ai/graviton/internal/app/client"
+	appstorage "github.com/deeploop-ai/graviton/internal/app/storage"
+	"github.com/deeploop-ai/graviton/internal/infra/auth"
+	"github.com/deeploop-ai/graviton/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/graviton/internal/infra/documentdb"
+	"github.com/deeploop-ai/graviton/internal/pkg/config"
+	"github.com/deeploop-ai/graviton/internal/testutil"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/stretchr/testify/require"
 )
@@ -182,7 +182,7 @@ func TestFileHandler_UserJWTProjectScope(t *testing.T) {
 
 	_, tokens, _, err := account.SignUp(ctx, client.SignUpCommand{
 		ProjectID: projectA,
-		Email:     "storage-http@orionid.local",
+		Email:     "storage-http@graviton.local",
 		Password:  "User@123456",
 		Name:      "Storage HTTP",
 	})
@@ -245,7 +245,7 @@ func TestFileHandler_UserJWTProjectScope(t *testing.T) {
 	require.Equal(t, http.StatusCreated, resp.StatusCode)
 	require.NotEmpty(t, created.ID)
 
-	// Forged X-Orionid-Project must not grant access to another project's bucket.
+	// Forged X-Graviton-Project must not grant access to another project's bucket.
 	bodyB := &bytes.Buffer{}
 	writerB := multipart.NewWriter(bodyB)
 	partB, err := writerB.CreateFormFile("file", "blocked.txt")
@@ -258,7 +258,7 @@ func TestFileHandler_UserJWTProjectScope(t *testing.T) {
 	require.NoError(t, err)
 	reqB.Header.Set("Content-Type", writerB.FormDataContentType())
 	reqB.Header.Set("Authorization", "Bearer "+tokens.AccessToken)
-	reqB.Header.Set("X-Orionid-Project", projectB)
+	reqB.Header.Set("X-Graviton-Project", projectB)
 	respB, err := http.DefaultClient.Do(reqB)
 	require.NoError(t, err)
 	respB.Body.Close()

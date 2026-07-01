@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
+	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -59,5 +59,5 @@ func (s *RedisOAuthStateStore) Delete(ctx context.Context, stateID string) error
 }
 
 func oauthStateKey(stateID string) string {
-	return "orionid:oauth:state:" + stateID
+	return "Graviton:oauth:state:" + stateID
 }

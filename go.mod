@@ -1,4 +1,4 @@
-module github.com/deeploop-ai/orionid
+module github.com/deeploop-ai/graviton
 
 go 1.25.0
 

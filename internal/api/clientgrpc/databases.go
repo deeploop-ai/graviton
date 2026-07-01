@@ -3,11 +3,11 @@ package clientgrpc
 import (
 	"context"
 
-	clientv1 "github.com/deeploop-ai/orionid/genproto/client/v1"
-	sharedv1 "github.com/deeploop-ai/orionid/genproto/shared/v1"
-	"github.com/deeploop-ai/orionid/internal/app/client"
-	"github.com/deeploop-ai/orionid/internal/domain/databases"
-	"github.com/deeploop-ai/orionid/internal/pkg/contexts"
+	clientv1 "github.com/deeploop-ai/graviton/genproto/client/v1"
+	sharedv1 "github.com/deeploop-ai/graviton/genproto/shared/v1"
+	"github.com/deeploop-ai/graviton/internal/app/client"
+	"github.com/deeploop-ai/graviton/internal/domain/databases"
+	"github.com/deeploop-ai/graviton/internal/pkg/contexts"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -123,7 +123,7 @@ func resolveProjectID(ctx context.Context, reqProjectID string) (string, error) 
 		return reqProjectID, nil
 	}
 	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		if values := md.Get("X-Orionid-Project"); len(values) > 0 && values[0] != "" {
+		if values := md.Get("X-Graviton-Project"); len(values) > 0 && values[0] != "" {
 			return values[0], nil
 		}
 	}

@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ConsoleAuthService_SignIn_FullMethodName = "/orionid.console.v1.ConsoleAuthService/SignIn"
+	ConsoleAuthService_SignIn_FullMethodName = "/graviton.console.v1.ConsoleAuthService/SignIn"
 )
 
 // ConsoleAuthServiceClient is the client API for ConsoleAuthService service.
@@ -108,7 +108,7 @@ func _ConsoleAuthService_SignIn_Handler(srv interface{}, ctx context.Context, de
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ConsoleAuthService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "orionid.console.v1.ConsoleAuthService",
+	ServiceName: "graviton.console.v1.ConsoleAuthService",
 	HandlerType: (*ConsoleAuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

@@ -293,11 +293,11 @@ function MessagingPanel() {
         <h3 className="font-medium">Email OTP（SMTP）</h3>
         <ul className="list-disc pl-5 text-muted-foreground space-y-1">
           <li>
-            <code>ORIONID_MESSAGING_SMTP_HOST</code> / <code>PORT</code> /{" "}
+            <code>GRAVITON_MESSAGING_SMTP_HOST</code> / <code>PORT</code> /{" "}
             <code>USERNAME</code> / <code>PASSWORD</code>
           </li>
           <li>
-            开发模式：<code>ORIONID_MESSAGING_DEV_LOG_OTP=true</code> 将验证码写入服务日志
+            开发模式：<code>GRAVITON_MESSAGING_DEV_LOG_OTP=true</code> 将验证码写入服务日志
           </li>
         </ul>
       </div>
@@ -305,11 +305,11 @@ function MessagingPanel() {
         <h3 className="font-medium">SMS OTP（Twilio）</h3>
         <ul className="list-disc pl-5 text-muted-foreground space-y-1">
           <li>
-            <code>ORIONID_MESSAGING_SMS_TWILIO_ACCOUNT_SID</code> /{" "}
+            <code>GRAVITON_MESSAGING_SMS_TWILIO_ACCOUNT_SID</code> /{" "}
             <code>AUTH_TOKEN</code> / <code>FROM</code>
           </li>
           <li>
-            开发模式：<code>ORIONID_MESSAGING_DEV_LOG_SMS=true</code>
+            开发模式：<code>GRAVITON_MESSAGING_DEV_LOG_SMS=true</code>
           </li>
         </ul>
       </div>

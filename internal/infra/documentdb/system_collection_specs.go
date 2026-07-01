@@ -1,6 +1,6 @@
 package documentdb
 
-import "github.com/deeploop-ai/orionid/internal/domain/databases"
+import "github.com/deeploop-ai/graviton/internal/domain/databases"
 
 type systemCollectionSpec struct {
 	id          string

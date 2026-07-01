@@ -7,9 +7,9 @@ server:
     timeout: "60s"
     public_url: "http://localhost:9099"
     cors:
-      allow_origins: ["http://orionid.local:9099"]  # set explicit origins; "*" is rejected when allow_credentials=true
+      allow_origins: ["http://graviton.local:9099"]  # set explicit origins; "*" is rejected when allow_credentials=true
       allow_methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
-      allow_headers: ["Content-Type", "Authorization", "X-Api-Key", "X-Orionid-Project", "X-Request-Id", "X-Correlation-Id"]
+      allow_headers: ["Content-Type", "Authorization", "X-Api-Key", "X-Graviton-Project", "X-Request-Id", "X-Correlation-Id"]
       allow_credentials: true
       max_age: 3600
   metrics:
@@ -17,7 +17,7 @@ server:
 
 security:
   jwt:
-    secret: ""              # env: ORIONID_SECURITY_JWT_SECRET
+    secret: ""              # env: GRAVITON_SECURITY_JWT_SECRET
     access_ttl: "15m"
     refresh_ttl: "7d"
   api_key:
@@ -25,7 +25,7 @@ security:
 
 data:
   database:
-    source: ""              # env: ORIONID_DATA_DATABASE_SOURCE
+    source: ""              # env: GRAVITON_DATA_DATABASE_SOURCE
     debug: true
     pool:
       max_idle_conns: 4
@@ -34,17 +34,17 @@ data:
       conn_max_idle_time: "30m"
   redis:
     addr: "127.0.0.1:6379"
-    password: ""            # env: ORIONID_DATA_REDIS_PASSWORD
+    password: ""            # env: GRAVITON_DATA_REDIS_PASSWORD
     db: 0
 
 storage:
   provider: "s3"            # or "minio" / "local"
   s3:
-    endpoint: ""            # env: ORIONID_STORAGE_S3_ENDPOINT
+    endpoint: ""            # env: GRAVITON_STORAGE_S3_ENDPOINT
     region: "us-east-1"
-    bucket: "orionid-storage"
-    access_key_id: ""       # env: ORIONID_STORAGE_S3_ACCESS_KEY
-    secret_access_key: ""   # env: ORIONID_STORAGE_S3_SECRET_KEY
+    bucket: "Graviton-storage"
+    access_key_id: ""       # env: GRAVITON_STORAGE_S3_ACCESS_KEY
+    secret_access_key: ""   # env: GRAVITON_STORAGE_S3_SECRET_KEY
   local:
     path: "./data/files"
 
@@ -52,27 +52,27 @@ functions:
   executor: "docker"
   docker:
     host: "unix:///var/run/docker.sock"
-    network: "orionid-functions"
-    registry: "orionid-funcs"
+    network: "Graviton-functions"
+    registry: "Graviton-funcs"
 
 telemetry:
   enabled: false
   otlp_endpoint: ""
-  service_name: "orionid"
+  service_name: "Graviton"
 
 messaging:
   smtp:
-    host: ""                # env: ORIONID_MESSAGING_SMTP_HOST
+    host: ""                # env: GRAVITON_MESSAGING_SMTP_HOST
     port: 587
     username: ""
-    password: ""            # env: ORIONID_MESSAGING_SMTP_PASSWORD
-    from: "noreply@orionid.local"
+    password: ""            # env: GRAVITON_MESSAGING_SMTP_PASSWORD
+    from: "noreply@graviton.local"
     use_tls: true
   dev_log_otp: true         # log OTP to stdout when SMTP host is empty (dev only)
   dev_log_sms: true         # log SMS OTP to stdout when SMS provider is empty (dev only)
   sms:
     provider: ""            # twilio
     twilio:
-      account_sid: ""       # env: ORIONID_MESSAGING_SMS_TWILIO_ACCOUNT_SID
-      auth_token: ""        # env: ORIONID_MESSAGING_SMS_TWILIO_AUTH_TOKEN
+      account_sid: ""       # env: GRAVITON_MESSAGING_SMS_TWILIO_ACCOUNT_SID
+      auth_token: ""        # env: GRAVITON_MESSAGING_SMS_TWILIO_AUTH_TOKEN
       from: ""

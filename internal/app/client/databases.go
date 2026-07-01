@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/deeploop-ai/orionid/internal/app/shared"
-	"github.com/deeploop-ai/orionid/internal/domain/databases"
-	"github.com/deeploop-ai/orionid/internal/domain/projects"
-	"github.com/deeploop-ai/orionid/internal/pkg/contexts"
+	"github.com/deeploop-ai/graviton/internal/app/shared"
+	"github.com/deeploop-ai/graviton/internal/domain/databases"
+	"github.com/deeploop-ai/graviton/internal/domain/projects"
+	"github.com/deeploop-ai/graviton/internal/pkg/contexts"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

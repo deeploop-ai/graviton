@@ -74,7 +74,7 @@ func RegisterConsoleAuthServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.console.v1.ConsoleAuthService/SignIn", runtime.WithHTTPPathPattern("/v1/console/auth/sign-in"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.console.v1.ConsoleAuthService/SignIn", runtime.WithHTTPPathPattern("/v1/console/auth/sign-in"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -132,7 +132,7 @@ func RegisterConsoleAuthServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.console.v1.ConsoleAuthService/SignIn", runtime.WithHTTPPathPattern("/v1/console/auth/sign-in"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.console.v1.ConsoleAuthService/SignIn", runtime.WithHTTPPathPattern("/v1/console/auth/sign-in"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return

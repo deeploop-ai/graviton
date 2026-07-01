@@ -7,7 +7,7 @@
 
 ## 1. 目标
 
-为 Orionid Client API 提供统一、可扩展的多方式登录能力：
+为 Graviton Client API 提供统一、可扩展的多方式登录能力：
 
 | 方式 | 阶段 | 状态 |
 |------|------|------|
@@ -103,15 +103,15 @@ HTTP 请求
 OTP 挑战与限流数据存 Redis，利用 TTL 自动过期：
 
 ```
-orionid:otp:ch:{challenge_id}     → 挑战 JSON（email、code_hash、attempts）
-orionid:otp:send:{project}:{email} → 发码冷却（60s）
-orionid:otp:ip:{project}:{ip}     → IP 计数（1h 窗口，上限 10）
+Graviton:otp:ch:{challenge_id}     → 挑战 JSON（email、code_hash、attempts）
+Graviton:otp:send:{project}:{email} → 发码冷却（60s）
+Graviton:otp:ip:{project}:{ip}     → IP 计数（1h 窗口，上限 10）
 ```
 
 OAuth state（Phase 2）：
 
 ```
-orionid:oauth:state:{state}       → project_id、provider、redirect_uri、pkce_verifier
+Graviton:oauth:state:{state}       → project_id、provider、redirect_uri、pkce_verifier
 ```
 
 ---
@@ -263,11 +263,11 @@ type Mailer interface {
 ```yaml
 messaging:
   smtp:
-    host: ""          # ORIONID_MESSAGING_SMTP_HOST
+    host: ""          # GRAVITON_MESSAGING_SMTP_HOST
     port: 587
     username: ""
-    password: ""      # ORIONID_MESSAGING_SMTP_PASSWORD
-    from: "noreply@orionid.local"
+    password: ""      # GRAVITON_MESSAGING_SMTP_PASSWORD
+    from: "noreply@graviton.local"
     use_tls: true
   dev_log_otp: false  # 开发模式：SMTP 未配置时将 OTP 写入日志（禁止生产开启）
 ```

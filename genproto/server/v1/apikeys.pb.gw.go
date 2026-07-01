@@ -14,7 +14,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/deeploop-ai/orionid/genproto/shared/v1"
+	"github.com/deeploop-ai/graviton/genproto/shared/v1"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/utilities"
 	"google.golang.org/grpc"
@@ -188,7 +188,7 @@ func RegisterAPIKeysServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.APIKeysService/CreateAPIKey", runtime.WithHTTPPathPattern("/v1/server/api-keys"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.server.v1.APIKeysService/CreateAPIKey", runtime.WithHTTPPathPattern("/v1/server/api-keys"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -208,7 +208,7 @@ func RegisterAPIKeysServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.APIKeysService/ListAPIKeys", runtime.WithHTTPPathPattern("/v1/server/api-keys"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.server.v1.APIKeysService/ListAPIKeys", runtime.WithHTTPPathPattern("/v1/server/api-keys"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -228,7 +228,7 @@ func RegisterAPIKeysServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.APIKeysService/GetAPIKey", runtime.WithHTTPPathPattern("/v1/server/api-keys/{id}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.server.v1.APIKeysService/GetAPIKey", runtime.WithHTTPPathPattern("/v1/server/api-keys/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -248,7 +248,7 @@ func RegisterAPIKeysServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/orionid.server.v1.APIKeysService/DeleteAPIKey", runtime.WithHTTPPathPattern("/v1/server/api-keys/{id}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/graviton.server.v1.APIKeysService/DeleteAPIKey", runtime.WithHTTPPathPattern("/v1/server/api-keys/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -306,7 +306,7 @@ func RegisterAPIKeysServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.APIKeysService/CreateAPIKey", runtime.WithHTTPPathPattern("/v1/server/api-keys"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.server.v1.APIKeysService/CreateAPIKey", runtime.WithHTTPPathPattern("/v1/server/api-keys"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -323,7 +323,7 @@ func RegisterAPIKeysServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.APIKeysService/ListAPIKeys", runtime.WithHTTPPathPattern("/v1/server/api-keys"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.server.v1.APIKeysService/ListAPIKeys", runtime.WithHTTPPathPattern("/v1/server/api-keys"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -340,7 +340,7 @@ func RegisterAPIKeysServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.APIKeysService/GetAPIKey", runtime.WithHTTPPathPattern("/v1/server/api-keys/{id}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.server.v1.APIKeysService/GetAPIKey", runtime.WithHTTPPathPattern("/v1/server/api-keys/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -357,7 +357,7 @@ func RegisterAPIKeysServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/orionid.server.v1.APIKeysService/DeleteAPIKey", runtime.WithHTTPPathPattern("/v1/server/api-keys/{id}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/graviton.server.v1.APIKeysService/DeleteAPIKey", runtime.WithHTTPPathPattern("/v1/server/api-keys/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return

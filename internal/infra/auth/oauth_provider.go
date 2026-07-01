@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
+	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
 	"golang.org/x/oauth2"
 	githuboauth "golang.org/x/oauth2/github"
 	googleoauth "golang.org/x/oauth2/google"

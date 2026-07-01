@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package orionid.client.v1;
+package graviton.client.v1;
 
-option go_package = "github.com/deeploop-ai/orionid/genproto/client/v1;clientv1";
+option go_package = "github.com/deeploop-ai/graviton/genproto/client/v1;clientv1";
 
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
@@ -11,96 +11,96 @@ import "shared/v1/authz.proto";
 import "shared/v1/common.proto";
 
 service AccountService {
-  option (orionid.shared.v1.service_auth) = { default_access: ACCESS_AUTHENTICATED };
+  option (graviton.shared.v1.service_auth) = { default_access: ACCESS_AUTHENTICATED };
 
   rpc SignUp(SignUpRequest) returns (SignUpResponse) {
     option (google.api.http) = { post: "/v1/account/sign-up", body: "*" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 
   rpc SignIn(SignInRequest) returns (SignInResponse) {
     option (google.api.http) = { post: "/v1/account/sign-in", body: "*" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 
   rpc SignOut(SignOutRequest) returns (shared.v1.Empty) {
     option (google.api.http) = { post: "/v1/account/sign-out", body: "*" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 
   rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {
     option (google.api.http) = { post: "/v1/account/refresh", body: "*" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 
   rpc Me(MeRequest) returns (Account) {
     option (google.api.http) = { get: "/v1/account/me" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 
   rpc UpdateAccount(UpdateAccountRequest) returns (Account) {
     option (google.api.http) = { patch: "/v1/account", body: "*" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 
   rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
     option (google.api.http) = { get: "/v1/account/sessions" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 
   rpc DeleteSession(DeleteSessionRequest) returns (shared.v1.Empty) {
     option (google.api.http) = { delete: "/v1/account/sessions/{session_id}" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 
   rpc DeleteSessions(DeleteSessionsRequest) returns (shared.v1.Empty) {
     option (google.api.http) = { delete: "/v1/account/sessions" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 
   rpc GetPrefs(GetPrefsRequest) returns (GetPrefsResponse) {
     option (google.api.http) = { get: "/v1/account/prefs" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 
   rpc UpdatePrefs(UpdatePrefsRequest) returns (GetPrefsResponse) {
     option (google.api.http) = { put: "/v1/account/prefs", body: "*" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
 
   rpc CreateEmailOTP(CreateEmailOTPRequest) returns (ChallengeResponse) {
     option (google.api.http) = { post: "/v1/account/sessions/email-otp", body: "*" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 
   rpc CreateEmailOTPSession(CreateEmailOTPSessionRequest) returns (SignInResponse) {
     option (google.api.http) = { post: "/v1/account/sessions/email-otp/verify", body: "*" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 
   rpc CreateOAuth2Session(CreateOAuth2SessionRequest) returns (CreateOAuth2SessionResponse) {
     option (google.api.http) = { get: "/v1/account/sessions/oauth2/{provider}" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 
   rpc CreateOAuth2TokenSession(CreateOAuth2TokenSessionRequest) returns (SignInResponse) {
     option (google.api.http) = { post: "/v1/account/sessions/oauth2/{provider}/token", body: "*" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 
   rpc CreatePhoneOTP(CreatePhoneOTPRequest) returns (ChallengeResponse) {
     option (google.api.http) = { post: "/v1/account/sessions/phone-otp", body: "*" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 
   rpc CreatePhoneOTPSession(CreatePhoneOTPSessionRequest) returns (SignInResponse) {
     option (google.api.http) = { post: "/v1/account/sessions/phone-otp/verify", body: "*" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 
   rpc CreateWeChatMiniProgramSession(CreateWeChatMiniProgramSessionRequest) returns (SignInResponse) {
     option (google.api.http) = { post: "/v1/account/sessions/wechat/miniprogram", body: "*" };
-    option (orionid.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
 }
 

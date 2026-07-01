@@ -1,14 +1,14 @@
 syntax = "proto3";
 
-package orionid.console.v1;
+package graviton.console.v1;
 
-option go_package = "github.com/deeploop-ai/orionid/genproto/console/v1;consolev1";
+option go_package = "github.com/deeploop-ai/graviton/genproto/console/v1;consolev1";
 
 import "google/api/annotations.proto";
 import "shared/v1/authz.proto";
 
 service ConsoleAuthService {
-  option (orionid.shared.v1.service_auth) = { default_access: ACCESS_PUBLIC };
+  option (graviton.shared.v1.service_auth) = { default_access: ACCESS_PUBLIC };
 
   rpc SignIn(SignInRequest) returns (SignInResponse) {
     option (google.api.http) = { post: "/v1/console/auth/sign-in", body: "*" };

@@ -1,8 +1,8 @@
-import { OrionidError, parseErrorResponse } from "./errors.js";
+import { GravitonError, parseErrorResponse } from "./errors.js";
 
 export type AuthMode = "apiKey" | "user" | "none";
 
-export interface OrionidConfig {
+export interface GravitonConfig {
   endpoint: string;
   projectId: string;
   apiKey?: string;
@@ -23,7 +23,7 @@ export class HttpTransport {
   private accessToken?: string;
   private fetchImpl: typeof fetch;
 
-  constructor(config: OrionidConfig) {
+  constructor(config: GravitonConfig) {
     this.endpoint = config.endpoint.replace(/\/+$/, "");
     this.projectId = config.projectId;
     this.apiKey = config.apiKey;
@@ -72,10 +72,10 @@ export class HttpTransport {
     const auth = options.auth ?? "user";
     if (auth === "apiKey") {
       if (!this.apiKey) {
-        throw new OrionidError("API key is required for this request", 0);
+        throw new GravitonError("API key is required for this request", 0);
       }
       headers["X-Api-Key"] = this.apiKey;
-      headers["X-Orionid-Project"] = this.projectId;
+      headers["X-Graviton-Project"] = this.projectId;
     } else if (auth === "user") {
       if (this.accessToken) {
         headers.Authorization = `Bearer ${this.accessToken}`;
@@ -113,10 +113,10 @@ export class HttpTransport {
     const headers: Record<string, string> = {};
     if (auth === "apiKey") {
       if (!this.apiKey) {
-        throw new OrionidError("API key is required for this request", 0);
+        throw new GravitonError("API key is required for this request", 0);
       }
       headers["X-Api-Key"] = this.apiKey;
-      headers["X-Orionid-Project"] = this.projectId;
+      headers["X-Graviton-Project"] = this.projectId;
     } else if (auth === "user" && this.accessToken) {
       headers.Authorization = `Bearer ${this.accessToken}`;
     }

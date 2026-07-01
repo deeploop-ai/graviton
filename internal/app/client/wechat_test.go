@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
-	"github.com/deeploop-ai/orionid/internal/infra/bun/bunrepo"
-	"github.com/deeploop-ai/orionid/internal/infra/bun/model"
-	"github.com/deeploop-ai/orionid/internal/infra/documentdb"
-	"github.com/deeploop-ai/orionid/internal/pkg/config"
-	"github.com/deeploop-ai/orionid/internal/testutil"
+	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
+	"github.com/deeploop-ai/graviton/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/graviton/internal/infra/bun/model"
+	"github.com/deeploop-ai/graviton/internal/infra/documentdb"
+	"github.com/deeploop-ai/graviton/internal/pkg/config"
+	"github.com/deeploop-ai/graviton/internal/testutil"
 	"github.com/stretchr/testify/require"
 )
 

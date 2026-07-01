@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/deeploop-ai/orionid/internal/pkg/contexts"
-	"github.com/deeploop-ai/orionid/pkg/grpc/interceptor"
+	"github.com/deeploop-ai/graviton/internal/pkg/contexts"
+	"github.com/deeploop-ai/graviton/pkg/grpc/interceptor"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"

@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
-	"github.com/deeploop-ai/orionid/internal/domain/projects"
-	"github.com/deeploop-ai/orionid/internal/infra/bun/bunrepo"
-	"github.com/deeploop-ai/orionid/internal/testutil"
+	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
+	"github.com/deeploop-ai/graviton/internal/domain/projects"
+	"github.com/deeploop-ai/graviton/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/graviton/internal/testutil"
 	"github.com/stretchr/testify/require"
 )
 

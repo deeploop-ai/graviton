@@ -399,7 +399,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/orionidserverv1ListDocumentsResponse"
+              "$ref": "#/definitions/gravitonserverv1ListDocumentsResponse"
             }
           },
           "default": {
@@ -456,7 +456,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/orionidserverv1Document"
+              "$ref": "#/definitions/gravitonserverv1Document"
             }
           },
           "default": {
@@ -484,7 +484,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/orionidserverv1DatabasesServiceCreateDocumentBody"
+              "$ref": "#/definitions/gravitonserverv1DatabasesServiceCreateDocumentBody"
             }
           }
         ],
@@ -588,7 +588,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/orionidserverv1CountDocumentsResponse"
+              "$ref": "#/definitions/gravitonserverv1CountDocumentsResponse"
             }
           },
           "default": {
@@ -647,7 +647,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/orionidserverv1Document"
+              "$ref": "#/definitions/gravitonserverv1Document"
             }
           },
           "default": {
@@ -727,7 +727,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/orionidserverv1Document"
+              "$ref": "#/definitions/gravitonserverv1Document"
             }
           },
           "default": {
@@ -761,7 +761,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/orionidserverv1DatabasesServiceUpdateDocumentBody"
+              "$ref": "#/definitions/gravitonserverv1DatabasesServiceUpdateDocumentBody"
             }
           }
         ],
@@ -1031,7 +1031,7 @@
         }
       }
     },
-    "orionidserverv1CountDocumentsResponse": {
+    "gravitonserverv1CountDocumentsResponse": {
       "type": "object",
       "properties": {
         "count": {
@@ -1040,7 +1040,7 @@
         }
       }
     },
-    "orionidserverv1DatabasesServiceCreateDocumentBody": {
+    "gravitonserverv1DatabasesServiceCreateDocumentBody": {
       "type": "object",
       "properties": {
         "documentId": {
@@ -1057,7 +1057,7 @@
         }
       }
     },
-    "orionidserverv1DatabasesServiceUpdateDocumentBody": {
+    "gravitonserverv1DatabasesServiceUpdateDocumentBody": {
       "type": "object",
       "properties": {
         "data": {
@@ -1078,7 +1078,7 @@
         }
       }
     },
-    "orionidserverv1Document": {
+    "gravitonserverv1Document": {
       "type": "object",
       "properties": {
         "id": {
@@ -1103,14 +1103,14 @@
         }
       }
     },
-    "orionidserverv1ListDocumentsResponse": {
+    "gravitonserverv1ListDocumentsResponse": {
       "type": "object",
       "properties": {
         "documents": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/orionidserverv1Document"
+            "$ref": "#/definitions/gravitonserverv1Document"
           }
         },
         "meta": {

@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/deeploop-ai/orionid/internal/domain/databases"
-	"github.com/deeploop-ai/orionid/internal/infra/bun/bunrepo"
-	"github.com/deeploop-ai/orionid/internal/infra/documentdb"
-	"github.com/deeploop-ai/orionid/internal/pkg/contexts"
-	"github.com/deeploop-ai/orionid/internal/testutil"
-	"github.com/deeploop-ai/orionid/pkg/query"
+	"github.com/deeploop-ai/graviton/internal/domain/databases"
+	"github.com/deeploop-ai/graviton/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/graviton/internal/infra/documentdb"
+	"github.com/deeploop-ai/graviton/internal/pkg/contexts"
+	"github.com/deeploop-ai/graviton/internal/testutil"
+	"github.com/deeploop-ai/graviton/pkg/query"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,7 +20,7 @@ func TestAccount_SignInRecordsClientInfo(t *testing.T) {
 
 	ctx := contexts.WithClientInfo(context.Background(), contexts.ClientInfo{
 		IP:        "198.51.100.42",
-		UserAgent: "Mozilla/5.0 Orionid",
+		UserAgent: "Mozilla/5.0 Graviton",
 	})
 
 	db := testutil.SetupTestDB(t)
@@ -36,7 +36,7 @@ func TestAccount_SignInRecordsClientInfo(t *testing.T) {
 
 	_, _, _, err := account.SignUp(ctx, SignUpCommand{
 		ProjectID: projectID,
-		Email:     "client-info@orionid.local",
+		Email:     "client-info@graviton.local",
 		Password:  "User@123",
 		Name:      "Client Info",
 	})
@@ -44,7 +44,7 @@ func TestAccount_SignInRecordsClientInfo(t *testing.T) {
 
 	_, _, _, err = account.SignIn(ctx, SignInCommand{
 		ProjectID: projectID,
-		Email:     "client-info@orionid.local",
+		Email:     "client-info@graviton.local",
 		Password:  "User@123",
 	})
 	require.NoError(t, err)
@@ -57,7 +57,7 @@ func TestAccount_SignInRecordsClientInfo(t *testing.T) {
 	require.NotEmpty(t, list.Documents)
 	found := false
 	for _, doc := range list.Documents {
-		if doc.Data["user_agent"] == "Mozilla/5.0 Orionid" {
+		if doc.Data["user_agent"] == "Mozilla/5.0 Graviton" {
 			found = true
 			break
 		}

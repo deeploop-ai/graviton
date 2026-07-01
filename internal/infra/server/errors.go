@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	sharedv1 "github.com/deeploop-ai/orionid/genproto/shared/v1"
+	sharedv1 "github.com/deeploop-ai/graviton/genproto/shared/v1"
 	"github.com/google/uuid"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc/codes"

@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/deeploop-ai/orionid/internal/infra/bun/bunrepo"
-	"github.com/deeploop-ai/orionid/internal/infra/bun/model"
-	"github.com/deeploop-ai/orionid/internal/infra/clients"
-	"github.com/deeploop-ai/orionid/internal/pkg/config"
-	"github.com/deeploop-ai/orionid/pkg/idgen"
-	"github.com/deeploop-ai/orionid/pkg/jwtparser"
-	"github.com/deeploop-ai/orionid/pkg/password"
+	"github.com/deeploop-ai/graviton/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/graviton/internal/infra/bun/model"
+	"github.com/deeploop-ai/graviton/internal/infra/clients"
+	"github.com/deeploop-ai/graviton/internal/pkg/config"
+	"github.com/deeploop-ai/graviton/pkg/idgen"
+	"github.com/deeploop-ai/graviton/pkg/jwtparser"
+	"github.com/deeploop-ai/graviton/pkg/password"
 )
 
 // CreateTestConsoleAdmin inserts a console admin and returns the model plus cleanup.
@@ -22,7 +22,7 @@ func CreateTestConsoleAdmin(ctx context.Context, db *clients.Database, role stri
 	}
 	admin := &model.ConsoleAdmin{
 		ID:           idgen.UUID().String(),
-		Email:        fmt.Sprintf("admin-%d@orionid.local", time.Now().UnixNano()),
+		Email:        fmt.Sprintf("admin-%d@graviton.local", time.Now().UnixNano()),
 		PasswordHash: hash,
 		Role:         role,
 		CreatedAt:    time.Now(),

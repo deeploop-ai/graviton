@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
+	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
 )
 
 func TestWeChatOAuth_AuthorizeURL(t *testing.T) {

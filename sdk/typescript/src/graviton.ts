@@ -1,5 +1,5 @@
 import { AccountService, ClientDatabasesService, ClientTeamsService } from "./client/index.js";
-import type { OrionidConfig } from "./http.js";
+import type { GravitonConfig } from "./http.js";
 import { HttpTransport } from "./http.js";
 import {
   APIKeysService,
@@ -12,11 +12,11 @@ import {
   UsersService,
 } from "./server/index.js";
 
-export type { OrionidConfig } from "./http.js";
-export { OrionidError } from "./errors.js";
+export type { GravitonConfig } from "./http.js";
+export { GravitonError } from "./errors.js";
 export * from "./types.js";
 
-export class Orionid {
+export class Graviton {
   readonly account: AccountService;
   readonly databases: ClientDatabasesService;
   readonly teams: ClientTeamsService;
@@ -34,7 +34,7 @@ export class Orionid {
 
   private readonly transport: HttpTransport;
 
-  constructor(config: OrionidConfig) {
+  constructor(config: GravitonConfig) {
     this.transport = new HttpTransport(config);
     this.account = new AccountService(this.transport);
     this.databases = new ClientDatabasesService(this.transport);
@@ -51,18 +51,18 @@ export class Orionid {
     };
   }
 
-  static create(config: OrionidConfig): Orionid {
-    return new Orionid(config);
+  static create(config: GravitonConfig): Graviton {
+    return new Graviton(config);
   }
 
   /** Server API + optional Client API with a project API key. */
-  static withApiKey(endpoint: string, projectId: string, apiKey: string): Orionid {
-    return new Orionid({ endpoint, projectId, apiKey });
+  static withApiKey(endpoint: string, projectId: string, apiKey: string): Graviton {
+    return new Graviton({ endpoint, projectId, apiKey });
   }
 
   /** Client API with an existing user access token. */
-  static withAccessToken(endpoint: string, projectId: string, accessToken: string): Orionid {
-    return new Orionid({ endpoint, projectId, accessToken });
+  static withAccessToken(endpoint: string, projectId: string, accessToken: string): Graviton {
+    return new Graviton({ endpoint, projectId, accessToken });
   }
 
   setAccessToken(token: string | undefined): void {

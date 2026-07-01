@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
-	"github.com/deeploop-ai/orionid/pkg/idgen"
+	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
+	"github.com/deeploop-ai/graviton/pkg/idgen"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -40,7 +40,7 @@ func NewRedisOTPChallengeStore(rdb *redis.Client) *RedisOTPChallengeStore {
 }
 
 func (s *RedisOTPChallengeStore) CheckSendRateLimit(ctx context.Context, projectID, target, ip string) error {
-	sendKey := fmt.Sprintf("orionid:otp:send:%s:%s", projectID, target)
+	sendKey := fmt.Sprintf("Graviton:otp:send:%s:%s", projectID, target)
 	ok, err := s.rdb.SetNX(ctx, sendKey, "1", otpSendCooldown).Result()
 	if err != nil {
 		return status.Error(codes.Internal, "otp rate limit check failed")
@@ -52,7 +52,7 @@ func (s *RedisOTPChallengeStore) CheckSendRateLimit(ctx context.Context, project
 	if ip == "" {
 		return nil
 	}
-	ipKey := fmt.Sprintf("orionid:otp:ip:%s:%s", projectID, ip)
+	ipKey := fmt.Sprintf("Graviton:otp:ip:%s:%s", projectID, ip)
 	count, err := s.rdb.Incr(ctx, ipKey).Result()
 	if err != nil {
 		return status.Error(codes.Internal, "otp ip rate limit check failed")
@@ -158,7 +158,7 @@ func (s *RedisOTPChallengeStore) verifyChallenge(ctx context.Context, projectID,
 }
 
 func challengeKey(challengeID string) string {
-	return "orionid:otp:ch:" + challengeID
+	return "Graviton:otp:ch:" + challengeID
 }
 
 func newChallengeID() string {

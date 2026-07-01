@@ -1,4 +1,4 @@
-import { Orionid, OrionidError } from "@orionid/sdk";
+import { Graviton, GravitonError } from "@graviton/sdk";
 import {
   createContext,
   useCallback,
@@ -16,29 +16,29 @@ import {
   type AuthState,
 } from "./storage";
 
-interface OrionidContextValue {
+interface GravitonContextValue {
   settings: AppSettings;
   auth: AuthState | null;
-  client: Orionid;
+  client: Graviton;
   updateSettings: (next: AppSettings) => void;
   setAuth: (next: AuthState | null) => void;
-  serverClient: () => Orionid;
+  serverClient: () => Graviton;
   lastError: string | null;
   setLastError: (msg: string | null) => void;
   run: <T>(fn: () => Promise<T>) => Promise<T>;
 }
 
-const OrionidContext = createContext<OrionidContextValue | null>(null);
+const GravitonContext = createContext<GravitonContextValue | null>(null);
 
-function buildClient(settings: AppSettings, auth: AuthState | null): Orionid {
-  return Orionid.create({
+function buildClient(settings: AppSettings, auth: AuthState | null): Graviton {
+  return Graviton.create({
     endpoint: settings.endpoint,
     projectId: settings.projectId,
     accessToken: auth?.accessToken,
   });
 }
 
-export function OrionidProvider({ children }: { children: ReactNode }) {
+export function GravitonProvider({ children }: { children: ReactNode }) {
   const [settings, setSettingsState] = useState<AppSettings>(() => loadSettings());
   const [auth, setAuthState] = useState<AuthState | null>(() => loadAuth());
   const [lastError, setLastError] = useState<string | null>(null);
@@ -62,9 +62,9 @@ export function OrionidProvider({ children }: { children: ReactNode }) {
 
   const serverClient = useCallback(() => {
     if (!settings.apiKey) {
-      throw new OrionidError("请先在设置页填写 Server API Key", 0);
+      throw new GravitonError("请先在设置页填写 Server API Key", 0);
     }
-    return Orionid.withApiKey(settings.endpoint, settings.projectId, settings.apiKey);
+    return Graviton.withApiKey(settings.endpoint, settings.projectId, settings.apiKey);
   }, [settings]);
 
   const run = useCallback(async <T,>(fn: () => Promise<T>): Promise<T> => {
@@ -73,7 +73,7 @@ export function OrionidProvider({ children }: { children: ReactNode }) {
       return await fn();
     } catch (err) {
       const message =
-        err instanceof OrionidError
+        err instanceof GravitonError
           ? `[${err.status}] ${err.message}`
           : err instanceof Error
             ? err.message
@@ -98,11 +98,11 @@ export function OrionidProvider({ children }: { children: ReactNode }) {
     [settings, auth, client, updateSettings, setAuth, serverClient, lastError, run]
   );
 
-  return <OrionidContext.Provider value={value}>{children}</OrionidContext.Provider>;
+  return <GravitonContext.Provider value={value}>{children}</GravitonContext.Provider>;
 }
 
-export function useOrionid() {
-  const ctx = useContext(OrionidContext);
-  if (!ctx) throw new Error("useOrionid must be used within OrionidProvider");
+export function useGraviton() {
+  const ctx = useContext(GravitonContext);
+  if (!ctx) throw new Error("useGraviton must be used within GravitonProvider");
   return ctx;
 }

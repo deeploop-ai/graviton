@@ -16,12 +16,12 @@ export interface AuthState {
   userId: string;
 }
 
-const SETTINGS_KEY = "orionid-demo-settings";
-const AUTH_KEY = "orionid-demo-auth";
+const SETTINGS_KEY = "Graviton-demo-settings";
+const AUTH_KEY = "Graviton-demo-auth";
 
 const defaultSettings = (): AppSettings => ({
-  endpoint: import.meta.env.VITE_ORIONID_ENDPOINT || "http://localhost:9080",
-  projectId: import.meta.env.VITE_ORIONID_PROJECT_ID || "default",
+  endpoint: import.meta.env.VITE_GRAVITON_ENDPOINT || "http://localhost:9080",
+  projectId: import.meta.env.VITE_GRAVITON_PROJECT_ID || "default",
   apiKey: "",
   demoDbId: "",
   demoCollId: "posts",

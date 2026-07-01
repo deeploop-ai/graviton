@@ -10,31 +10,31 @@ export const api = axios.create({
 
 export function setAuthToken(token: string | null) {
   if (token) {
-    localStorage.setItem("ORIONID_console_token", token);
+    localStorage.setItem("GRAVITON_console_token", token);
     authRedirecting = false;
   } else {
-    localStorage.removeItem("ORIONID_console_token");
+    localStorage.removeItem("GRAVITON_console_token");
   }
 }
 
 export function clearAuthToken() {
-  localStorage.removeItem("ORIONID_console_token");
+  localStorage.removeItem("GRAVITON_console_token");
 }
 
 export function getAuthToken(): string | null {
-  return localStorage.getItem("ORIONID_console_token");
+  return localStorage.getItem("GRAVITON_console_token");
 }
 
 export function setProjectID(projectID: string | null) {
   if (projectID) {
-    localStorage.setItem("ORIONID_console_project", projectID);
+    localStorage.setItem("GRAVITON_console_project", projectID);
   } else {
-    localStorage.removeItem("ORIONID_console_project");
+    localStorage.removeItem("GRAVITON_console_project");
   }
 }
 
 export function getProjectID(): string | null {
-  return localStorage.getItem("ORIONID_console_project");
+  return localStorage.getItem("GRAVITON_console_project");
 }
 
 api.interceptors.request.use((config) => {
@@ -44,7 +44,7 @@ api.interceptors.request.use((config) => {
   }
   const projectID = getProjectID();
   if (projectID) {
-    config.headers["X-Orionid-Project"] = projectID;
+    config.headers["X-Graviton-Project"] = projectID;
   }
   return config;
 });

@@ -3,11 +3,11 @@ package servergrpc
 import (
 	"context"
 
-	serverv1 "github.com/deeploop-ai/orionid/genproto/server/v1"
-	sharedv1 "github.com/deeploop-ai/orionid/genproto/shared/v1"
-	appserver "github.com/deeploop-ai/orionid/internal/app/server"
-	"github.com/deeploop-ai/orionid/internal/domain/projects"
-	"github.com/deeploop-ai/orionid/pkg/crud"
+	serverv1 "github.com/deeploop-ai/graviton/genproto/server/v1"
+	sharedv1 "github.com/deeploop-ai/graviton/genproto/shared/v1"
+	appserver "github.com/deeploop-ai/graviton/internal/app/server"
+	"github.com/deeploop-ai/graviton/internal/domain/projects"
+	"github.com/deeploop-ai/graviton/pkg/crud"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

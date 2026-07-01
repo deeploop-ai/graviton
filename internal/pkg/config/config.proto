@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package orionid.api.config;
+package graviton.api.config;
 
-option go_package = "github.com/deeploop-ai/orionid/internal/pkg/config";
+option go_package = "github.com/deeploop-ai/graviton/internal/pkg/config";
 
 message AppConfig {
   Server server = 1;

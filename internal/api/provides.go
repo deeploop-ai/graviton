@@ -1,10 +1,10 @@
 package api
 
 import (
-	"github.com/deeploop-ai/orionid/internal/api/clientgrpc"
-	"github.com/deeploop-ai/orionid/internal/api/consolegrpc"
-	"github.com/deeploop-ai/orionid/internal/api/servergrpc"
-	"github.com/deeploop-ai/orionid/internal/api/serverhttp"
+	"github.com/deeploop-ai/graviton/internal/api/clientgrpc"
+	"github.com/deeploop-ai/graviton/internal/api/consolegrpc"
+	"github.com/deeploop-ai/graviton/internal/api/servergrpc"
+	"github.com/deeploop-ai/graviton/internal/api/serverhttp"
 	"github.com/google/wire"
 )
 

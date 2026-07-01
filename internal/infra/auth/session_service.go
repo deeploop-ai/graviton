@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	domainauth "github.com/deeploop-ai/orionid/internal/domain/auth"
-	"github.com/deeploop-ai/orionid/internal/domain/databases"
-	"github.com/deeploop-ai/orionid/internal/pkg/config"
-	"github.com/deeploop-ai/orionid/internal/pkg/contexts"
-	"github.com/deeploop-ai/orionid/pkg/idgen"
-	"github.com/deeploop-ai/orionid/pkg/jwtparser"
+	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
+	"github.com/deeploop-ai/graviton/internal/domain/databases"
+	"github.com/deeploop-ai/graviton/internal/pkg/config"
+	"github.com/deeploop-ai/graviton/internal/pkg/contexts"
+	"github.com/deeploop-ai/graviton/pkg/idgen"
+	"github.com/deeploop-ai/graviton/pkg/jwtparser"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

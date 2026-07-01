@@ -7,7 +7,7 @@
 package clientv1
 
 import (
-	v1 "github.com/deeploop-ai/orionid/genproto/shared/v1"
+	v1 "github.com/deeploop-ai/graviton/genproto/shared/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -1597,7 +1597,7 @@ var File_client_v1_account_proto protoreflect.FileDescriptor
 
 const file_client_v1_account_proto_rawDesc = "" +
 	"\n" +
-	"\x17client/v1/account.proto\x12\x11orionid.client.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\"t\n" +
+	"\x17client/v1/account.proto\x12\x12graviton.client.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\"t\n" +
 	"\rSignUpRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x12\n" +
@@ -1629,19 +1629,19 @@ const file_client_v1_account_proto_rawDesc = "" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x12\x1d\n" +
 	"\n" +
-	"expires_at\x18\x03 \x01(\x03R\texpiresAt\"~\n" +
-	"\x0eSignUpResponse\x124\n" +
-	"\aaccount\x18\x01 \x01(\v2\x1a.orionid.client.v1.AccountR\aaccount\x126\n" +
-	"\x06tokens\x18\x02 \x01(\v2\x1e.orionid.client.v1.TokenBundleR\x06tokens\"~\n" +
-	"\x0eSignInResponse\x124\n" +
-	"\aaccount\x18\x01 \x01(\v2\x1a.orionid.client.v1.AccountR\aaccount\x126\n" +
-	"\x06tokens\x18\x02 \x01(\v2\x1e.orionid.client.v1.TokenBundleR\x06tokens\"Y\n" +
+	"expires_at\x18\x03 \x01(\x03R\texpiresAt\"\x80\x01\n" +
+	"\x0eSignUpResponse\x125\n" +
+	"\aaccount\x18\x01 \x01(\v2\x1b.graviton.client.v1.AccountR\aaccount\x127\n" +
+	"\x06tokens\x18\x02 \x01(\v2\x1f.graviton.client.v1.TokenBundleR\x06tokens\"\x80\x01\n" +
+	"\x0eSignInResponse\x125\n" +
+	"\aaccount\x18\x01 \x01(\v2\x1b.graviton.client.v1.AccountR\aaccount\x127\n" +
+	"\x06tokens\x18\x02 \x01(\v2\x1f.graviton.client.v1.TokenBundleR\x06tokens\"Y\n" +
 	"\x13RefreshTokenRequest\x12\x1d\n" +
 	"\n" +
 	"project_id\x18\x01 \x01(\tR\tprojectId\x12#\n" +
-	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\"N\n" +
-	"\x14RefreshTokenResponse\x126\n" +
-	"\x06tokens\x18\x01 \x01(\v2\x1e.orionid.client.v1.TokenBundleR\x06tokens\"\x7f\n" +
+	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\"O\n" +
+	"\x14RefreshTokenResponse\x127\n" +
+	"\x06tokens\x18\x01 \x01(\v2\x1f.graviton.client.v1.TokenBundleR\x06tokens\"\x7f\n" +
 	"\x14UpdateAccountRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
@@ -1658,9 +1658,9 @@ const file_client_v1_account_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x18\n" +
 	"\acurrent\x18\b \x01(\bR\acurrent\"\x15\n" +
-	"\x13ListSessionsRequest\"N\n" +
-	"\x14ListSessionsResponse\x126\n" +
-	"\bsessions\x18\x01 \x03(\v2\x1a.orionid.client.v1.SessionR\bsessions\"5\n" +
+	"\x13ListSessionsRequest\"O\n" +
+	"\x14ListSessionsResponse\x127\n" +
+	"\bsessions\x18\x01 \x03(\v2\x1b.graviton.client.v1.SessionR\bsessions\"5\n" +
 	"\x14DeleteSessionRequest\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\":\n" +
@@ -1713,26 +1713,26 @@ const file_client_v1_account_proto_rawDesc = "" +
 	"%CreateWeChatMiniProgramSessionRequest\x12\x1d\n" +
 	"\n" +
 	"project_id\x18\x01 \x01(\tR\tprojectId\x12\x12\n" +
-	"\x04code\x18\x02 \x01(\tR\x04code2\x8d\x14\n" +
-	"\x0eAccountService\x12s\n" +
-	"\x06SignUp\x12 .orionid.client.v1.SignUpRequest\x1a!.orionid.client.v1.SignUpResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/sign-up\x12s\n" +
-	"\x06SignIn\x12 .orionid.client.v1.SignInRequest\x1a!.orionid.client.v1.SignInResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/sign-in\x12t\n" +
-	"\aSignOut\x12!.orionid.client.v1.SignOutRequest\x1a\x18.orionid.shared.v1.Empty\",\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/v1/account/sign-out\x12\x85\x01\n" +
-	"\fRefreshToken\x12&.orionid.client.v1.RefreshTokenRequest\x1a'.orionid.client.v1.RefreshTokenResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/refresh\x12c\n" +
-	"\x02Me\x12\x1c.orionid.client.v1.MeRequest\x1a\x1a.orionid.client.v1.Account\"#\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/account/me\x12y\n" +
-	"\rUpdateAccount\x12'.orionid.client.v1.UpdateAccountRequest\x1a\x1a.orionid.client.v1.Account\"#\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x10:\x01*2\v/v1/account\x12\x8a\x01\n" +
-	"\fListSessions\x12&.orionid.client.v1.ListSessionsRequest\x1a'.orionid.client.v1.ListSessionsResponse\")\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x16\x12\x14/v1/account/sessions\x12\x8a\x01\n" +
-	"\rDeleteSession\x12'.orionid.client.v1.DeleteSessionRequest\x1a\x18.orionid.shared.v1.Empty\"6\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02#*!/v1/account/sessions/{session_id}\x12\x7f\n" +
-	"\x0eDeleteSessions\x12(.orionid.client.v1.DeleteSessionsRequest\x1a\x18.orionid.shared.v1.Empty\")\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x16*\x14/v1/account/sessions\x12{\n" +
-	"\bGetPrefs\x12\".orionid.client.v1.GetPrefsRequest\x1a#.orionid.client.v1.GetPrefsResponse\"&\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x13\x12\x11/v1/account/prefs\x12\x84\x01\n" +
-	"\vUpdatePrefs\x12%.orionid.client.v1.UpdatePrefsRequest\x1a#.orionid.client.v1.GetPrefsResponse\")\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x16:\x01*\x1a\x11/v1/account/prefs\x12\x91\x01\n" +
-	"\x0eCreateEmailOTP\x12(.orionid.client.v1.CreateEmailOTPRequest\x1a$.orionid.client.v1.ChallengeResponse\"/\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/v1/account/sessions/email-otp\x12\xa3\x01\n" +
-	"\x15CreateEmailOTPSession\x12/.orionid.client.v1.CreateEmailOTPSessionRequest\x1a!.orionid.client.v1.SignInResponse\"6\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02*:\x01*\"%/v1/account/sessions/email-otp/verify\x12\xaa\x01\n" +
-	"\x13CreateOAuth2Session\x12-.orionid.client.v1.CreateOAuth2SessionRequest\x1a..orionid.client.v1.CreateOAuth2SessionResponse\"4\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02(\x12&/v1/account/sessions/oauth2/{provider}\x12\xb0\x01\n" +
-	"\x18CreateOAuth2TokenSession\x122.orionid.client.v1.CreateOAuth2TokenSessionRequest\x1a!.orionid.client.v1.SignInResponse\"=\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x021:\x01*\",/v1/account/sessions/oauth2/{provider}/token\x12\x91\x01\n" +
-	"\x0eCreatePhoneOTP\x12(.orionid.client.v1.CreatePhoneOTPRequest\x1a$.orionid.client.v1.ChallengeResponse\"/\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/v1/account/sessions/phone-otp\x12\xa3\x01\n" +
-	"\x15CreatePhoneOTPSession\x12/.orionid.client.v1.CreatePhoneOTPSessionRequest\x1a!.orionid.client.v1.SignInResponse\"6\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02*:\x01*\"%/v1/account/sessions/phone-otp/verify\x12\xb7\x01\n" +
-	"\x1eCreateWeChatMiniProgramSession\x128.orionid.client.v1.CreateWeChatMiniProgramSessionRequest\x1a!.orionid.client.v1.SignInResponse\"8\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02,:\x01*\"'/v1/account/sessions/wechat/miniprogram\x1a\x06\x92\xb2\x19\x02\b\x02B<Z:github.com/deeploop-ai/orionid/genproto/client/v1;clientv1b\x06proto3"
+	"\x04code\x18\x02 \x01(\tR\x04code2\xb2\x14\n" +
+	"\x0eAccountService\x12u\n" +
+	"\x06SignUp\x12!.graviton.client.v1.SignUpRequest\x1a\".graviton.client.v1.SignUpResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/sign-up\x12u\n" +
+	"\x06SignIn\x12!.graviton.client.v1.SignInRequest\x1a\".graviton.client.v1.SignInResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/sign-in\x12v\n" +
+	"\aSignOut\x12\".graviton.client.v1.SignOutRequest\x1a\x19.graviton.shared.v1.Empty\",\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/v1/account/sign-out\x12\x87\x01\n" +
+	"\fRefreshToken\x12'.graviton.client.v1.RefreshTokenRequest\x1a(.graviton.client.v1.RefreshTokenResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/refresh\x12e\n" +
+	"\x02Me\x12\x1d.graviton.client.v1.MeRequest\x1a\x1b.graviton.client.v1.Account\"#\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/account/me\x12{\n" +
+	"\rUpdateAccount\x12(.graviton.client.v1.UpdateAccountRequest\x1a\x1b.graviton.client.v1.Account\"#\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x10:\x01*2\v/v1/account\x12\x8c\x01\n" +
+	"\fListSessions\x12'.graviton.client.v1.ListSessionsRequest\x1a(.graviton.client.v1.ListSessionsResponse\")\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x16\x12\x14/v1/account/sessions\x12\x8c\x01\n" +
+	"\rDeleteSession\x12(.graviton.client.v1.DeleteSessionRequest\x1a\x19.graviton.shared.v1.Empty\"6\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02#*!/v1/account/sessions/{session_id}\x12\x81\x01\n" +
+	"\x0eDeleteSessions\x12).graviton.client.v1.DeleteSessionsRequest\x1a\x19.graviton.shared.v1.Empty\")\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x16*\x14/v1/account/sessions\x12}\n" +
+	"\bGetPrefs\x12#.graviton.client.v1.GetPrefsRequest\x1a$.graviton.client.v1.GetPrefsResponse\"&\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x13\x12\x11/v1/account/prefs\x12\x86\x01\n" +
+	"\vUpdatePrefs\x12&.graviton.client.v1.UpdatePrefsRequest\x1a$.graviton.client.v1.GetPrefsResponse\")\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x16:\x01*\x1a\x11/v1/account/prefs\x12\x93\x01\n" +
+	"\x0eCreateEmailOTP\x12).graviton.client.v1.CreateEmailOTPRequest\x1a%.graviton.client.v1.ChallengeResponse\"/\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/v1/account/sessions/email-otp\x12\xa5\x01\n" +
+	"\x15CreateEmailOTPSession\x120.graviton.client.v1.CreateEmailOTPSessionRequest\x1a\".graviton.client.v1.SignInResponse\"6\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02*:\x01*\"%/v1/account/sessions/email-otp/verify\x12\xac\x01\n" +
+	"\x13CreateOAuth2Session\x12..graviton.client.v1.CreateOAuth2SessionRequest\x1a/.graviton.client.v1.CreateOAuth2SessionResponse\"4\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02(\x12&/v1/account/sessions/oauth2/{provider}\x12\xb2\x01\n" +
+	"\x18CreateOAuth2TokenSession\x123.graviton.client.v1.CreateOAuth2TokenSessionRequest\x1a\".graviton.client.v1.SignInResponse\"=\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x021:\x01*\",/v1/account/sessions/oauth2/{provider}/token\x12\x93\x01\n" +
+	"\x0eCreatePhoneOTP\x12).graviton.client.v1.CreatePhoneOTPRequest\x1a%.graviton.client.v1.ChallengeResponse\"/\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/v1/account/sessions/phone-otp\x12\xa5\x01\n" +
+	"\x15CreatePhoneOTPSession\x120.graviton.client.v1.CreatePhoneOTPSessionRequest\x1a\".graviton.client.v1.SignInResponse\"6\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02*:\x01*\"%/v1/account/sessions/phone-otp/verify\x12\xb9\x01\n" +
+	"\x1eCreateWeChatMiniProgramSession\x129.graviton.client.v1.CreateWeChatMiniProgramSessionRequest\x1a\".graviton.client.v1.SignInResponse\"8\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02,:\x01*\"'/v1/account/sessions/wechat/miniprogram\x1a\x06\x92\xb2\x19\x02\b\x02B=Z;github.com/deeploop-ai/graviton/genproto/client/v1;clientv1b\x06proto3"
 
 var (
 	file_client_v1_account_proto_rawDescOnce sync.Once
@@ -1748,87 +1748,87 @@ func file_client_v1_account_proto_rawDescGZIP() []byte {
 
 var file_client_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
 var file_client_v1_account_proto_goTypes = []any{
-	(*SignUpRequest)(nil),                         // 0: orionid.client.v1.SignUpRequest
-	(*SignInRequest)(nil),                         // 1: orionid.client.v1.SignInRequest
-	(*SignOutRequest)(nil),                        // 2: orionid.client.v1.SignOutRequest
-	(*MeRequest)(nil),                             // 3: orionid.client.v1.MeRequest
-	(*Account)(nil),                               // 4: orionid.client.v1.Account
-	(*TokenBundle)(nil),                           // 5: orionid.client.v1.TokenBundle
-	(*SignUpResponse)(nil),                        // 6: orionid.client.v1.SignUpResponse
-	(*SignInResponse)(nil),                        // 7: orionid.client.v1.SignInResponse
-	(*RefreshTokenRequest)(nil),                   // 8: orionid.client.v1.RefreshTokenRequest
-	(*RefreshTokenResponse)(nil),                  // 9: orionid.client.v1.RefreshTokenResponse
-	(*UpdateAccountRequest)(nil),                  // 10: orionid.client.v1.UpdateAccountRequest
-	(*Session)(nil),                               // 11: orionid.client.v1.Session
-	(*ListSessionsRequest)(nil),                   // 12: orionid.client.v1.ListSessionsRequest
-	(*ListSessionsResponse)(nil),                  // 13: orionid.client.v1.ListSessionsResponse
-	(*DeleteSessionRequest)(nil),                  // 14: orionid.client.v1.DeleteSessionRequest
-	(*DeleteSessionsRequest)(nil),                 // 15: orionid.client.v1.DeleteSessionsRequest
-	(*GetPrefsRequest)(nil),                       // 16: orionid.client.v1.GetPrefsRequest
-	(*GetPrefsResponse)(nil),                      // 17: orionid.client.v1.GetPrefsResponse
-	(*UpdatePrefsRequest)(nil),                    // 18: orionid.client.v1.UpdatePrefsRequest
-	(*CreateEmailOTPRequest)(nil),                 // 19: orionid.client.v1.CreateEmailOTPRequest
-	(*CreateEmailOTPSessionRequest)(nil),          // 20: orionid.client.v1.CreateEmailOTPSessionRequest
-	(*ChallengeResponse)(nil),                     // 21: orionid.client.v1.ChallengeResponse
-	(*CreateOAuth2SessionRequest)(nil),            // 22: orionid.client.v1.CreateOAuth2SessionRequest
-	(*CreateOAuth2SessionResponse)(nil),           // 23: orionid.client.v1.CreateOAuth2SessionResponse
-	(*CreateOAuth2TokenSessionRequest)(nil),       // 24: orionid.client.v1.CreateOAuth2TokenSessionRequest
-	(*CreatePhoneOTPRequest)(nil),                 // 25: orionid.client.v1.CreatePhoneOTPRequest
-	(*CreatePhoneOTPSessionRequest)(nil),          // 26: orionid.client.v1.CreatePhoneOTPSessionRequest
-	(*CreateWeChatMiniProgramSessionRequest)(nil), // 27: orionid.client.v1.CreateWeChatMiniProgramSessionRequest
+	(*SignUpRequest)(nil),                         // 0: graviton.client.v1.SignUpRequest
+	(*SignInRequest)(nil),                         // 1: graviton.client.v1.SignInRequest
+	(*SignOutRequest)(nil),                        // 2: graviton.client.v1.SignOutRequest
+	(*MeRequest)(nil),                             // 3: graviton.client.v1.MeRequest
+	(*Account)(nil),                               // 4: graviton.client.v1.Account
+	(*TokenBundle)(nil),                           // 5: graviton.client.v1.TokenBundle
+	(*SignUpResponse)(nil),                        // 6: graviton.client.v1.SignUpResponse
+	(*SignInResponse)(nil),                        // 7: graviton.client.v1.SignInResponse
+	(*RefreshTokenRequest)(nil),                   // 8: graviton.client.v1.RefreshTokenRequest
+	(*RefreshTokenResponse)(nil),                  // 9: graviton.client.v1.RefreshTokenResponse
+	(*UpdateAccountRequest)(nil),                  // 10: graviton.client.v1.UpdateAccountRequest
+	(*Session)(nil),                               // 11: graviton.client.v1.Session
+	(*ListSessionsRequest)(nil),                   // 12: graviton.client.v1.ListSessionsRequest
+	(*ListSessionsResponse)(nil),                  // 13: graviton.client.v1.ListSessionsResponse
+	(*DeleteSessionRequest)(nil),                  // 14: graviton.client.v1.DeleteSessionRequest
+	(*DeleteSessionsRequest)(nil),                 // 15: graviton.client.v1.DeleteSessionsRequest
+	(*GetPrefsRequest)(nil),                       // 16: graviton.client.v1.GetPrefsRequest
+	(*GetPrefsResponse)(nil),                      // 17: graviton.client.v1.GetPrefsResponse
+	(*UpdatePrefsRequest)(nil),                    // 18: graviton.client.v1.UpdatePrefsRequest
+	(*CreateEmailOTPRequest)(nil),                 // 19: graviton.client.v1.CreateEmailOTPRequest
+	(*CreateEmailOTPSessionRequest)(nil),          // 20: graviton.client.v1.CreateEmailOTPSessionRequest
+	(*ChallengeResponse)(nil),                     // 21: graviton.client.v1.ChallengeResponse
+	(*CreateOAuth2SessionRequest)(nil),            // 22: graviton.client.v1.CreateOAuth2SessionRequest
+	(*CreateOAuth2SessionResponse)(nil),           // 23: graviton.client.v1.CreateOAuth2SessionResponse
+	(*CreateOAuth2TokenSessionRequest)(nil),       // 24: graviton.client.v1.CreateOAuth2TokenSessionRequest
+	(*CreatePhoneOTPRequest)(nil),                 // 25: graviton.client.v1.CreatePhoneOTPRequest
+	(*CreatePhoneOTPSessionRequest)(nil),          // 26: graviton.client.v1.CreatePhoneOTPSessionRequest
+	(*CreateWeChatMiniProgramSessionRequest)(nil), // 27: graviton.client.v1.CreateWeChatMiniProgramSessionRequest
 	(*timestamppb.Timestamp)(nil),                 // 28: google.protobuf.Timestamp
 	(*structpb.Struct)(nil),                       // 29: google.protobuf.Struct
-	(*v1.Empty)(nil),                              // 30: orionid.shared.v1.Empty
+	(*v1.Empty)(nil),                              // 30: graviton.shared.v1.Empty
 }
 var file_client_v1_account_proto_depIdxs = []int32{
-	28, // 0: orionid.client.v1.Account.created_at:type_name -> google.protobuf.Timestamp
-	28, // 1: orionid.client.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
-	4,  // 2: orionid.client.v1.SignUpResponse.account:type_name -> orionid.client.v1.Account
-	5,  // 3: orionid.client.v1.SignUpResponse.tokens:type_name -> orionid.client.v1.TokenBundle
-	4,  // 4: orionid.client.v1.SignInResponse.account:type_name -> orionid.client.v1.Account
-	5,  // 5: orionid.client.v1.SignInResponse.tokens:type_name -> orionid.client.v1.TokenBundle
-	5,  // 6: orionid.client.v1.RefreshTokenResponse.tokens:type_name -> orionid.client.v1.TokenBundle
-	28, // 7: orionid.client.v1.Session.expire_at:type_name -> google.protobuf.Timestamp
-	28, // 8: orionid.client.v1.Session.created_at:type_name -> google.protobuf.Timestamp
-	11, // 9: orionid.client.v1.ListSessionsResponse.sessions:type_name -> orionid.client.v1.Session
-	29, // 10: orionid.client.v1.GetPrefsResponse.prefs:type_name -> google.protobuf.Struct
-	29, // 11: orionid.client.v1.UpdatePrefsRequest.prefs:type_name -> google.protobuf.Struct
-	0,  // 12: orionid.client.v1.AccountService.SignUp:input_type -> orionid.client.v1.SignUpRequest
-	1,  // 13: orionid.client.v1.AccountService.SignIn:input_type -> orionid.client.v1.SignInRequest
-	2,  // 14: orionid.client.v1.AccountService.SignOut:input_type -> orionid.client.v1.SignOutRequest
-	8,  // 15: orionid.client.v1.AccountService.RefreshToken:input_type -> orionid.client.v1.RefreshTokenRequest
-	3,  // 16: orionid.client.v1.AccountService.Me:input_type -> orionid.client.v1.MeRequest
-	10, // 17: orionid.client.v1.AccountService.UpdateAccount:input_type -> orionid.client.v1.UpdateAccountRequest
-	12, // 18: orionid.client.v1.AccountService.ListSessions:input_type -> orionid.client.v1.ListSessionsRequest
-	14, // 19: orionid.client.v1.AccountService.DeleteSession:input_type -> orionid.client.v1.DeleteSessionRequest
-	15, // 20: orionid.client.v1.AccountService.DeleteSessions:input_type -> orionid.client.v1.DeleteSessionsRequest
-	16, // 21: orionid.client.v1.AccountService.GetPrefs:input_type -> orionid.client.v1.GetPrefsRequest
-	18, // 22: orionid.client.v1.AccountService.UpdatePrefs:input_type -> orionid.client.v1.UpdatePrefsRequest
-	19, // 23: orionid.client.v1.AccountService.CreateEmailOTP:input_type -> orionid.client.v1.CreateEmailOTPRequest
-	20, // 24: orionid.client.v1.AccountService.CreateEmailOTPSession:input_type -> orionid.client.v1.CreateEmailOTPSessionRequest
-	22, // 25: orionid.client.v1.AccountService.CreateOAuth2Session:input_type -> orionid.client.v1.CreateOAuth2SessionRequest
-	24, // 26: orionid.client.v1.AccountService.CreateOAuth2TokenSession:input_type -> orionid.client.v1.CreateOAuth2TokenSessionRequest
-	25, // 27: orionid.client.v1.AccountService.CreatePhoneOTP:input_type -> orionid.client.v1.CreatePhoneOTPRequest
-	26, // 28: orionid.client.v1.AccountService.CreatePhoneOTPSession:input_type -> orionid.client.v1.CreatePhoneOTPSessionRequest
-	27, // 29: orionid.client.v1.AccountService.CreateWeChatMiniProgramSession:input_type -> orionid.client.v1.CreateWeChatMiniProgramSessionRequest
-	6,  // 30: orionid.client.v1.AccountService.SignUp:output_type -> orionid.client.v1.SignUpResponse
-	7,  // 31: orionid.client.v1.AccountService.SignIn:output_type -> orionid.client.v1.SignInResponse
-	30, // 32: orionid.client.v1.AccountService.SignOut:output_type -> orionid.shared.v1.Empty
-	9,  // 33: orionid.client.v1.AccountService.RefreshToken:output_type -> orionid.client.v1.RefreshTokenResponse
-	4,  // 34: orionid.client.v1.AccountService.Me:output_type -> orionid.client.v1.Account
-	4,  // 35: orionid.client.v1.AccountService.UpdateAccount:output_type -> orionid.client.v1.Account
-	13, // 36: orionid.client.v1.AccountService.ListSessions:output_type -> orionid.client.v1.ListSessionsResponse
-	30, // 37: orionid.client.v1.AccountService.DeleteSession:output_type -> orionid.shared.v1.Empty
-	30, // 38: orionid.client.v1.AccountService.DeleteSessions:output_type -> orionid.shared.v1.Empty
-	17, // 39: orionid.client.v1.AccountService.GetPrefs:output_type -> orionid.client.v1.GetPrefsResponse
-	17, // 40: orionid.client.v1.AccountService.UpdatePrefs:output_type -> orionid.client.v1.GetPrefsResponse
-	21, // 41: orionid.client.v1.AccountService.CreateEmailOTP:output_type -> orionid.client.v1.ChallengeResponse
-	7,  // 42: orionid.client.v1.AccountService.CreateEmailOTPSession:output_type -> orionid.client.v1.SignInResponse
-	23, // 43: orionid.client.v1.AccountService.CreateOAuth2Session:output_type -> orionid.client.v1.CreateOAuth2SessionResponse
-	7,  // 44: orionid.client.v1.AccountService.CreateOAuth2TokenSession:output_type -> orionid.client.v1.SignInResponse
-	21, // 45: orionid.client.v1.AccountService.CreatePhoneOTP:output_type -> orionid.client.v1.ChallengeResponse
-	7,  // 46: orionid.client.v1.AccountService.CreatePhoneOTPSession:output_type -> orionid.client.v1.SignInResponse
-	7,  // 47: orionid.client.v1.AccountService.CreateWeChatMiniProgramSession:output_type -> orionid.client.v1.SignInResponse
+	28, // 0: graviton.client.v1.Account.created_at:type_name -> google.protobuf.Timestamp
+	28, // 1: graviton.client.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
+	4,  // 2: graviton.client.v1.SignUpResponse.account:type_name -> graviton.client.v1.Account
+	5,  // 3: graviton.client.v1.SignUpResponse.tokens:type_name -> graviton.client.v1.TokenBundle
+	4,  // 4: graviton.client.v1.SignInResponse.account:type_name -> graviton.client.v1.Account
+	5,  // 5: graviton.client.v1.SignInResponse.tokens:type_name -> graviton.client.v1.TokenBundle
+	5,  // 6: graviton.client.v1.RefreshTokenResponse.tokens:type_name -> graviton.client.v1.TokenBundle
+	28, // 7: graviton.client.v1.Session.expire_at:type_name -> google.protobuf.Timestamp
+	28, // 8: graviton.client.v1.Session.created_at:type_name -> google.protobuf.Timestamp
+	11, // 9: graviton.client.v1.ListSessionsResponse.sessions:type_name -> graviton.client.v1.Session
+	29, // 10: graviton.client.v1.GetPrefsResponse.prefs:type_name -> google.protobuf.Struct
+	29, // 11: graviton.client.v1.UpdatePrefsRequest.prefs:type_name -> google.protobuf.Struct
+	0,  // 12: graviton.client.v1.AccountService.SignUp:input_type -> graviton.client.v1.SignUpRequest
+	1,  // 13: graviton.client.v1.AccountService.SignIn:input_type -> graviton.client.v1.SignInRequest
+	2,  // 14: graviton.client.v1.AccountService.SignOut:input_type -> graviton.client.v1.SignOutRequest
+	8,  // 15: graviton.client.v1.AccountService.RefreshToken:input_type -> graviton.client.v1.RefreshTokenRequest
+	3,  // 16: graviton.client.v1.AccountService.Me:input_type -> graviton.client.v1.MeRequest
+	10, // 17: graviton.client.v1.AccountService.UpdateAccount:input_type -> graviton.client.v1.UpdateAccountRequest
+	12, // 18: graviton.client.v1.AccountService.ListSessions:input_type -> graviton.client.v1.ListSessionsRequest
+	14, // 19: graviton.client.v1.AccountService.DeleteSession:input_type -> graviton.client.v1.DeleteSessionRequest
+	15, // 20: graviton.client.v1.AccountService.DeleteSessions:input_type -> graviton.client.v1.DeleteSessionsRequest
+	16, // 21: graviton.client.v1.AccountService.GetPrefs:input_type -> graviton.client.v1.GetPrefsRequest
+	18, // 22: graviton.client.v1.AccountService.UpdatePrefs:input_type -> graviton.client.v1.UpdatePrefsRequest
+	19, // 23: graviton.client.v1.AccountService.CreateEmailOTP:input_type -> graviton.client.v1.CreateEmailOTPRequest
+	20, // 24: graviton.client.v1.AccountService.CreateEmailOTPSession:input_type -> graviton.client.v1.CreateEmailOTPSessionRequest
+	22, // 25: graviton.client.v1.AccountService.CreateOAuth2Session:input_type -> graviton.client.v1.CreateOAuth2SessionRequest
+	24, // 26: graviton.client.v1.AccountService.CreateOAuth2TokenSession:input_type -> graviton.client.v1.CreateOAuth2TokenSessionRequest
+	25, // 27: graviton.client.v1.AccountService.CreatePhoneOTP:input_type -> graviton.client.v1.CreatePhoneOTPRequest
+	26, // 28: graviton.client.v1.AccountService.CreatePhoneOTPSession:input_type -> graviton.client.v1.CreatePhoneOTPSessionRequest
+	27, // 29: graviton.client.v1.AccountService.CreateWeChatMiniProgramSession:input_type -> graviton.client.v1.CreateWeChatMiniProgramSessionRequest
+	6,  // 30: graviton.client.v1.AccountService.SignUp:output_type -> graviton.client.v1.SignUpResponse
+	7,  // 31: graviton.client.v1.AccountService.SignIn:output_type -> graviton.client.v1.SignInResponse
+	30, // 32: graviton.client.v1.AccountService.SignOut:output_type -> graviton.shared.v1.Empty
+	9,  // 33: graviton.client.v1.AccountService.RefreshToken:output_type -> graviton.client.v1.RefreshTokenResponse
+	4,  // 34: graviton.client.v1.AccountService.Me:output_type -> graviton.client.v1.Account
+	4,  // 35: graviton.client.v1.AccountService.UpdateAccount:output_type -> graviton.client.v1.Account
+	13, // 36: graviton.client.v1.AccountService.ListSessions:output_type -> graviton.client.v1.ListSessionsResponse
+	30, // 37: graviton.client.v1.AccountService.DeleteSession:output_type -> graviton.shared.v1.Empty
+	30, // 38: graviton.client.v1.AccountService.DeleteSessions:output_type -> graviton.shared.v1.Empty
+	17, // 39: graviton.client.v1.AccountService.GetPrefs:output_type -> graviton.client.v1.GetPrefsResponse
+	17, // 40: graviton.client.v1.AccountService.UpdatePrefs:output_type -> graviton.client.v1.GetPrefsResponse
+	21, // 41: graviton.client.v1.AccountService.CreateEmailOTP:output_type -> graviton.client.v1.ChallengeResponse
+	7,  // 42: graviton.client.v1.AccountService.CreateEmailOTPSession:output_type -> graviton.client.v1.SignInResponse
+	23, // 43: graviton.client.v1.AccountService.CreateOAuth2Session:output_type -> graviton.client.v1.CreateOAuth2SessionResponse
+	7,  // 44: graviton.client.v1.AccountService.CreateOAuth2TokenSession:output_type -> graviton.client.v1.SignInResponse
+	21, // 45: graviton.client.v1.AccountService.CreatePhoneOTP:output_type -> graviton.client.v1.ChallengeResponse
+	7,  // 46: graviton.client.v1.AccountService.CreatePhoneOTPSession:output_type -> graviton.client.v1.SignInResponse
+	7,  // 47: graviton.client.v1.AccountService.CreateWeChatMiniProgramSession:output_type -> graviton.client.v1.SignInResponse
 	30, // [30:48] is the sub-list for method output_type
 	12, // [12:30] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name

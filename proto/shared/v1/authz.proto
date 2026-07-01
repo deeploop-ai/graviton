@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package orionid.shared.v1;
+package graviton.shared.v1;
 
-option go_package = "github.com/deeploop-ai/orionid/genproto/shared/v1;sharedv1";
+option go_package = "github.com/deeploop-ai/graviton/genproto/shared/v1;sharedv1";
 
 import "google/protobuf/descriptor.proto";
 

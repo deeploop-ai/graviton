@@ -4,7 +4,7 @@ import "testing"
 
 func TestAPIKeyScopeAllowed(t *testing.T) {
 	t.Parallel()
-	method := "/orionid.server.v1.UsersService/ListUsers"
+	method := "/graviton.server.v1.UsersService/ListUsers"
 
 	if apiKeyScopeAllowed(method, nil) {
 		t.Fatal("empty scopes should deny resource-scoped methods")

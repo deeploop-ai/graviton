@@ -1,8 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_ORIONID_ENDPOINT: string;
-  readonly VITE_ORIONID_PROJECT_ID: string;
+  readonly VITE_GRAVITON_ENDPOINT: string;
+  readonly VITE_GRAVITON_PROJECT_ID: string;
 }
 
 interface ImportMeta {

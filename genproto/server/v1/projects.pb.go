@@ -7,7 +7,7 @@
 package serverv1
 
 import (
-	v1 "github.com/deeploop-ai/orionid/genproto/shared/v1"
+	v1 "github.com/deeploop-ai/graviton/genproto/shared/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -260,15 +260,15 @@ var File_server_v1_projects_proto protoreflect.FileDescriptor
 
 const file_server_v1_projects_proto_rawDesc = "" +
 	"\n" +
-	"\x18server/v1/projects.proto\x12\x11orionid.server.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\"L\n" +
+	"\x18server/v1/projects.proto\x12\x12graviton.server.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x15shared/v1/authz.proto\x1a\x16shared/v1/common.proto\"L\n" +
 	"\x14CreateProjectRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\"#\n" +
 	"\x11GetProjectRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\x87\x01\n" +
-	"\x14ListProjectsResponse\x126\n" +
-	"\bprojects\x18\x01 \x03(\v2\x1a.orionid.server.v1.ProjectR\bprojects\x127\n" +
-	"\x04meta\x18\x02 \x01(\v2#.orionid.shared.v1.ListResponseMetaR\x04meta\"\xdd\x01\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x89\x01\n" +
+	"\x14ListProjectsResponse\x127\n" +
+	"\bprojects\x18\x01 \x03(\v2\x1b.graviton.server.v1.ProjectR\bprojects\x128\n" +
+	"\x04meta\x18\x02 \x01(\v2$.graviton.shared.v1.ListResponseMetaR\x04meta\"\xdd\x01\n" +
 	"\aProject\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -277,12 +277,12 @@ const file_server_v1_projects_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt2\xf7\x02\n" +
-	"\x0fProjectsService\x12t\n" +
-	"\rCreateProject\x12'.orionid.server.v1.CreateProjectRequest\x1a\x1a.orionid.server.v1.Project\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/server/projects\x12t\n" +
-	"\fListProjects\x12\x1e.orionid.shared.v1.ListRequest\x1a'.orionid.server.v1.ListProjectsResponse\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/v1/server/projects\x12p\n" +
+	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt2\xfd\x02\n" +
+	"\x0fProjectsService\x12v\n" +
+	"\rCreateProject\x12(.graviton.server.v1.CreateProjectRequest\x1a\x1b.graviton.server.v1.Project\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/server/projects\x12v\n" +
+	"\fListProjects\x12\x1f.graviton.shared.v1.ListRequest\x1a(.graviton.server.v1.ListProjectsResponse\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/v1/server/projects\x12r\n" +
 	"\n" +
-	"GetProject\x12$.orionid.server.v1.GetProjectRequest\x1a\x1a.orionid.server.v1.Project\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/v1/server/projects/{id}\x1a\x06\x92\xb2\x19\x02\b\x04B<Z:github.com/deeploop-ai/orionid/genproto/server/v1;serverv1b\x06proto3"
+	"GetProject\x12%.graviton.server.v1.GetProjectRequest\x1a\x1b.graviton.server.v1.Project\" \x82\xd3\xe4\x93\x02\x1a\x12\x18/v1/server/projects/{id}\x1a\x06\x92\xb2\x19\x02\b\x04B=Z;github.com/deeploop-ai/graviton/genproto/server/v1;serverv1b\x06proto3"
 
 var (
 	file_server_v1_projects_proto_rawDescOnce sync.Once
@@ -298,25 +298,25 @@ func file_server_v1_projects_proto_rawDescGZIP() []byte {
 
 var file_server_v1_projects_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_server_v1_projects_proto_goTypes = []any{
-	(*CreateProjectRequest)(nil),  // 0: orionid.server.v1.CreateProjectRequest
-	(*GetProjectRequest)(nil),     // 1: orionid.server.v1.GetProjectRequest
-	(*ListProjectsResponse)(nil),  // 2: orionid.server.v1.ListProjectsResponse
-	(*Project)(nil),               // 3: orionid.server.v1.Project
-	(*v1.ListResponseMeta)(nil),   // 4: orionid.shared.v1.ListResponseMeta
+	(*CreateProjectRequest)(nil),  // 0: graviton.server.v1.CreateProjectRequest
+	(*GetProjectRequest)(nil),     // 1: graviton.server.v1.GetProjectRequest
+	(*ListProjectsResponse)(nil),  // 2: graviton.server.v1.ListProjectsResponse
+	(*Project)(nil),               // 3: graviton.server.v1.Project
+	(*v1.ListResponseMeta)(nil),   // 4: graviton.shared.v1.ListResponseMeta
 	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
-	(*v1.ListRequest)(nil),        // 6: orionid.shared.v1.ListRequest
+	(*v1.ListRequest)(nil),        // 6: graviton.shared.v1.ListRequest
 }
 var file_server_v1_projects_proto_depIdxs = []int32{
-	3, // 0: orionid.server.v1.ListProjectsResponse.projects:type_name -> orionid.server.v1.Project
-	4, // 1: orionid.server.v1.ListProjectsResponse.meta:type_name -> orionid.shared.v1.ListResponseMeta
-	5, // 2: orionid.server.v1.Project.created_at:type_name -> google.protobuf.Timestamp
-	5, // 3: orionid.server.v1.Project.updated_at:type_name -> google.protobuf.Timestamp
-	0, // 4: orionid.server.v1.ProjectsService.CreateProject:input_type -> orionid.server.v1.CreateProjectRequest
-	6, // 5: orionid.server.v1.ProjectsService.ListProjects:input_type -> orionid.shared.v1.ListRequest
-	1, // 6: orionid.server.v1.ProjectsService.GetProject:input_type -> orionid.server.v1.GetProjectRequest
-	3, // 7: orionid.server.v1.ProjectsService.CreateProject:output_type -> orionid.server.v1.Project
-	2, // 8: orionid.server.v1.ProjectsService.ListProjects:output_type -> orionid.server.v1.ListProjectsResponse
-	3, // 9: orionid.server.v1.ProjectsService.GetProject:output_type -> orionid.server.v1.Project
+	3, // 0: graviton.server.v1.ListProjectsResponse.projects:type_name -> graviton.server.v1.Project
+	4, // 1: graviton.server.v1.ListProjectsResponse.meta:type_name -> graviton.shared.v1.ListResponseMeta
+	5, // 2: graviton.server.v1.Project.created_at:type_name -> google.protobuf.Timestamp
+	5, // 3: graviton.server.v1.Project.updated_at:type_name -> google.protobuf.Timestamp
+	0, // 4: graviton.server.v1.ProjectsService.CreateProject:input_type -> graviton.server.v1.CreateProjectRequest
+	6, // 5: graviton.server.v1.ProjectsService.ListProjects:input_type -> graviton.shared.v1.ListRequest
+	1, // 6: graviton.server.v1.ProjectsService.GetProject:input_type -> graviton.server.v1.GetProjectRequest
+	3, // 7: graviton.server.v1.ProjectsService.CreateProject:output_type -> graviton.server.v1.Project
+	2, // 8: graviton.server.v1.ProjectsService.ListProjects:output_type -> graviton.server.v1.ListProjectsResponse
+	3, // 9: graviton.server.v1.ProjectsService.GetProject:output_type -> graviton.server.v1.Project
 	7, // [7:10] is the sub-list for method output_type
 	4, // [4:7] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name

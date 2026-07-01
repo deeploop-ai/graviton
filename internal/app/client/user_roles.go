@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/deeploop-ai/orionid/internal/domain/databases"
-	"github.com/deeploop-ai/orionid/internal/domain/teams"
-	"github.com/deeploop-ai/orionid/pkg/query"
+	"github.com/deeploop-ai/graviton/internal/domain/databases"
+	"github.com/deeploop-ai/graviton/internal/domain/teams"
+	"github.com/deeploop-ai/graviton/pkg/query"
 )
 
 // UserRoles resolves JWT role claims for a user from document collections.

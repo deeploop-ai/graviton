@@ -1,7 +1,7 @@
 package bun
 
 import (
-	"github.com/deeploop-ai/orionid/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/graviton/internal/infra/bun/bunrepo"
 	"github.com/google/wire"
 )
 

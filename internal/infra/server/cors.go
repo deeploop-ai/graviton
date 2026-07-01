@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/deeploop-ai/orionid/internal/pkg/config"
+	"github.com/deeploop-ai/graviton/internal/pkg/config"
 )
 
 func CORSMiddleware(cfg *config.Http_Cors) func(http.Handler) http.Handler {
