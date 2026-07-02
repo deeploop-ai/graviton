@@ -17,8 +17,10 @@ type Service struct {
 	cfg             *config.AppConfig
 	rdb             *redis.Client
 	projectRepo     projects.Repository
-	snowflake       *pkgidgen.Snowflake
-	seqPrefix       string
+	snowflake         *pkgidgen.Snowflake
+	randomCfg         pkgidgen.RandomConfig
+	randomPrefix      string
+	seqPrefix         string
 	defaultStrategy string
 	resourceUsers   string
 	resourceSessions string
@@ -27,6 +29,10 @@ type Service struct {
 
 func NewService(cfg *config.AppConfig, rdb *redis.Client, projectRepo projects.Repository) (*Service, error) {
 	nodeID := int64(0)
+	randomLen := int32(10)
+	randomCharset := pkgidgen.RandomCharsetNumeric
+	randomPrefix := "Graviton:id:random"
+	randomMaxRetries := int32(10)
 	seqPrefix := "Graviton:seq"
 	defaultStrategy := pkgidgen.StrategyUUID
 	resourceUsers := ""
@@ -38,6 +44,18 @@ func NewService(cfg *config.AppConfig, rdb *redis.Client, projectRepo projects.R
 		defaultStrategy = pkgidgen.NormalizeStrategy(idCfg.GetDefaultStrategy())
 		if idCfg.GetSnowflake() != nil {
 			nodeID = int64(idCfg.GetSnowflake().GetNodeId())
+		}
+		if idCfg.GetRandom() != nil {
+			randomLen = idCfg.GetRandom().GetLength()
+			if c := strings.TrimSpace(idCfg.GetRandom().GetCharset()); c != "" {
+				randomCharset = c
+			}
+			if p := strings.TrimSpace(idCfg.GetRandom().GetRedisKeyPrefix()); p != "" {
+				randomPrefix = p
+			}
+			if idCfg.GetRandom().GetMaxRetries() > 0 {
+				randomMaxRetries = idCfg.GetRandom().GetMaxRetries()
+			}
 		}
 		if idCfg.GetSequence() != nil && strings.TrimSpace(idCfg.GetSequence().GetRedisKeyPrefix()) != "" {
 			seqPrefix = strings.TrimSpace(idCfg.GetSequence().GetRedisKeyPrefix())
@@ -59,6 +77,12 @@ func NewService(cfg *config.AppConfig, rdb *redis.Client, projectRepo projects.R
 		rdb:               rdb,
 		projectRepo:       projectRepo,
 		snowflake:         sf,
+		randomCfg: pkgidgen.RandomConfig{
+			Length:     int(randomLen),
+			Charset:    randomCharset,
+			MaxRetries: int(randomMaxRetries),
+		}.WithDefaults(),
+		randomPrefix:      randomPrefix,
 		seqPrefix:         seqPrefix,
 		defaultStrategy:   defaultStrategy,
 		resourceUsers:     resourceUsers,
@@ -78,7 +102,7 @@ func (s *Service) NewID(ctx context.Context, projectID string, resource domainid
 	case pkgidgen.StrategySequence:
 		return s.nextSequence(ctx, projectID, resource)
 	case pkgidgen.StrategyRandom:
-		return "", pkgidgen.ErrRandomStrategyNotImplemented
+		return s.nextRandom(ctx, projectID, resource)
 	default:
 		return pkgidgen.UUID().String(), nil
 	}

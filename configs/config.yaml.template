@@ -78,10 +78,12 @@ messaging:
       from: ""
 
 idgen:
-  default_strategy: uuid    # uuid | ulid | snowflake | sequence | random (random reserved)
+  default_strategy: uuid    # uuid | ulid | snowflake | sequence | random
   random:
-    length: 10              # reserved for future random strategy
+    length: 10
     charset: numeric        # numeric | alphanumeric
+    redis_key_prefix: Graviton:id:random
+    max_retries: 10
   snowflake:
     node_id: 0                # env: GRAVITON_IDGEN_SNOWFLAKE_NODE_ID
   sequence:

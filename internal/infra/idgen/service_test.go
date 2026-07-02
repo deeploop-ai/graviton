@@ -9,7 +9,6 @@ import (
 	"github.com/deeploop-ai/graviton/internal/domain/projects"
 	infraidgen "github.com/deeploop-ai/graviton/internal/infra/idgen"
 	"github.com/deeploop-ai/graviton/internal/pkg/config"
-	pkgidgen "github.com/deeploop-ai/graviton/pkg/idgen"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
 )
@@ -90,20 +89,4 @@ func TestService_NewID_Snowflake(t *testing.T) {
 	sfID, err := svc.NewID(ctx, "proj-1", idgen.ResourceUsers)
 	require.NoError(t, err)
 	require.NotEmpty(t, sfID)
-}
-
-func TestService_NewID_RandomNotImplemented(t *testing.T) {
-	t.Parallel()
-	ctx := context.Background()
-
-	cfg := &config.AppConfig{
-		Idgen: &config.IdGen{
-			Random: &config.IdGen_Random{Length: 8, Charset: "numeric"},
-		},
-	}
-	svc, err := infraidgen.NewService(cfg, nil, stubProjectRepo{settings: map[string]any{"idgen.users": "random"}})
-	require.NoError(t, err)
-
-	_, err = svc.NewID(ctx, "proj-1", idgen.ResourceUsers)
-	require.ErrorIs(t, err, pkgidgen.ErrRandomStrategyNotImplemented)
 }

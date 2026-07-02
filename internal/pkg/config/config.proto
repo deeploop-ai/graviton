@@ -143,6 +143,8 @@ message IdGen {
   message Random {
     int32 length = 1;
     string charset = 2; // numeric | alphanumeric
+    string redis_key_prefix = 3;
+    int32 max_retries = 4;
   }
   message Snowflake {
     int32 node_id = 1;
@@ -155,8 +157,8 @@ message IdGen {
     string sessions = 2;
     string documents = 3;
   }
-  string default_strategy = 1; // uuid | ulid | snowflake | sequence | random (random reserved)
-  Random random = 2; // reserved; random strategy is not implemented yet
+  string default_strategy = 1; // uuid | ulid | snowflake | sequence | random
+  Random random = 2;
   Snowflake snowflake = 3;
   Sequence sequence = 4;
   Resources resources = 5;
