@@ -117,6 +117,26 @@ service AccountService {
     option (google.api.http) = { post: "/v1/account/sessions/oauth2/{provider}/link/token", body: "*" };
     option (graviton.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
   }
+
+  rpc CreateVerification(CreateVerificationRequest) returns (CreateVerificationResponse) {
+    option (google.api.http) = { post: "/v1/account/verification", body: "*" };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+  }
+
+  rpc UpdateVerification(UpdateVerificationRequest) returns (Account) {
+    option (google.api.http) = { put: "/v1/account/verification", body: "*" };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+  }
+
+  rpc CreateRecovery(CreateRecoveryRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { post: "/v1/account/recovery", body: "*" };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+  }
+
+  rpc UpdateRecovery(UpdateRecoveryRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { put: "/v1/account/recovery", body: "*" };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+  }
 }
 
 message SignUpRequest {
@@ -287,4 +307,33 @@ message CreateOAuth2LinkTokenSessionRequest {
   string project_id = 2;
   string code = 3;
   string state = 4;
+}
+
+message CreateVerificationRequest {
+  string project_id = 1;
+  string url = 2;
+}
+
+message CreateVerificationResponse {
+  string user_id = 1;
+  int64 expire_at = 2;
+}
+
+message UpdateVerificationRequest {
+  string project_id = 1;
+  string user_id = 2;
+  string secret = 3;
+}
+
+message CreateRecoveryRequest {
+  string project_id = 1;
+  string email = 2;
+  string url = 3;
+}
+
+message UpdateRecoveryRequest {
+  string project_id = 1;
+  string user_id = 2;
+  string secret = 3;
+  string password = 4;
 }

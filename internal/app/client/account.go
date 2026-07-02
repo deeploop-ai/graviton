@@ -32,6 +32,7 @@ type Account struct {
 	sessions       domainauth.SessionService
 	otp            domainauth.OTPChallengeStore
 	oauthState     domainauth.OAuthStateStore
+	tokens         domainauth.AccountTokenStore
 	mailer         messaging.Mailer
 	sms            messaging.SMSSender
 }
@@ -44,6 +45,7 @@ func NewAccount(
 	sessions domainauth.SessionService,
 	otp domainauth.OTPChallengeStore,
 	oauthState domainauth.OAuthStateStore,
+	tokens domainauth.AccountTokenStore,
 	mailer messaging.Mailer,
 	sms messaging.SMSSender,
 ) *Account {
@@ -55,6 +57,7 @@ func NewAccount(
 		sessions:       sessions,
 		otp:            otp,
 		oauthState:     oauthState,
+		tokens:         tokens,
 		mailer:         mailer,
 		sms:            sms,
 	}

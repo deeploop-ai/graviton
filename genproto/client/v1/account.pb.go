@@ -1773,6 +1773,298 @@ func (x *CreateOAuth2LinkTokenSessionRequest) GetState() string {
 	return ""
 }
 
+type CreateVerificationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Url           string                 `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateVerificationRequest) Reset() {
+	*x = CreateVerificationRequest{}
+	mi := &file_client_v1_account_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateVerificationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateVerificationRequest) ProtoMessage() {}
+
+func (x *CreateVerificationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateVerificationRequest.ProtoReflect.Descriptor instead.
+func (*CreateVerificationRequest) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *CreateVerificationRequest) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+func (x *CreateVerificationRequest) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+type CreateVerificationResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ExpireAt      int64                  `protobuf:"varint,2,opt,name=expire_at,json=expireAt,proto3" json:"expire_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateVerificationResponse) Reset() {
+	*x = CreateVerificationResponse{}
+	mi := &file_client_v1_account_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateVerificationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateVerificationResponse) ProtoMessage() {}
+
+func (x *CreateVerificationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateVerificationResponse.ProtoReflect.Descriptor instead.
+func (*CreateVerificationResponse) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *CreateVerificationResponse) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *CreateVerificationResponse) GetExpireAt() int64 {
+	if x != nil {
+		return x.ExpireAt
+	}
+	return 0
+}
+
+type UpdateVerificationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Secret        string                 `protobuf:"bytes,3,opt,name=secret,proto3" json:"secret,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateVerificationRequest) Reset() {
+	*x = UpdateVerificationRequest{}
+	mi := &file_client_v1_account_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateVerificationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateVerificationRequest) ProtoMessage() {}
+
+func (x *UpdateVerificationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateVerificationRequest.ProtoReflect.Descriptor instead.
+func (*UpdateVerificationRequest) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *UpdateVerificationRequest) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+func (x *UpdateVerificationRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UpdateVerificationRequest) GetSecret() string {
+	if x != nil {
+		return x.Secret
+	}
+	return ""
+}
+
+type CreateRecoveryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	Url           string                 `protobuf:"bytes,3,opt,name=url,proto3" json:"url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateRecoveryRequest) Reset() {
+	*x = CreateRecoveryRequest{}
+	mi := &file_client_v1_account_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateRecoveryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateRecoveryRequest) ProtoMessage() {}
+
+func (x *CreateRecoveryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateRecoveryRequest.ProtoReflect.Descriptor instead.
+func (*CreateRecoveryRequest) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *CreateRecoveryRequest) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+func (x *CreateRecoveryRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *CreateRecoveryRequest) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+type UpdateRecoveryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Secret        string                 `protobuf:"bytes,3,opt,name=secret,proto3" json:"secret,omitempty"`
+	Password      string                 `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateRecoveryRequest) Reset() {
+	*x = UpdateRecoveryRequest{}
+	mi := &file_client_v1_account_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateRecoveryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateRecoveryRequest) ProtoMessage() {}
+
+func (x *UpdateRecoveryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateRecoveryRequest.ProtoReflect.Descriptor instead.
+func (*UpdateRecoveryRequest) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *UpdateRecoveryRequest) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+func (x *UpdateRecoveryRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UpdateRecoveryRequest) GetSecret() string {
+	if x != nil {
+		return x.Secret
+	}
+	return ""
+}
+
+func (x *UpdateRecoveryRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
 var File_client_v1_account_proto protoreflect.FileDescriptor
 
 const file_client_v1_account_proto_rawDesc = "" +
@@ -1908,7 +2200,30 @@ const file_client_v1_account_proto_rawDesc = "" +
 	"\n" +
 	"project_id\x18\x02 \x01(\tR\tprojectId\x12\x12\n" +
 	"\x04code\x18\x03 \x01(\tR\x04code\x12\x14\n" +
-	"\x05state\x18\x04 \x01(\tR\x05state2\xda\x18\n" +
+	"\x05state\x18\x04 \x01(\tR\x05state\"L\n" +
+	"\x19CreateVerificationRequest\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x01 \x01(\tR\tprojectId\x12\x10\n" +
+	"\x03url\x18\x02 \x01(\tR\x03url\"R\n" +
+	"\x1aCreateVerificationResponse\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
+	"\texpire_at\x18\x02 \x01(\x03R\bexpireAt\"k\n" +
+	"\x19UpdateVerificationRequest\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x01 \x01(\tR\tprojectId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x16\n" +
+	"\x06secret\x18\x03 \x01(\tR\x06secret\"^\n" +
+	"\x15CreateRecoveryRequest\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x01 \x01(\tR\tprojectId\x12\x14\n" +
+	"\x05email\x18\x02 \x01(\tR\x05email\x12\x10\n" +
+	"\x03url\x18\x03 \x01(\tR\x03url\"\x83\x01\n" +
+	"\x15UpdateRecoveryRequest\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x01 \x01(\tR\tprojectId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x16\n" +
+	"\x06secret\x18\x03 \x01(\tR\x06secret\x12\x1a\n" +
+	"\bpassword\x18\x04 \x01(\tR\bpassword2\x8e\x1d\n" +
 	"\x0eAccountService\x12u\n" +
 	"\x06SignUp\x12!.graviton.client.v1.SignUpRequest\x1a\".graviton.client.v1.SignUpResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/sign-up\x12u\n" +
 	"\x06SignIn\x12!.graviton.client.v1.SignInRequest\x1a\".graviton.client.v1.SignInResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/sign-in\x12v\n" +
@@ -1930,7 +2245,11 @@ const file_client_v1_account_proto_rawDesc = "" +
 	"\x1eCreateWeChatMiniProgramSession\x129.graviton.client.v1.CreateWeChatMiniProgramSessionRequest\x1a\".graviton.client.v1.SignInResponse\"8\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02,:\x01*\"'/v1/account/sessions/wechat/miniprogram\x12\xa0\x01\n" +
 	"\x16CreateAnonymousSession\x121.graviton.client.v1.CreateAnonymousSessionRequest\x1a\".graviton.client.v1.SignInResponse\"/\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/v1/account/sessions/anonymous\x12\xc0\x01\n" +
 	"\x17CreateOAuth2LinkSession\x122.graviton.client.v1.CreateOAuth2LinkSessionRequest\x1a/.graviton.client.v1.CreateOAuth2SessionResponse\"@\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02-\x12+/v1/account/sessions/oauth2/{provider}/link\x12\xbf\x01\n" +
-	"\x1cCreateOAuth2LinkTokenSession\x127.graviton.client.v1.CreateOAuth2LinkTokenSessionRequest\x1a\x1b.graviton.client.v1.Account\"I\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x026:\x01*\"1/v1/account/sessions/oauth2/{provider}/link/token\x1a\x06\x92\xb2\x19\x02\b\x02B=Z;github.com/deeploop-ai/graviton/genproto/client/v1;clientv1b\x06proto3"
+	"\x1cCreateOAuth2LinkTokenSession\x127.graviton.client.v1.CreateOAuth2LinkTokenSessionRequest\x1a\x1b.graviton.client.v1.Account\"I\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x026:\x01*\"1/v1/account/sessions/oauth2/{provider}/link/token\x12\xa5\x01\n" +
+	"\x12CreateVerification\x12-.graviton.client.v1.CreateVerificationRequest\x1a..graviton.client.v1.CreateVerificationResponse\"0\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/v1/account/verification\x12\x8b\x01\n" +
+	"\x12UpdateVerification\x12-.graviton.client.v1.UpdateVerificationRequest\x1a\x1b.graviton.client.v1.Account\")\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x1d:\x01*\x1a\x18/v1/account/verification\x12}\n" +
+	"\x0eCreateRecovery\x12).graviton.client.v1.CreateRecoveryRequest\x1a\x19.graviton.shared.v1.Empty\"%\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/v1/account/recovery\x12}\n" +
+	"\x0eUpdateRecovery\x12).graviton.client.v1.UpdateRecoveryRequest\x1a\x19.graviton.shared.v1.Empty\"%\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x19:\x01*\x1a\x14/v1/account/recovery\x1a\x06\x92\xb2\x19\x02\b\x02B=Z;github.com/deeploop-ai/graviton/genproto/client/v1;clientv1b\x06proto3"
 
 var (
 	file_client_v1_account_proto_rawDescOnce sync.Once
@@ -1944,7 +2263,7 @@ func file_client_v1_account_proto_rawDescGZIP() []byte {
 	return file_client_v1_account_proto_rawDescData
 }
 
-var file_client_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
+var file_client_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 36)
 var file_client_v1_account_proto_goTypes = []any{
 	(*SignUpRequest)(nil),                         // 0: graviton.client.v1.SignUpRequest
 	(*SignInRequest)(nil),                         // 1: graviton.client.v1.SignInRequest
@@ -1977,23 +2296,28 @@ var file_client_v1_account_proto_goTypes = []any{
 	(*CreateAnonymousSessionRequest)(nil),         // 28: graviton.client.v1.CreateAnonymousSessionRequest
 	(*CreateOAuth2LinkSessionRequest)(nil),        // 29: graviton.client.v1.CreateOAuth2LinkSessionRequest
 	(*CreateOAuth2LinkTokenSessionRequest)(nil),   // 30: graviton.client.v1.CreateOAuth2LinkTokenSessionRequest
-	(*timestamppb.Timestamp)(nil),                 // 31: google.protobuf.Timestamp
-	(*structpb.Struct)(nil),                       // 32: google.protobuf.Struct
-	(*v1.Empty)(nil),                              // 33: graviton.shared.v1.Empty
+	(*CreateVerificationRequest)(nil),             // 31: graviton.client.v1.CreateVerificationRequest
+	(*CreateVerificationResponse)(nil),            // 32: graviton.client.v1.CreateVerificationResponse
+	(*UpdateVerificationRequest)(nil),             // 33: graviton.client.v1.UpdateVerificationRequest
+	(*CreateRecoveryRequest)(nil),                 // 34: graviton.client.v1.CreateRecoveryRequest
+	(*UpdateRecoveryRequest)(nil),                 // 35: graviton.client.v1.UpdateRecoveryRequest
+	(*timestamppb.Timestamp)(nil),                 // 36: google.protobuf.Timestamp
+	(*structpb.Struct)(nil),                       // 37: google.protobuf.Struct
+	(*v1.Empty)(nil),                              // 38: graviton.shared.v1.Empty
 }
 var file_client_v1_account_proto_depIdxs = []int32{
-	31, // 0: graviton.client.v1.Account.created_at:type_name -> google.protobuf.Timestamp
-	31, // 1: graviton.client.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
+	36, // 0: graviton.client.v1.Account.created_at:type_name -> google.protobuf.Timestamp
+	36, // 1: graviton.client.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
 	4,  // 2: graviton.client.v1.SignUpResponse.account:type_name -> graviton.client.v1.Account
 	5,  // 3: graviton.client.v1.SignUpResponse.tokens:type_name -> graviton.client.v1.TokenBundle
 	4,  // 4: graviton.client.v1.SignInResponse.account:type_name -> graviton.client.v1.Account
 	5,  // 5: graviton.client.v1.SignInResponse.tokens:type_name -> graviton.client.v1.TokenBundle
 	5,  // 6: graviton.client.v1.RefreshTokenResponse.tokens:type_name -> graviton.client.v1.TokenBundle
-	31, // 7: graviton.client.v1.Session.expire_at:type_name -> google.protobuf.Timestamp
-	31, // 8: graviton.client.v1.Session.created_at:type_name -> google.protobuf.Timestamp
+	36, // 7: graviton.client.v1.Session.expire_at:type_name -> google.protobuf.Timestamp
+	36, // 8: graviton.client.v1.Session.created_at:type_name -> google.protobuf.Timestamp
 	11, // 9: graviton.client.v1.ListSessionsResponse.sessions:type_name -> graviton.client.v1.Session
-	32, // 10: graviton.client.v1.GetPrefsResponse.prefs:type_name -> google.protobuf.Struct
-	32, // 11: graviton.client.v1.UpdatePrefsRequest.prefs:type_name -> google.protobuf.Struct
+	37, // 10: graviton.client.v1.GetPrefsResponse.prefs:type_name -> google.protobuf.Struct
+	37, // 11: graviton.client.v1.UpdatePrefsRequest.prefs:type_name -> google.protobuf.Struct
 	0,  // 12: graviton.client.v1.AccountService.SignUp:input_type -> graviton.client.v1.SignUpRequest
 	1,  // 13: graviton.client.v1.AccountService.SignIn:input_type -> graviton.client.v1.SignInRequest
 	2,  // 14: graviton.client.v1.AccountService.SignOut:input_type -> graviton.client.v1.SignOutRequest
@@ -2015,29 +2339,37 @@ var file_client_v1_account_proto_depIdxs = []int32{
 	28, // 30: graviton.client.v1.AccountService.CreateAnonymousSession:input_type -> graviton.client.v1.CreateAnonymousSessionRequest
 	29, // 31: graviton.client.v1.AccountService.CreateOAuth2LinkSession:input_type -> graviton.client.v1.CreateOAuth2LinkSessionRequest
 	30, // 32: graviton.client.v1.AccountService.CreateOAuth2LinkTokenSession:input_type -> graviton.client.v1.CreateOAuth2LinkTokenSessionRequest
-	6,  // 33: graviton.client.v1.AccountService.SignUp:output_type -> graviton.client.v1.SignUpResponse
-	7,  // 34: graviton.client.v1.AccountService.SignIn:output_type -> graviton.client.v1.SignInResponse
-	33, // 35: graviton.client.v1.AccountService.SignOut:output_type -> graviton.shared.v1.Empty
-	9,  // 36: graviton.client.v1.AccountService.RefreshToken:output_type -> graviton.client.v1.RefreshTokenResponse
-	4,  // 37: graviton.client.v1.AccountService.Me:output_type -> graviton.client.v1.Account
-	4,  // 38: graviton.client.v1.AccountService.UpdateAccount:output_type -> graviton.client.v1.Account
-	13, // 39: graviton.client.v1.AccountService.ListSessions:output_type -> graviton.client.v1.ListSessionsResponse
-	33, // 40: graviton.client.v1.AccountService.DeleteSession:output_type -> graviton.shared.v1.Empty
-	33, // 41: graviton.client.v1.AccountService.DeleteSessions:output_type -> graviton.shared.v1.Empty
-	17, // 42: graviton.client.v1.AccountService.GetPrefs:output_type -> graviton.client.v1.GetPrefsResponse
-	17, // 43: graviton.client.v1.AccountService.UpdatePrefs:output_type -> graviton.client.v1.GetPrefsResponse
-	21, // 44: graviton.client.v1.AccountService.CreateEmailOTP:output_type -> graviton.client.v1.ChallengeResponse
-	7,  // 45: graviton.client.v1.AccountService.CreateEmailOTPSession:output_type -> graviton.client.v1.SignInResponse
-	23, // 46: graviton.client.v1.AccountService.CreateOAuth2Session:output_type -> graviton.client.v1.CreateOAuth2SessionResponse
-	7,  // 47: graviton.client.v1.AccountService.CreateOAuth2TokenSession:output_type -> graviton.client.v1.SignInResponse
-	21, // 48: graviton.client.v1.AccountService.CreatePhoneOTP:output_type -> graviton.client.v1.ChallengeResponse
-	7,  // 49: graviton.client.v1.AccountService.CreatePhoneOTPSession:output_type -> graviton.client.v1.SignInResponse
-	7,  // 50: graviton.client.v1.AccountService.CreateWeChatMiniProgramSession:output_type -> graviton.client.v1.SignInResponse
-	7,  // 51: graviton.client.v1.AccountService.CreateAnonymousSession:output_type -> graviton.client.v1.SignInResponse
-	23, // 52: graviton.client.v1.AccountService.CreateOAuth2LinkSession:output_type -> graviton.client.v1.CreateOAuth2SessionResponse
-	4,  // 53: graviton.client.v1.AccountService.CreateOAuth2LinkTokenSession:output_type -> graviton.client.v1.Account
-	33, // [33:54] is the sub-list for method output_type
-	12, // [12:33] is the sub-list for method input_type
+	31, // 33: graviton.client.v1.AccountService.CreateVerification:input_type -> graviton.client.v1.CreateVerificationRequest
+	33, // 34: graviton.client.v1.AccountService.UpdateVerification:input_type -> graviton.client.v1.UpdateVerificationRequest
+	34, // 35: graviton.client.v1.AccountService.CreateRecovery:input_type -> graviton.client.v1.CreateRecoveryRequest
+	35, // 36: graviton.client.v1.AccountService.UpdateRecovery:input_type -> graviton.client.v1.UpdateRecoveryRequest
+	6,  // 37: graviton.client.v1.AccountService.SignUp:output_type -> graviton.client.v1.SignUpResponse
+	7,  // 38: graviton.client.v1.AccountService.SignIn:output_type -> graviton.client.v1.SignInResponse
+	38, // 39: graviton.client.v1.AccountService.SignOut:output_type -> graviton.shared.v1.Empty
+	9,  // 40: graviton.client.v1.AccountService.RefreshToken:output_type -> graviton.client.v1.RefreshTokenResponse
+	4,  // 41: graviton.client.v1.AccountService.Me:output_type -> graviton.client.v1.Account
+	4,  // 42: graviton.client.v1.AccountService.UpdateAccount:output_type -> graviton.client.v1.Account
+	13, // 43: graviton.client.v1.AccountService.ListSessions:output_type -> graviton.client.v1.ListSessionsResponse
+	38, // 44: graviton.client.v1.AccountService.DeleteSession:output_type -> graviton.shared.v1.Empty
+	38, // 45: graviton.client.v1.AccountService.DeleteSessions:output_type -> graviton.shared.v1.Empty
+	17, // 46: graviton.client.v1.AccountService.GetPrefs:output_type -> graviton.client.v1.GetPrefsResponse
+	17, // 47: graviton.client.v1.AccountService.UpdatePrefs:output_type -> graviton.client.v1.GetPrefsResponse
+	21, // 48: graviton.client.v1.AccountService.CreateEmailOTP:output_type -> graviton.client.v1.ChallengeResponse
+	7,  // 49: graviton.client.v1.AccountService.CreateEmailOTPSession:output_type -> graviton.client.v1.SignInResponse
+	23, // 50: graviton.client.v1.AccountService.CreateOAuth2Session:output_type -> graviton.client.v1.CreateOAuth2SessionResponse
+	7,  // 51: graviton.client.v1.AccountService.CreateOAuth2TokenSession:output_type -> graviton.client.v1.SignInResponse
+	21, // 52: graviton.client.v1.AccountService.CreatePhoneOTP:output_type -> graviton.client.v1.ChallengeResponse
+	7,  // 53: graviton.client.v1.AccountService.CreatePhoneOTPSession:output_type -> graviton.client.v1.SignInResponse
+	7,  // 54: graviton.client.v1.AccountService.CreateWeChatMiniProgramSession:output_type -> graviton.client.v1.SignInResponse
+	7,  // 55: graviton.client.v1.AccountService.CreateAnonymousSession:output_type -> graviton.client.v1.SignInResponse
+	23, // 56: graviton.client.v1.AccountService.CreateOAuth2LinkSession:output_type -> graviton.client.v1.CreateOAuth2SessionResponse
+	4,  // 57: graviton.client.v1.AccountService.CreateOAuth2LinkTokenSession:output_type -> graviton.client.v1.Account
+	32, // 58: graviton.client.v1.AccountService.CreateVerification:output_type -> graviton.client.v1.CreateVerificationResponse
+	4,  // 59: graviton.client.v1.AccountService.UpdateVerification:output_type -> graviton.client.v1.Account
+	38, // 60: graviton.client.v1.AccountService.CreateRecovery:output_type -> graviton.shared.v1.Empty
+	38, // 61: graviton.client.v1.AccountService.UpdateRecovery:output_type -> graviton.shared.v1.Empty
+	37, // [37:62] is the sub-list for method output_type
+	12, // [12:37] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
 	12, // [12:12] is the sub-list for extension extendee
 	0,  // [0:12] is the sub-list for field type_name
@@ -2054,7 +2386,7 @@ func file_client_v1_account_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_client_v1_account_proto_rawDesc), len(file_client_v1_account_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   31,
+			NumMessages:   36,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

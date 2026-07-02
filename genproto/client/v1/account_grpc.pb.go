@@ -41,6 +41,10 @@ const (
 	AccountService_CreateAnonymousSession_FullMethodName         = "/graviton.client.v1.AccountService/CreateAnonymousSession"
 	AccountService_CreateOAuth2LinkSession_FullMethodName        = "/graviton.client.v1.AccountService/CreateOAuth2LinkSession"
 	AccountService_CreateOAuth2LinkTokenSession_FullMethodName   = "/graviton.client.v1.AccountService/CreateOAuth2LinkTokenSession"
+	AccountService_CreateVerification_FullMethodName             = "/graviton.client.v1.AccountService/CreateVerification"
+	AccountService_UpdateVerification_FullMethodName             = "/graviton.client.v1.AccountService/UpdateVerification"
+	AccountService_CreateRecovery_FullMethodName                 = "/graviton.client.v1.AccountService/CreateRecovery"
+	AccountService_UpdateRecovery_FullMethodName                 = "/graviton.client.v1.AccountService/UpdateRecovery"
 )
 
 // AccountServiceClient is the client API for AccountService service.
@@ -68,6 +72,10 @@ type AccountServiceClient interface {
 	CreateAnonymousSession(ctx context.Context, in *CreateAnonymousSessionRequest, opts ...grpc.CallOption) (*SignInResponse, error)
 	CreateOAuth2LinkSession(ctx context.Context, in *CreateOAuth2LinkSessionRequest, opts ...grpc.CallOption) (*CreateOAuth2SessionResponse, error)
 	CreateOAuth2LinkTokenSession(ctx context.Context, in *CreateOAuth2LinkTokenSessionRequest, opts ...grpc.CallOption) (*Account, error)
+	CreateVerification(ctx context.Context, in *CreateVerificationRequest, opts ...grpc.CallOption) (*CreateVerificationResponse, error)
+	UpdateVerification(ctx context.Context, in *UpdateVerificationRequest, opts ...grpc.CallOption) (*Account, error)
+	CreateRecovery(ctx context.Context, in *CreateRecoveryRequest, opts ...grpc.CallOption) (*v1.Empty, error)
+	UpdateRecovery(ctx context.Context, in *UpdateRecoveryRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 }
 
 type accountServiceClient struct {
@@ -288,6 +296,46 @@ func (c *accountServiceClient) CreateOAuth2LinkTokenSession(ctx context.Context,
 	return out, nil
 }
 
+func (c *accountServiceClient) CreateVerification(ctx context.Context, in *CreateVerificationRequest, opts ...grpc.CallOption) (*CreateVerificationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateVerificationResponse)
+	err := c.cc.Invoke(ctx, AccountService_CreateVerification_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) UpdateVerification(ctx context.Context, in *UpdateVerificationRequest, opts ...grpc.CallOption) (*Account, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Account)
+	err := c.cc.Invoke(ctx, AccountService_UpdateVerification_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) CreateRecovery(ctx context.Context, in *CreateRecoveryRequest, opts ...grpc.CallOption) (*v1.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Empty)
+	err := c.cc.Invoke(ctx, AccountService_CreateRecovery_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) UpdateRecovery(ctx context.Context, in *UpdateRecoveryRequest, opts ...grpc.CallOption) (*v1.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Empty)
+	err := c.cc.Invoke(ctx, AccountService_UpdateRecovery_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AccountServiceServer is the server API for AccountService service.
 // All implementations must embed UnimplementedAccountServiceServer
 // for forward compatibility.
@@ -313,6 +361,10 @@ type AccountServiceServer interface {
 	CreateAnonymousSession(context.Context, *CreateAnonymousSessionRequest) (*SignInResponse, error)
 	CreateOAuth2LinkSession(context.Context, *CreateOAuth2LinkSessionRequest) (*CreateOAuth2SessionResponse, error)
 	CreateOAuth2LinkTokenSession(context.Context, *CreateOAuth2LinkTokenSessionRequest) (*Account, error)
+	CreateVerification(context.Context, *CreateVerificationRequest) (*CreateVerificationResponse, error)
+	UpdateVerification(context.Context, *UpdateVerificationRequest) (*Account, error)
+	CreateRecovery(context.Context, *CreateRecoveryRequest) (*v1.Empty, error)
+	UpdateRecovery(context.Context, *UpdateRecoveryRequest) (*v1.Empty, error)
 	mustEmbedUnimplementedAccountServiceServer()
 }
 
@@ -385,6 +437,18 @@ func (UnimplementedAccountServiceServer) CreateOAuth2LinkSession(context.Context
 }
 func (UnimplementedAccountServiceServer) CreateOAuth2LinkTokenSession(context.Context, *CreateOAuth2LinkTokenSessionRequest) (*Account, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateOAuth2LinkTokenSession not implemented")
+}
+func (UnimplementedAccountServiceServer) CreateVerification(context.Context, *CreateVerificationRequest) (*CreateVerificationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateVerification not implemented")
+}
+func (UnimplementedAccountServiceServer) UpdateVerification(context.Context, *UpdateVerificationRequest) (*Account, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateVerification not implemented")
+}
+func (UnimplementedAccountServiceServer) CreateRecovery(context.Context, *CreateRecoveryRequest) (*v1.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateRecovery not implemented")
+}
+func (UnimplementedAccountServiceServer) UpdateRecovery(context.Context, *UpdateRecoveryRequest) (*v1.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateRecovery not implemented")
 }
 func (UnimplementedAccountServiceServer) mustEmbedUnimplementedAccountServiceServer() {}
 func (UnimplementedAccountServiceServer) testEmbeddedByValue()                        {}
@@ -785,6 +849,78 @@ func _AccountService_CreateOAuth2LinkTokenSession_Handler(srv interface{}, ctx c
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AccountService_CreateVerification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateVerificationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).CreateVerification(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_CreateVerification_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).CreateVerification(ctx, req.(*CreateVerificationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_UpdateVerification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateVerificationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).UpdateVerification(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_UpdateVerification_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).UpdateVerification(ctx, req.(*UpdateVerificationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_CreateRecovery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateRecoveryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).CreateRecovery(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_CreateRecovery_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).CreateRecovery(ctx, req.(*CreateRecoveryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_UpdateRecovery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateRecoveryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).UpdateRecovery(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_UpdateRecovery_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).UpdateRecovery(ctx, req.(*UpdateRecoveryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AccountService_ServiceDesc is the grpc.ServiceDesc for AccountService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -875,6 +1011,22 @@ var AccountService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateOAuth2LinkTokenSession",
 			Handler:    _AccountService_CreateOAuth2LinkTokenSession_Handler,
+		},
+		{
+			MethodName: "CreateVerification",
+			Handler:    _AccountService_CreateVerification_Handler,
+		},
+		{
+			MethodName: "UpdateVerification",
+			Handler:    _AccountService_UpdateVerification_Handler,
+		},
+		{
+			MethodName: "CreateRecovery",
+			Handler:    _AccountService_CreateRecovery_Handler,
+		},
+		{
+			MethodName: "UpdateRecovery",
+			Handler:    _AccountService_UpdateRecovery_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

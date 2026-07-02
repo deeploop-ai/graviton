@@ -292,6 +292,55 @@ func (s *AccountService) CreateOAuth2LinkTokenSession(ctx context.Context, req *
 	return mapUser(user), nil
 }
 
+func (s *AccountService) CreateVerification(ctx context.Context, req *clientv1.CreateVerificationRequest) (*clientv1.CreateVerificationResponse, error) {
+	challenge, err := s.account.CreateVerification(ctx, client.CreateVerificationCommand{
+		ProjectID: req.GetProjectId(),
+		URL:       req.GetUrl(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &clientv1.CreateVerificationResponse{
+		UserId:   challenge.UserID,
+		ExpireAt: challenge.ExpireAt,
+	}, nil
+}
+
+func (s *AccountService) UpdateVerification(ctx context.Context, req *clientv1.UpdateVerificationRequest) (*clientv1.Account, error) {
+	user, err := s.account.UpdateVerification(ctx, client.UpdateVerificationCommand{
+		ProjectID: req.GetProjectId(),
+		UserID:    req.GetUserId(),
+		Secret:    req.GetSecret(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return mapUser(user), nil
+}
+
+func (s *AccountService) CreateRecovery(ctx context.Context, req *clientv1.CreateRecoveryRequest) (*sharedv1.Empty, error) {
+	if err := s.account.CreateRecovery(ctx, client.CreateRecoveryCommand{
+		ProjectID: req.GetProjectId(),
+		Email:     req.GetEmail(),
+		URL:       req.GetUrl(),
+	}); err != nil {
+		return nil, err
+	}
+	return &sharedv1.Empty{}, nil
+}
+
+func (s *AccountService) UpdateRecovery(ctx context.Context, req *clientv1.UpdateRecoveryRequest) (*sharedv1.Empty, error) {
+	if err := s.account.UpdateRecovery(ctx, client.UpdateRecoveryCommand{
+		ProjectID: req.GetProjectId(),
+		UserID:    req.GetUserId(),
+		Secret:    req.GetSecret(),
+		Password:  req.GetPassword(),
+	}); err != nil {
+		return nil, err
+	}
+	return &sharedv1.Empty{}, nil
+}
+
 func mapUser(u *client.User) *clientv1.Account {
 	if u == nil {
 		return nil
