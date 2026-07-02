@@ -76,3 +76,17 @@ messaging:
       account_sid: ""       # env: GRAVITON_MESSAGING_SMS_TWILIO_ACCOUNT_SID
       auth_token: ""        # env: GRAVITON_MESSAGING_SMS_TWILIO_AUTH_TOKEN
       from: ""
+
+idgen:
+  default_strategy: uuid    # uuid | snowflake | sequence | random
+  random:
+    length: 10
+    charset: numeric        # numeric | alphanumeric
+  snowflake:
+    node_id: 0                # env: GRAVITON_IDGEN_SNOWFLAKE_NODE_ID
+  sequence:
+    redis_key_prefix: Graviton:seq
+  resources:
+    users: uuid
+    sessions: uuid
+    documents: uuid

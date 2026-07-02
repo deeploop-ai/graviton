@@ -8,7 +8,6 @@ import (
 	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
 	"github.com/deeploop-ai/graviton/internal/domain/databases"
 	"github.com/deeploop-ai/graviton/internal/domain/users"
-	"github.com/deeploop-ai/graviton/pkg/idgen"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -26,7 +25,10 @@ func (a *Account) CreateAnonymousSession(ctx context.Context, cmd CreateAnonymou
 		return nil, nil, "", err
 	}
 
-	userID := idgen.UUID().String()
+	userID, err := a.generateUserID(ctx, projectID)
+	if err != nil {
+		return nil, nil, "", err
+	}
 	email := anonymousEmail(userID)
 	userDoc := databases.Document{
 		ID: userID,

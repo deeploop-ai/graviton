@@ -19,6 +19,7 @@ import (
 	"github.com/deeploop-ai/graviton/internal/infra/bun/bunrepo"
 	"github.com/deeploop-ai/graviton/internal/infra/clients"
 	"github.com/deeploop-ai/graviton/internal/infra/documentdb"
+	"github.com/deeploop-ai/graviton/internal/infra/idgen"
 	"github.com/deeploop-ai/graviton/internal/infra/messaging"
 	server2 "github.com/deeploop-ai/graviton/internal/infra/server"
 	"github.com/deeploop-ai/graviton/internal/infra/storage"
@@ -54,9 +55,14 @@ func wireBootstrap(app lynx.Lynx) (*boot.Bootstrap, func(), error) {
 	redisOTPChallengeStore := auth.NewRedisOTPChallengeStore(redisClient)
 	redisOAuthStateStore := auth.NewRedisOAuthStateStore(redisClient)
 	redisAccountTokenStore := auth.NewRedisAccountTokenStore(redisClient)
+	service, err := idgen.NewService(appConfig, redisClient, projectsRepository)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
 	mailerService := messaging.NewMailer(appConfig)
 	smsService := messaging.NewSMSService(appConfig)
-	account := client.NewAccount(appConfig, projectsRepository, oAuthProviderRepository, documentDB, sessionService, redisOTPChallengeStore, redisOAuthStateStore, redisAccountTokenStore, mailerService, smsService)
+	account := client.NewAccount(appConfig, projectsRepository, oAuthProviderRepository, documentDB, sessionService, redisOTPChallengeStore, redisOAuthStateStore, redisAccountTokenStore, service, mailerService, smsService)
 	accountService := clientgrpc.NewAccountService(account)
 	databases := client.NewDatabases(projectsRepository, documentDB)
 	databasesService := clientgrpc.NewDatabasesService(databases)

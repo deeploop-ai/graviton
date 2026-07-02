@@ -12,6 +12,7 @@ message AppConfig {
   Functions functions = 5;
   Telemetry telemetry = 6;
   Messaging messaging = 7;
+  IdGen idgen = 8;
 }
 
 message Server {
@@ -136,4 +137,27 @@ message Twilio {
   string account_sid = 1;
   string auth_token = 2;
   string from = 3;
+}
+
+message IdGen {
+  message Random {
+    int32 length = 1;
+    string charset = 2; // numeric | alphanumeric
+  }
+  message Snowflake {
+    int32 node_id = 1;
+  }
+  message Sequence {
+    string redis_key_prefix = 1;
+  }
+  message Resources {
+    string users = 1;
+    string sessions = 2;
+    string documents = 3;
+  }
+  string default_strategy = 1; // uuid | snowflake | sequence | random
+  Random random = 2;
+  Snowflake snowflake = 3;
+  Sequence sequence = 4;
+  Resources resources = 5;
 }

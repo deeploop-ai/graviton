@@ -13,7 +13,6 @@ import (
 	"github.com/deeploop-ai/graviton/internal/infra/documentdb"
 	"github.com/deeploop-ai/graviton/internal/pkg/contexts"
 	infraauth "github.com/deeploop-ai/graviton/internal/infra/auth"
-	"github.com/deeploop-ai/graviton/pkg/idgen"
 	"github.com/deeploop-ai/graviton/pkg/query"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -150,7 +149,10 @@ func (a *Account) findOrCreateUserByPhone(ctx context.Context, projectID, phone 
 		return user, nil
 	}
 
-	userID := idgen.UUID().String()
+	userID, err := a.generateUserID(ctx, projectID)
+	if err != nil {
+		return nil, err
+	}
 	placeholderEmail := phonePlaceholderEmail(phone)
 	userDoc := databases.Document{
 		ID: userID,

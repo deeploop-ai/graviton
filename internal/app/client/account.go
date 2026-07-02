@@ -7,6 +7,7 @@ import (
 	"time"
 
 	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
+	domainidgen "github.com/deeploop-ai/graviton/internal/domain/idgen"
 	"github.com/deeploop-ai/graviton/internal/domain/databases"
 	"github.com/deeploop-ai/graviton/internal/domain/messaging"
 	"github.com/deeploop-ai/graviton/internal/domain/projects"
@@ -33,6 +34,7 @@ type Account struct {
 	otp            domainauth.OTPChallengeStore
 	oauthState     domainauth.OAuthStateStore
 	tokens         domainauth.AccountTokenStore
+	idGen          domainidgen.Generator
 	mailer         messaging.Mailer
 	sms            messaging.SMSSender
 }
@@ -46,6 +48,7 @@ func NewAccount(
 	otp domainauth.OTPChallengeStore,
 	oauthState domainauth.OAuthStateStore,
 	tokens domainauth.AccountTokenStore,
+	idGen domainidgen.Generator,
 	mailer messaging.Mailer,
 	sms messaging.SMSSender,
 ) *Account {
@@ -58,6 +61,7 @@ func NewAccount(
 		otp:            otp,
 		oauthState:     oauthState,
 		tokens:         tokens,
+		idGen:          idGen,
 		mailer:         mailer,
 		sms:            sms,
 	}
@@ -149,7 +153,10 @@ func (a *Account) SignUp(ctx context.Context, cmd SignUpCommand) (*User, *TokenB
 		return nil, nil, "", err
 	}
 
-	userID := idgen.UUID().String()
+	userID, err := a.generateUserID(ctx, project.ID)
+	if err != nil {
+		return nil, nil, "", err
+	}
 	userDoc := databases.Document{
 		ID: userID,
 		Data: map[string]any{
@@ -182,6 +189,13 @@ func (a *Account) SignUp(ctx context.Context, cmd SignUpCommand) (*User, *TokenB
 
 	user := mapUserDoc(&userDoc)
 	return a.finishSignIn(ctx, project.ID, user)
+}
+
+func (a *Account) generateUserID(ctx context.Context, projectID string) (string, error) {
+	if a.idGen != nil {
+		return a.idGen.NewID(ctx, projectID, domainidgen.ResourceUsers)
+	}
+	return idgen.UUID().String(), nil
 }
 
 func (a *Account) finishSignIn(ctx context.Context, projectID string, user *User) (*User, *TokenBundle, string, error) {

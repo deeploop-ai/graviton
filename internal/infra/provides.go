@@ -2,11 +2,13 @@ package infra
 
 import (
 	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
+	domainidgen "github.com/deeploop-ai/graviton/internal/domain/idgen"
 	"github.com/deeploop-ai/graviton/internal/infra/auth"
 	"github.com/deeploop-ai/graviton/internal/infra/bun"
 	"github.com/deeploop-ai/graviton/internal/infra/clients"
 	"github.com/deeploop-ai/graviton/internal/infra/documentdb"
 	infrafunctions "github.com/deeploop-ai/graviton/internal/infra/functions"
+	infraidgen "github.com/deeploop-ai/graviton/internal/infra/idgen"
 	inframessaging "github.com/deeploop-ai/graviton/internal/infra/messaging"
 	infrastorage "github.com/deeploop-ai/graviton/internal/infra/storage"
 	"github.com/deeploop-ai/graviton/internal/infra/server"
@@ -27,6 +29,9 @@ var ProviderSet = wire.NewSet(
 	wire.Bind(new(domainauth.OTPChallengeStore), new(*auth.RedisOTPChallengeStore)),
 	wire.Bind(new(domainauth.OAuthStateStore), new(*auth.RedisOAuthStateStore)),
 	wire.Bind(new(domainauth.AccountTokenStore), new(*auth.RedisAccountTokenStore)),
+
+	infraidgen.ProviderSet,
+	wire.Bind(new(domainidgen.Generator), new(*infraidgen.Service)),
 
 	inframessaging.ProviderSet,
 
