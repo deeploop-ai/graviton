@@ -926,8 +926,8 @@ type IdGen struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	DefaultStrategy string           `protobuf:"bytes,1,opt,name=default_strategy,json=defaultStrategy,proto3" json:"default_strategy,omitempty"` // uuid | snowflake | sequence | random
-	Random          *IdGen_Random    `protobuf:"bytes,2,opt,name=random,proto3" json:"random,omitempty"`
+	DefaultStrategy string           `protobuf:"bytes,1,opt,name=default_strategy,json=defaultStrategy,proto3" json:"default_strategy,omitempty"` // uuid | ulid | snowflake | sequence | random (random reserved)
+	Random          *IdGen_Random    `protobuf:"bytes,2,opt,name=random,proto3" json:"random,omitempty"`                                          // reserved; random strategy is not implemented yet
 	Snowflake       *IdGen_Snowflake `protobuf:"bytes,3,opt,name=snowflake,proto3" json:"snowflake,omitempty"`
 	Sequence        *IdGen_Sequence  `protobuf:"bytes,4,opt,name=sequence,proto3" json:"sequence,omitempty"`
 	Resources       *IdGen_Resources `protobuf:"bytes,5,opt,name=resources,proto3" json:"resources,omitempty"`

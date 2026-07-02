@@ -78,9 +78,9 @@ messaging:
       from: ""
 
 idgen:
-  default_strategy: uuid    # uuid | snowflake | sequence | random
+  default_strategy: uuid    # uuid | ulid | snowflake | sequence | random (random reserved)
   random:
-    length: 10
+    length: 10              # reserved for future random strategy
     charset: numeric        # numeric | alphanumeric
   snowflake:
     node_id: 0                # env: GRAVITON_IDGEN_SNOWFLAKE_NODE_ID

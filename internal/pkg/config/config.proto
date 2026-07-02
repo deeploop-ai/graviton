@@ -155,8 +155,8 @@ message IdGen {
     string sessions = 2;
     string documents = 3;
   }
-  string default_strategy = 1; // uuid | snowflake | sequence | random
-  Random random = 2;
+  string default_strategy = 1; // uuid | ulid | snowflake | sequence | random (random reserved)
+  Random random = 2; // reserved; random strategy is not implemented yet
   Snowflake snowflake = 3;
   Sequence sequence = 4;
   Resources resources = 5;

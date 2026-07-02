@@ -18,7 +18,6 @@ type Service struct {
 	rdb             *redis.Client
 	projectRepo     projects.Repository
 	snowflake       *pkgidgen.Snowflake
-	randomCfg       pkgidgen.RandomConfig
 	seqPrefix       string
 	defaultStrategy string
 	resourceUsers   string
@@ -28,8 +27,6 @@ type Service struct {
 
 func NewService(cfg *config.AppConfig, rdb *redis.Client, projectRepo projects.Repository) (*Service, error) {
 	nodeID := int64(0)
-	randomLen := int32(10)
-	randomCharset := pkgidgen.RandomCharsetNumeric
 	seqPrefix := "Graviton:seq"
 	defaultStrategy := pkgidgen.StrategyUUID
 	resourceUsers := ""
@@ -41,12 +38,6 @@ func NewService(cfg *config.AppConfig, rdb *redis.Client, projectRepo projects.R
 		defaultStrategy = pkgidgen.NormalizeStrategy(idCfg.GetDefaultStrategy())
 		if idCfg.GetSnowflake() != nil {
 			nodeID = int64(idCfg.GetSnowflake().GetNodeId())
-		}
-		if idCfg.GetRandom() != nil {
-			randomLen = idCfg.GetRandom().GetLength()
-			if c := strings.TrimSpace(idCfg.GetRandom().GetCharset()); c != "" {
-				randomCharset = c
-			}
 		}
 		if idCfg.GetSequence() != nil && strings.TrimSpace(idCfg.GetSequence().GetRedisKeyPrefix()) != "" {
 			seqPrefix = strings.TrimSpace(idCfg.GetSequence().GetRedisKeyPrefix())
@@ -68,7 +59,6 @@ func NewService(cfg *config.AppConfig, rdb *redis.Client, projectRepo projects.R
 		rdb:               rdb,
 		projectRepo:       projectRepo,
 		snowflake:         sf,
-		randomCfg:         pkgidgen.RandomConfig{Length: int(randomLen), Charset: randomCharset},
 		seqPrefix:         seqPrefix,
 		defaultStrategy:   defaultStrategy,
 		resourceUsers:     resourceUsers,
@@ -81,12 +71,14 @@ var _ domainidgen.Generator = (*Service)(nil)
 
 func (s *Service) NewID(ctx context.Context, projectID string, resource domainidgen.Resource) (string, error) {
 	switch s.resolveStrategy(ctx, projectID, resource) {
+	case pkgidgen.StrategyULID:
+		return pkgidgen.ULID().String(), nil
 	case pkgidgen.StrategySnowflake:
 		return s.snowflake.NextString(), nil
 	case pkgidgen.StrategySequence:
 		return s.nextSequence(ctx, projectID, resource)
 	case pkgidgen.StrategyRandom:
-		return pkgidgen.RandomString(s.randomCfg)
+		return "", pkgidgen.ErrRandomStrategyNotImplemented
 	default:
 		return pkgidgen.UUID().String(), nil
 	}

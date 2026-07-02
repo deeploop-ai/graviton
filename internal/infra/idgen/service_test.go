@@ -9,6 +9,7 @@ import (
 	"github.com/deeploop-ai/graviton/internal/domain/projects"
 	infraidgen "github.com/deeploop-ai/graviton/internal/infra/idgen"
 	"github.com/deeploop-ai/graviton/internal/pkg/config"
+	pkgidgen "github.com/deeploop-ai/graviton/pkg/idgen"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
 )
@@ -28,7 +29,7 @@ func (stubProjectRepo) ListProjects(context.Context) ([]projects.Project, error)
 func (stubProjectRepo) UpdateProject(context.Context, *projects.Project) error     { return nil }
 func (stubProjectRepo) DeleteProject(context.Context, string) error                { return nil }
 
-func TestService_NewID_Strategies(t *testing.T) {
+func TestService_NewID_Sequence(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
 
@@ -54,27 +55,55 @@ func TestService_NewID_Strategies(t *testing.T) {
 	id2, err := svc.NewID(ctx, "proj-1", idgen.ResourceUsers)
 	require.NoError(t, err)
 	require.Equal(t, "2", id2)
+}
 
-	cfgSnow := &config.AppConfig{
+func TestService_NewID_ULID(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+
+	cfg := &config.AppConfig{
+		Idgen: &config.IdGen{
+			Resources: &config.IdGen_Resources{Users: "ulid"},
+		},
+	}
+	svc, err := infraidgen.NewService(cfg, nil, stubProjectRepo{})
+	require.NoError(t, err)
+
+	id, err := svc.NewID(ctx, "proj-1", idgen.ResourceUsers)
+	require.NoError(t, err)
+	require.Len(t, id, 26)
+}
+
+func TestService_NewID_Snowflake(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+
+	cfg := &config.AppConfig{
 		Idgen: &config.IdGen{
 			DefaultStrategy: "snowflake",
 			Snowflake:       &config.IdGen_Snowflake{NodeId: 2},
 		},
 	}
-	svcSnow, err := infraidgen.NewService(cfgSnow, nil, stubProjectRepo{settings: map[string]any{"idgen.users": "snowflake"}})
+	svc, err := infraidgen.NewService(cfg, nil, stubProjectRepo{settings: map[string]any{"idgen.users": "snowflake"}})
 	require.NoError(t, err)
-	sfID, err := svcSnow.NewID(ctx, "proj-1", idgen.ResourceUsers)
+
+	sfID, err := svc.NewID(ctx, "proj-1", idgen.ResourceUsers)
 	require.NoError(t, err)
 	require.NotEmpty(t, sfID)
+}
 
-	cfgRandom := &config.AppConfig{
+func TestService_NewID_RandomNotImplemented(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+
+	cfg := &config.AppConfig{
 		Idgen: &config.IdGen{
 			Random: &config.IdGen_Random{Length: 8, Charset: "numeric"},
 		},
 	}
-	svcRandom, err := infraidgen.NewService(cfgRandom, nil, stubProjectRepo{settings: map[string]any{"idgen.users": "random"}})
+	svc, err := infraidgen.NewService(cfg, nil, stubProjectRepo{settings: map[string]any{"idgen.users": "random"}})
 	require.NoError(t, err)
-	randID, err := svcRandom.NewID(ctx, "proj-1", idgen.ResourceUsers)
-	require.NoError(t, err)
-	require.Len(t, randID, 8)
+
+	_, err = svc.NewID(ctx, "proj-1", idgen.ResourceUsers)
+	require.ErrorIs(t, err, pkgidgen.ErrRandomStrategyNotImplemented)
 }
