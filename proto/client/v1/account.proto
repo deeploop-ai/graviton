@@ -102,6 +102,21 @@ service AccountService {
     option (google.api.http) = { post: "/v1/account/sessions/wechat/miniprogram", body: "*" };
     option (graviton.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
   }
+
+  rpc CreateAnonymousSession(CreateAnonymousSessionRequest) returns (SignInResponse) {
+    option (google.api.http) = { post: "/v1/account/sessions/anonymous", body: "*" };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PUBLIC };
+  }
+
+  rpc CreateOAuth2LinkSession(CreateOAuth2LinkSessionRequest) returns (CreateOAuth2SessionResponse) {
+    option (google.api.http) = { get: "/v1/account/sessions/oauth2/{provider}/link" };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+  }
+
+  rpc CreateOAuth2LinkTokenSession(CreateOAuth2LinkTokenSessionRequest) returns (Account) {
+    option (google.api.http) = { post: "/v1/account/sessions/oauth2/{provider}/link/token", body: "*" };
+    option (graviton.shared.v1.method_auth) = { access: ACCESS_PERMISSION, permissions: ["users"] };
+  }
 }
 
 message SignUpRequest {
@@ -254,4 +269,22 @@ message CreatePhoneOTPSessionRequest {
 message CreateWeChatMiniProgramSessionRequest {
   string project_id = 1;
   string code = 2;
+}
+
+message CreateAnonymousSessionRequest {
+  string project_id = 1;
+}
+
+message CreateOAuth2LinkSessionRequest {
+  string provider = 1;
+  string project_id = 2;
+  string success = 3;
+  string failure = 4;
+}
+
+message CreateOAuth2LinkTokenSessionRequest {
+  string provider = 1;
+  string project_id = 2;
+  string code = 3;
+  string state = 4;
 }

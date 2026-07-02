@@ -116,6 +116,11 @@ func collectMethodsByAccess(fileDescs ...protoreflect.FileDescriptor) (publicMet
 					publicMethods = append(publicMethods, fullMethod)
 				case sharedv1.AccessLevel_ACCESS_API_KEY:
 					apiKeyMethods = append(apiKeyMethods, fullMethod)
+				case sharedv1.AccessLevel_ACCESS_AUTHENTICATED:
+					if len(perms) == 0 {
+						perms = []string{"users"}
+					}
+					permissionMethods[fullMethod] = perms
 				case sharedv1.AccessLevel_ACCESS_PERMISSION:
 					permissionMethods[fullMethod] = perms
 				}

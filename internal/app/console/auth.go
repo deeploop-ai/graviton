@@ -27,35 +27,90 @@ type SignInCommand struct {
 	Password string
 }
 
-func (a *Auth) SignIn(ctx context.Context, cmd SignInCommand) (string, int64, error) {
+type RefreshTokenCommand struct {
+	RefreshToken string
+}
+
+type TokenPair struct {
+	AccessToken  string
+	RefreshToken string
+	ExpiresAt    int64
+}
+
+func (a *Auth) SignIn(ctx context.Context, cmd SignInCommand) (*TokenPair, error) {
 	admin, err := a.adminRepo.GetConsoleAdminByEmail(ctx, cmd.Email)
 	if err != nil {
-		return "", 0, status.Error(codes.Internal, "admin lookup failed")
+		return nil, status.Error(codes.Internal, "admin lookup failed")
 	}
 	if admin == nil {
-		return "", 0, status.Error(codes.Unauthenticated, "invalid credentials")
+		return nil, status.Error(codes.Unauthenticated, "invalid credentials")
 	}
 	if ok, _ := password.Verify(cmd.Password, admin.PasswordHash); !ok {
-		return "", 0, status.Error(codes.Unauthenticated, "invalid credentials")
+		return nil, status.Error(codes.Unauthenticated, "invalid credentials")
 	}
+	return a.issueAdminTokens(admin.ID, admin.Email, admin.Role)
+}
 
-	ttl := 24 * time.Hour
+func (a *Auth) RefreshToken(_ context.Context, cmd RefreshTokenCommand) (*TokenPair, error) {
+	if cmd.RefreshToken == "" {
+		return nil, status.Error(codes.InvalidArgument, "refresh_token is required")
+	}
+	claims, ok := jwtparser.Parse([]byte(a.cfg.GetSecurity().GetJwt().GetSecret()), cmd.RefreshToken)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "invalid refresh token")
+	}
+	if claims.TokenType != jwtparser.TokenTypeRefresh || claims.ActorKind != "admin" {
+		return nil, status.Error(codes.Unauthenticated, "invalid refresh token")
+	}
+	return a.issueAdminTokens(claims.UserID, claims.Username, firstRole(claims.Roles))
+}
+
+func (a *Auth) SignOut(context.Context) error {
+	return nil
+}
+
+func (a *Auth) issueAdminTokens(adminID, email, role string) (*TokenPair, error) {
+	accessTTL := 24 * time.Hour
 	if d, err := time.ParseDuration(a.cfg.GetSecurity().GetJwt().GetAccessTtl()); err == nil {
-		ttl = d
+		accessTTL = d
+	}
+	refreshTTL := 7 * 24 * time.Hour
+	if d, err := time.ParseDuration(a.cfg.GetSecurity().GetJwt().GetRefreshTtl()); err == nil {
+		refreshTTL = d
 	}
 	now := time.Now()
-	claims := jwtparser.Claims{
+	accessClaims := jwtparser.Claims{
 		TokenID:   idgen.UUID().String(),
-		UserID:    admin.ID,
-		Username:  admin.Email,
+		UserID:    adminID,
+		Username:  email,
 		ActorKind: "admin",
-		Roles:     []string{admin.Role},
-		ExpiresAt: now.Add(ttl).Unix(),
+		Roles:     []string{role},
+		TokenType: jwtparser.TokenTypeAccess,
+		ExpiresAt: now.Add(accessTTL).Unix(),
 		IssuedAt:  now.Unix(),
 	}
-	token, err := jwtparser.Generate([]byte(a.cfg.GetSecurity().GetJwt().GetSecret()), claims)
+	accessToken, err := jwtparser.Generate([]byte(a.cfg.GetSecurity().GetJwt().GetSecret()), accessClaims)
 	if err != nil {
-		return "", 0, err
+		return nil, err
 	}
-	return token, claims.ExpiresAt, nil
+	refreshClaims := accessClaims
+	refreshClaims.TokenID = idgen.UUID().String()
+	refreshClaims.TokenType = jwtparser.TokenTypeRefresh
+	refreshClaims.ExpiresAt = now.Add(refreshTTL).Unix()
+	refreshToken, err := jwtparser.Generate([]byte(a.cfg.GetSecurity().GetJwt().GetSecret()), refreshClaims)
+	if err != nil {
+		return nil, err
+	}
+	return &TokenPair{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		ExpiresAt:    accessClaims.ExpiresAt,
+	}, nil
+}
+
+func firstRole(roles []string) string {
+	if len(roles) == 0 {
+		return "admin"
+	}
+	return roles[0]
 }

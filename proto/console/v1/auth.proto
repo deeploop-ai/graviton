@@ -6,12 +6,21 @@ option go_package = "github.com/deeploop-ai/graviton/genproto/console/v1;console
 
 import "google/api/annotations.proto";
 import "shared/v1/authz.proto";
+import "shared/v1/common.proto";
 
 service ConsoleAuthService {
   option (graviton.shared.v1.service_auth) = { default_access: ACCESS_PUBLIC };
 
   rpc SignIn(SignInRequest) returns (SignInResponse) {
     option (google.api.http) = { post: "/v1/console/auth/sign-in", body: "*" };
+  }
+
+  rpc RefreshToken(RefreshTokenRequest) returns (SignInResponse) {
+    option (google.api.http) = { post: "/v1/console/auth/refresh", body: "*" };
+  }
+
+  rpc SignOut(SignOutRequest) returns (shared.v1.Empty) {
+    option (google.api.http) = { post: "/v1/console/auth/sign-out", body: "*" };
   }
 }
 
@@ -23,4 +32,11 @@ message SignInRequest {
 message SignInResponse {
   string access_token = 1;
   int64 expires_at = 2;
+  string refresh_token = 3;
 }
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message SignOutRequest {}

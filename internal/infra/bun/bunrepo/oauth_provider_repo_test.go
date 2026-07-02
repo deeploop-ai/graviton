@@ -7,7 +7,10 @@ import (
 	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
 	"github.com/deeploop-ai/graviton/internal/domain/projects"
 	"github.com/deeploop-ai/graviton/internal/infra/bun/bunrepo"
+	"github.com/deeploop-ai/graviton/internal/infra/bun/model"
+	"github.com/deeploop-ai/graviton/internal/pkg/config"
 	"github.com/deeploop-ai/graviton/internal/testutil"
+	"github.com/deeploop-ai/graviton/pkg/secretbox"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,7 +26,11 @@ func TestOAuthProviderRepository_CRUD(t *testing.T) {
 	projectID, _, cleanup := testutil.CreateTestProject(ctx, db)
 	defer cleanup()
 
-	repo := bunrepo.NewOAuthProviderRepository(db)
+	repo := bunrepo.NewOAuthProviderRepository(db, &config.AppConfig{
+		Security: &config.Security{
+			Jwt: &config.Security_Jwt{Secret: "test-jwt-secret"},
+		},
+	})
 
 	list, err := repo.ListOAuthProviders(ctx, projectID)
 	require.NoError(t, err)
@@ -43,6 +50,17 @@ func TestOAuthProviderRepository_CRUD(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, stored)
 	require.Equal(t, "id-1", stored.ClientID)
+	require.Equal(t, "secret-1", stored.ClientSecret)
+
+	var row model.ProjectOAuthProvider
+	require.NoError(t, db.NewSelect().Model(&row).
+		Where("project_id = ? AND provider = ?", projectID, domainauth.ProviderGoogle).
+		Scan(ctx))
+	require.NotEqual(t, "secret-1", row.ClientSecret)
+	require.True(t, stringsHasEncPrefix(row.ClientSecret))
+	plain, err := secretbox.Decrypt(row.ClientSecret, "test-jwt-secret")
+	require.NoError(t, err)
+	require.Equal(t, "secret-1", plain)
 
 	cfg.ClientID = "id-2"
 	cfg.ClientSecret = "secret-2"
@@ -62,4 +80,8 @@ func TestOAuthProviderRepository_CRUD(t *testing.T) {
 	stored, err = repo.GetOAuthProvider(ctx, projectID, domainauth.ProviderGoogle)
 	require.NoError(t, err)
 	require.Nil(t, stored)
+}
+
+func stringsHasEncPrefix(s string) bool {
+	return len(s) > 8 && s[:8] == "enc:v1:"
 }

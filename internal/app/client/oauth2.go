@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
+	"github.com/deeploop-ai/graviton/internal/domain/databases"
+	"github.com/deeploop-ai/graviton/internal/domain/projects"
 	"github.com/deeploop-ai/graviton/internal/domain/users"
 	infraauth "github.com/deeploop-ai/graviton/internal/infra/auth"
 	"github.com/deeploop-ai/graviton/pkg/idgen"
@@ -14,6 +16,20 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
+type CreateOAuth2LinkSessionCommand struct {
+	ProjectID string
+	Provider  string
+	Success   string
+	Failure   string
+}
+
+type CreateOAuth2LinkTokenSessionCommand struct {
+	ProjectID string
+	Provider  string
+	Code      string
+	State     string
+}
 
 type CreateOAuth2SessionCommand struct {
 	ProjectID string
@@ -53,32 +69,89 @@ func (a *Account) CreateOAuth2Session(ctx context.Context, cmd CreateOAuth2Sessi
 	if provider == "" {
 		return "", status.Error(codes.InvalidArgument, "provider is required")
 	}
+	return a.createOAuth2Session(ctx, createOAuth2SessionParams{
+		projectID: projectID,
+		provider:  provider,
+		success:   cmd.Success,
+		failure:   cmd.Failure,
+	})
+}
+
+func (a *Account) CreateOAuth2LinkSession(ctx context.Context, cmd CreateOAuth2LinkSessionCommand) (string, error) {
+	p, err := a.requireUser(ctx)
+	if err != nil {
+		return "", err
+	}
+	projectID := strings.TrimSpace(cmd.ProjectID)
+	if projectID == "" {
+		projectID = p.ProjectID
+	}
+	if projectID != p.ProjectID {
+		return "", status.Error(codes.PermissionDenied, "cannot link oauth provider for another project")
+	}
+	return a.createOAuth2Session(ctx, createOAuth2SessionParams{
+		projectID:  projectID,
+		provider:   cmd.Provider,
+		success:    cmd.Success,
+		failure:    cmd.Failure,
+		linkUserID: p.UserID,
+	})
+}
+
+func (a *Account) CreateOAuth2LinkTokenSession(ctx context.Context, cmd CreateOAuth2LinkTokenSessionCommand) (*User, error) {
+	if _, err := a.requireUser(ctx); err != nil {
+		return nil, err
+	}
+	result, err := a.completeOAuth2Code(ctx, completeOAuth2CodeCommand{
+		ProjectID: cmd.ProjectID,
+		Provider:  cmd.Provider,
+		Code:      cmd.Code,
+		State:     cmd.State,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if result.User == nil {
+		return nil, status.Error(codes.Internal, "oauth link did not return user")
+	}
+	return result.User, nil
+}
+
+type createOAuth2SessionParams struct {
+	projectID  string
+	provider   string
+	success    string
+	failure    string
+	linkUserID string
+}
+
+func (a *Account) createOAuth2Session(ctx context.Context, params createOAuth2SessionParams) (string, error) {
+	if a.oauthState == nil {
+		return "", status.Error(codes.Unimplemented, "oauth2 is not configured")
+	}
+	provider := normalizeOAuthProvider(params.provider)
+	if provider == "" {
+		return "", status.Error(codes.InvalidArgument, "provider is required")
+	}
 	if provider == domainauth.ProviderWeChatMiniProgram {
 		return "", status.Error(codes.InvalidArgument, "use CreateWeChatMiniProgramSession for wechat_miniprogram")
 	}
-	if err := validateRedirectURL(cmd.Success); err != nil {
+	if err := validateRedirectURL(params.success); err != nil {
 		return "", status.Errorf(codes.InvalidArgument, "invalid success url: %v", err)
 	}
-	if err := validateRedirectURL(cmd.Failure); err != nil {
+	if err := validateRedirectURL(params.failure); err != nil {
 		return "", status.Errorf(codes.InvalidArgument, "invalid failure url: %v", err)
 	}
-
-	project, err := a.projectRepo.GetProject(ctx, projectID)
+	if err := a.validateProjectOAuthRedirectURLs(ctx, params.projectID, params.success, params.failure); err != nil {
+		return "", err
+	}
+	if err := a.ensureProjectReady(ctx, params.projectID); err != nil {
+		return "", err
+	}
+	oauthCfg, err := a.loadOAuthProvider(ctx, params.projectID, provider)
 	if err != nil {
 		return "", err
 	}
-	if project == nil {
-		return "", status.Error(codes.NotFound, "project not found")
-	}
-	if err := a.docDB.EnsureSystemCollections(ctx, project.ID, project.InternalID); err != nil {
-		return "", err
-	}
-
-	oauthCfg, err := a.loadOAuthProvider(ctx, projectID, provider)
-	if err != nil {
-		return "", err
-	}
-
 	stateID := idgen.UUID().String()
 	verifier := ""
 	challenge := ""
@@ -88,15 +161,15 @@ func (a *Account) CreateOAuth2Session(ctx context.Context, cmd CreateOAuth2Sessi
 	}
 	if err := a.oauthState.Save(ctx, domainauth.OAuthState{
 		StateID:      stateID,
-		ProjectID:    projectID,
+		ProjectID:    params.projectID,
 		Provider:     provider,
-		SuccessURL:   cmd.Success,
-		FailureURL:   cmd.Failure,
+		SuccessURL:   params.success,
+		FailureURL:   params.failure,
 		PKCEVerifier: verifier,
+		LinkUserID:   params.linkUserID,
 	}, 0); err != nil {
 		return "", err
 	}
-
 	authClient, err := infraauth.NewOAuthAuthenticator(provider, oauthCfg.ClientID, oauthCfg.ClientSecret, a.oauthCallbackURL(provider), oauthCfg.Scopes)
 	if err != nil {
 		return "", status.Errorf(codes.InvalidArgument, "%v", err)
@@ -216,6 +289,25 @@ func (a *Account) completeOAuth2Code(ctx context.Context, cmd completeOAuth2Code
 	profile, err := authClient.Exchange(ctx, code, oauthState.PKCEVerifier)
 	if err != nil {
 		return &completeOAuth2CodeResult{SuccessURL: oauthState.SuccessURL, FailureURL: oauthState.FailureURL}, status.Errorf(codes.Unauthenticated, "oauth code exchange failed: %v", err)
+	}
+
+	if oauthState.LinkUserID != "" {
+		if err := a.linkOAuthIdentity(ctx, projectID, oauthState.LinkUserID, provider, profile); err != nil {
+			return &completeOAuth2CodeResult{SuccessURL: oauthState.SuccessURL, FailureURL: oauthState.FailureURL}, err
+		}
+		doc, err := a.docDB.GetDocument(ctx, projectID, "default", "users", oauthState.LinkUserID, databases.SystemPrincipal)
+		if err != nil {
+			return &completeOAuth2CodeResult{SuccessURL: oauthState.SuccessURL, FailureURL: oauthState.FailureURL}, err
+		}
+		if doc == nil {
+			return &completeOAuth2CodeResult{SuccessURL: oauthState.SuccessURL, FailureURL: oauthState.FailureURL}, status.Error(codes.NotFound, "user not found")
+		}
+		return &completeOAuth2CodeResult{
+			ProjectID:  projectID,
+			SuccessURL: oauthState.SuccessURL,
+			FailureURL: oauthState.FailureURL,
+			User:       mapUserDoc(doc),
+		}, nil
 	}
 
 	user, err := a.resolveOAuthUser(ctx, projectID, provider, profile)
@@ -338,8 +430,39 @@ func appendOAuthSPAFragment(rawURL, userID string, tokens *TokenBundle) string {
 	}
 	if tokens != nil {
 		vals.Set("access_token", tokens.AccessToken)
-		vals.Set("refresh_token", tokens.RefreshToken)
 	}
 	u.Fragment = vals.Encode()
 	return u.String()
+}
+
+func (a *Account) ensureProjectReady(ctx context.Context, projectID string) error {
+	project, err := a.projectRepo.GetProject(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	if project == nil {
+		return status.Error(codes.NotFound, "project not found")
+	}
+	return a.docDB.EnsureSystemCollections(ctx, project.ID, project.InternalID)
+}
+
+func (a *Account) validateProjectOAuthRedirectURLs(ctx context.Context, projectID, successURL, failureURL string) error {
+	project, err := a.projectRepo.GetProject(ctx, projectID)
+	if err != nil {
+		return err
+	}
+	if project == nil {
+		return status.Error(codes.NotFound, "project not found")
+	}
+	allowed := projects.OAuthAllowedRedirectURLs(project.Settings)
+	if len(allowed) == 0 {
+		allowed = projects.DefaultOAuthRedirectAllowlist(a.publicBaseURL())
+	}
+	if !projects.MatchRedirectURL(successURL, allowed) {
+		return status.Error(codes.InvalidArgument, "success url is not allowed for this project")
+	}
+	if !projects.MatchRedirectURL(failureURL, allowed) {
+		return status.Error(codes.InvalidArgument, "failure url is not allowed for this project")
+	}
+	return nil
 }

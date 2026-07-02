@@ -8,7 +8,6 @@ import (
 	"github.com/deeploop-ai/graviton/internal/infra/bun/bunrepo"
 	"github.com/deeploop-ai/graviton/internal/infra/bun/model"
 	"github.com/deeploop-ai/graviton/internal/infra/documentdb"
-	"github.com/deeploop-ai/graviton/internal/pkg/config"
 	"github.com/deeploop-ai/graviton/internal/testutil"
 	"github.com/stretchr/testify/require"
 )
@@ -74,9 +73,9 @@ func TestAccount_CreateWeChatMiniProgramSession(t *testing.T) {
 	}).Exec(ctx)
 	require.NoError(t, err)
 
-	cfg := &config.AppConfig{}
+	cfg := buildTestConfig()
 	projectRepo := bunrepo.NewProjectRepository(db)
-	oauthRepo := bunrepo.NewOAuthProviderRepository(db)
+	oauthRepo := bunrepo.NewOAuthProviderRepository(db, cfg)
 	docDB := documentdb.NewPostgresDocumentDB(db)
 	account := NewTestAccountWithDeps(cfg, projectRepo, oauthRepo, docDB, nil, nil, nil)
 

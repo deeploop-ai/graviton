@@ -9,6 +9,8 @@ import (
 	"github.com/deeploop-ai/graviton/internal/domain/databases"
 	"github.com/deeploop-ai/graviton/pkg/idgen"
 	"github.com/deeploop-ai/graviton/pkg/query"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (a *Account) findIdentity(ctx context.Context, projectID, provider, providerUID string) (*domainauth.Identity, error) {
@@ -114,11 +116,7 @@ func (a *Account) resolveOAuthUser(ctx context.Context, projectID, provider stri
 			return nil, err
 		}
 		if len(list.Documents) > 0 {
-			user := mapUserDoc(&list.Documents[0])
-			if err := a.createIdentity(ctx, projectID, user.ID, info, provider); err != nil {
-				return nil, err
-			}
-			return user, nil
+			return nil, status.Error(codes.FailedPrecondition, "an account with this email already exists; sign in and link the oauth provider")
 		}
 	}
 
@@ -143,4 +141,33 @@ func (a *Account) resolveOAuthUser(ctx context.Context, projectID, provider stri
 		return nil, err
 	}
 	return user, nil
+}
+
+func (a *Account) linkOAuthIdentity(ctx context.Context, projectID, userID, provider string, info *domainauth.OAuthUserInfo) error {
+	if info == nil || info.ProviderUID == "" {
+		return status.Error(codes.InvalidArgument, "oauth profile missing provider uid")
+	}
+	existing, err := a.findIdentity(ctx, projectID, provider, info.ProviderUID)
+	if err != nil {
+		return err
+	}
+	if existing != nil {
+		if existing.UserID != userID {
+			return status.Error(codes.AlreadyExists, "oauth identity already linked to another account")
+		}
+		return nil
+	}
+	if strings.TrimSpace(info.Email) != "" {
+		list, err := a.docDB.ListDocuments(ctx, projectID, "default", "users", databases.Query{
+			Queries:  []string{query.BuildEqual("email", info.Email)},
+			PageSize: 1,
+		}, databases.SystemPrincipal)
+		if err != nil {
+			return err
+		}
+		if len(list.Documents) > 0 && list.Documents[0].ID != userID {
+			return status.Error(codes.AlreadyExists, "oauth email belongs to another account")
+		}
+	}
+	return a.createIdentity(ctx, projectID, userID, info, provider)
 }

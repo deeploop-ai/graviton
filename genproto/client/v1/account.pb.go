@@ -1593,6 +1593,186 @@ func (x *CreateWeChatMiniProgramSessionRequest) GetCode() string {
 	return ""
 }
 
+type CreateAnonymousSessionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateAnonymousSessionRequest) Reset() {
+	*x = CreateAnonymousSessionRequest{}
+	mi := &file_client_v1_account_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateAnonymousSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateAnonymousSessionRequest) ProtoMessage() {}
+
+func (x *CreateAnonymousSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateAnonymousSessionRequest.ProtoReflect.Descriptor instead.
+func (*CreateAnonymousSessionRequest) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *CreateAnonymousSessionRequest) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+type CreateOAuth2LinkSessionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Provider      string                 `protobuf:"bytes,1,opt,name=provider,proto3" json:"provider,omitempty"`
+	ProjectId     string                 `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Success       string                 `protobuf:"bytes,3,opt,name=success,proto3" json:"success,omitempty"`
+	Failure       string                 `protobuf:"bytes,4,opt,name=failure,proto3" json:"failure,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateOAuth2LinkSessionRequest) Reset() {
+	*x = CreateOAuth2LinkSessionRequest{}
+	mi := &file_client_v1_account_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateOAuth2LinkSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateOAuth2LinkSessionRequest) ProtoMessage() {}
+
+func (x *CreateOAuth2LinkSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateOAuth2LinkSessionRequest.ProtoReflect.Descriptor instead.
+func (*CreateOAuth2LinkSessionRequest) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *CreateOAuth2LinkSessionRequest) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
+func (x *CreateOAuth2LinkSessionRequest) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+func (x *CreateOAuth2LinkSessionRequest) GetSuccess() string {
+	if x != nil {
+		return x.Success
+	}
+	return ""
+}
+
+func (x *CreateOAuth2LinkSessionRequest) GetFailure() string {
+	if x != nil {
+		return x.Failure
+	}
+	return ""
+}
+
+type CreateOAuth2LinkTokenSessionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Provider      string                 `protobuf:"bytes,1,opt,name=provider,proto3" json:"provider,omitempty"`
+	ProjectId     string                 `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	Code          string                 `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
+	State         string                 `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateOAuth2LinkTokenSessionRequest) Reset() {
+	*x = CreateOAuth2LinkTokenSessionRequest{}
+	mi := &file_client_v1_account_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateOAuth2LinkTokenSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateOAuth2LinkTokenSessionRequest) ProtoMessage() {}
+
+func (x *CreateOAuth2LinkTokenSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_client_v1_account_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateOAuth2LinkTokenSessionRequest.ProtoReflect.Descriptor instead.
+func (*CreateOAuth2LinkTokenSessionRequest) Descriptor() ([]byte, []int) {
+	return file_client_v1_account_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *CreateOAuth2LinkTokenSessionRequest) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
+func (x *CreateOAuth2LinkTokenSessionRequest) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+func (x *CreateOAuth2LinkTokenSessionRequest) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *CreateOAuth2LinkTokenSessionRequest) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
 var File_client_v1_account_proto protoreflect.FileDescriptor
 
 const file_client_v1_account_proto_rawDesc = "" +
@@ -1713,7 +1893,22 @@ const file_client_v1_account_proto_rawDesc = "" +
 	"%CreateWeChatMiniProgramSessionRequest\x12\x1d\n" +
 	"\n" +
 	"project_id\x18\x01 \x01(\tR\tprojectId\x12\x12\n" +
-	"\x04code\x18\x02 \x01(\tR\x04code2\xb2\x14\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code\">\n" +
+	"\x1dCreateAnonymousSessionRequest\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x01 \x01(\tR\tprojectId\"\x8f\x01\n" +
+	"\x1eCreateOAuth2LinkSessionRequest\x12\x1a\n" +
+	"\bprovider\x18\x01 \x01(\tR\bprovider\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x02 \x01(\tR\tprojectId\x12\x18\n" +
+	"\asuccess\x18\x03 \x01(\tR\asuccess\x12\x18\n" +
+	"\afailure\x18\x04 \x01(\tR\afailure\"\x8a\x01\n" +
+	"#CreateOAuth2LinkTokenSessionRequest\x12\x1a\n" +
+	"\bprovider\x18\x01 \x01(\tR\bprovider\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x02 \x01(\tR\tprojectId\x12\x12\n" +
+	"\x04code\x18\x03 \x01(\tR\x04code\x12\x14\n" +
+	"\x05state\x18\x04 \x01(\tR\x05state2\xda\x18\n" +
 	"\x0eAccountService\x12u\n" +
 	"\x06SignUp\x12!.graviton.client.v1.SignUpRequest\x1a\".graviton.client.v1.SignUpResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/sign-up\x12u\n" +
 	"\x06SignIn\x12!.graviton.client.v1.SignInRequest\x1a\".graviton.client.v1.SignInResponse\"$\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/v1/account/sign-in\x12v\n" +
@@ -1732,7 +1927,10 @@ const file_client_v1_account_proto_rawDesc = "" +
 	"\x18CreateOAuth2TokenSession\x123.graviton.client.v1.CreateOAuth2TokenSessionRequest\x1a\".graviton.client.v1.SignInResponse\"=\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x021:\x01*\",/v1/account/sessions/oauth2/{provider}/token\x12\x93\x01\n" +
 	"\x0eCreatePhoneOTP\x12).graviton.client.v1.CreatePhoneOTPRequest\x1a%.graviton.client.v1.ChallengeResponse\"/\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/v1/account/sessions/phone-otp\x12\xa5\x01\n" +
 	"\x15CreatePhoneOTPSession\x120.graviton.client.v1.CreatePhoneOTPSessionRequest\x1a\".graviton.client.v1.SignInResponse\"6\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02*:\x01*\"%/v1/account/sessions/phone-otp/verify\x12\xb9\x01\n" +
-	"\x1eCreateWeChatMiniProgramSession\x129.graviton.client.v1.CreateWeChatMiniProgramSessionRequest\x1a\".graviton.client.v1.SignInResponse\"8\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02,:\x01*\"'/v1/account/sessions/wechat/miniprogram\x1a\x06\x92\xb2\x19\x02\b\x02B=Z;github.com/deeploop-ai/graviton/genproto/client/v1;clientv1b\x06proto3"
+	"\x1eCreateWeChatMiniProgramSession\x129.graviton.client.v1.CreateWeChatMiniProgramSessionRequest\x1a\".graviton.client.v1.SignInResponse\"8\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02,:\x01*\"'/v1/account/sessions/wechat/miniprogram\x12\xa0\x01\n" +
+	"\x16CreateAnonymousSession\x121.graviton.client.v1.CreateAnonymousSessionRequest\x1a\".graviton.client.v1.SignInResponse\"/\x8a\xb2\x19\x02\b\x01\x82\xd3\xe4\x93\x02#:\x01*\"\x1e/v1/account/sessions/anonymous\x12\xc0\x01\n" +
+	"\x17CreateOAuth2LinkSession\x122.graviton.client.v1.CreateOAuth2LinkSessionRequest\x1a/.graviton.client.v1.CreateOAuth2SessionResponse\"@\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x02-\x12+/v1/account/sessions/oauth2/{provider}/link\x12\xbf\x01\n" +
+	"\x1cCreateOAuth2LinkTokenSession\x127.graviton.client.v1.CreateOAuth2LinkTokenSessionRequest\x1a\x1b.graviton.client.v1.Account\"I\x8a\xb2\x19\t\b\x03\x12\x05users\x82\xd3\xe4\x93\x026:\x01*\"1/v1/account/sessions/oauth2/{provider}/link/token\x1a\x06\x92\xb2\x19\x02\b\x02B=Z;github.com/deeploop-ai/graviton/genproto/client/v1;clientv1b\x06proto3"
 
 var (
 	file_client_v1_account_proto_rawDescOnce sync.Once
@@ -1746,7 +1944,7 @@ func file_client_v1_account_proto_rawDescGZIP() []byte {
 	return file_client_v1_account_proto_rawDescData
 }
 
-var file_client_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
+var file_client_v1_account_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
 var file_client_v1_account_proto_goTypes = []any{
 	(*SignUpRequest)(nil),                         // 0: graviton.client.v1.SignUpRequest
 	(*SignInRequest)(nil),                         // 1: graviton.client.v1.SignInRequest
@@ -1776,23 +1974,26 @@ var file_client_v1_account_proto_goTypes = []any{
 	(*CreatePhoneOTPRequest)(nil),                 // 25: graviton.client.v1.CreatePhoneOTPRequest
 	(*CreatePhoneOTPSessionRequest)(nil),          // 26: graviton.client.v1.CreatePhoneOTPSessionRequest
 	(*CreateWeChatMiniProgramSessionRequest)(nil), // 27: graviton.client.v1.CreateWeChatMiniProgramSessionRequest
-	(*timestamppb.Timestamp)(nil),                 // 28: google.protobuf.Timestamp
-	(*structpb.Struct)(nil),                       // 29: google.protobuf.Struct
-	(*v1.Empty)(nil),                              // 30: graviton.shared.v1.Empty
+	(*CreateAnonymousSessionRequest)(nil),         // 28: graviton.client.v1.CreateAnonymousSessionRequest
+	(*CreateOAuth2LinkSessionRequest)(nil),        // 29: graviton.client.v1.CreateOAuth2LinkSessionRequest
+	(*CreateOAuth2LinkTokenSessionRequest)(nil),   // 30: graviton.client.v1.CreateOAuth2LinkTokenSessionRequest
+	(*timestamppb.Timestamp)(nil),                 // 31: google.protobuf.Timestamp
+	(*structpb.Struct)(nil),                       // 32: google.protobuf.Struct
+	(*v1.Empty)(nil),                              // 33: graviton.shared.v1.Empty
 }
 var file_client_v1_account_proto_depIdxs = []int32{
-	28, // 0: graviton.client.v1.Account.created_at:type_name -> google.protobuf.Timestamp
-	28, // 1: graviton.client.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
+	31, // 0: graviton.client.v1.Account.created_at:type_name -> google.protobuf.Timestamp
+	31, // 1: graviton.client.v1.Account.updated_at:type_name -> google.protobuf.Timestamp
 	4,  // 2: graviton.client.v1.SignUpResponse.account:type_name -> graviton.client.v1.Account
 	5,  // 3: graviton.client.v1.SignUpResponse.tokens:type_name -> graviton.client.v1.TokenBundle
 	4,  // 4: graviton.client.v1.SignInResponse.account:type_name -> graviton.client.v1.Account
 	5,  // 5: graviton.client.v1.SignInResponse.tokens:type_name -> graviton.client.v1.TokenBundle
 	5,  // 6: graviton.client.v1.RefreshTokenResponse.tokens:type_name -> graviton.client.v1.TokenBundle
-	28, // 7: graviton.client.v1.Session.expire_at:type_name -> google.protobuf.Timestamp
-	28, // 8: graviton.client.v1.Session.created_at:type_name -> google.protobuf.Timestamp
+	31, // 7: graviton.client.v1.Session.expire_at:type_name -> google.protobuf.Timestamp
+	31, // 8: graviton.client.v1.Session.created_at:type_name -> google.protobuf.Timestamp
 	11, // 9: graviton.client.v1.ListSessionsResponse.sessions:type_name -> graviton.client.v1.Session
-	29, // 10: graviton.client.v1.GetPrefsResponse.prefs:type_name -> google.protobuf.Struct
-	29, // 11: graviton.client.v1.UpdatePrefsRequest.prefs:type_name -> google.protobuf.Struct
+	32, // 10: graviton.client.v1.GetPrefsResponse.prefs:type_name -> google.protobuf.Struct
+	32, // 11: graviton.client.v1.UpdatePrefsRequest.prefs:type_name -> google.protobuf.Struct
 	0,  // 12: graviton.client.v1.AccountService.SignUp:input_type -> graviton.client.v1.SignUpRequest
 	1,  // 13: graviton.client.v1.AccountService.SignIn:input_type -> graviton.client.v1.SignInRequest
 	2,  // 14: graviton.client.v1.AccountService.SignOut:input_type -> graviton.client.v1.SignOutRequest
@@ -1811,26 +2012,32 @@ var file_client_v1_account_proto_depIdxs = []int32{
 	25, // 27: graviton.client.v1.AccountService.CreatePhoneOTP:input_type -> graviton.client.v1.CreatePhoneOTPRequest
 	26, // 28: graviton.client.v1.AccountService.CreatePhoneOTPSession:input_type -> graviton.client.v1.CreatePhoneOTPSessionRequest
 	27, // 29: graviton.client.v1.AccountService.CreateWeChatMiniProgramSession:input_type -> graviton.client.v1.CreateWeChatMiniProgramSessionRequest
-	6,  // 30: graviton.client.v1.AccountService.SignUp:output_type -> graviton.client.v1.SignUpResponse
-	7,  // 31: graviton.client.v1.AccountService.SignIn:output_type -> graviton.client.v1.SignInResponse
-	30, // 32: graviton.client.v1.AccountService.SignOut:output_type -> graviton.shared.v1.Empty
-	9,  // 33: graviton.client.v1.AccountService.RefreshToken:output_type -> graviton.client.v1.RefreshTokenResponse
-	4,  // 34: graviton.client.v1.AccountService.Me:output_type -> graviton.client.v1.Account
-	4,  // 35: graviton.client.v1.AccountService.UpdateAccount:output_type -> graviton.client.v1.Account
-	13, // 36: graviton.client.v1.AccountService.ListSessions:output_type -> graviton.client.v1.ListSessionsResponse
-	30, // 37: graviton.client.v1.AccountService.DeleteSession:output_type -> graviton.shared.v1.Empty
-	30, // 38: graviton.client.v1.AccountService.DeleteSessions:output_type -> graviton.shared.v1.Empty
-	17, // 39: graviton.client.v1.AccountService.GetPrefs:output_type -> graviton.client.v1.GetPrefsResponse
-	17, // 40: graviton.client.v1.AccountService.UpdatePrefs:output_type -> graviton.client.v1.GetPrefsResponse
-	21, // 41: graviton.client.v1.AccountService.CreateEmailOTP:output_type -> graviton.client.v1.ChallengeResponse
-	7,  // 42: graviton.client.v1.AccountService.CreateEmailOTPSession:output_type -> graviton.client.v1.SignInResponse
-	23, // 43: graviton.client.v1.AccountService.CreateOAuth2Session:output_type -> graviton.client.v1.CreateOAuth2SessionResponse
-	7,  // 44: graviton.client.v1.AccountService.CreateOAuth2TokenSession:output_type -> graviton.client.v1.SignInResponse
-	21, // 45: graviton.client.v1.AccountService.CreatePhoneOTP:output_type -> graviton.client.v1.ChallengeResponse
-	7,  // 46: graviton.client.v1.AccountService.CreatePhoneOTPSession:output_type -> graviton.client.v1.SignInResponse
-	7,  // 47: graviton.client.v1.AccountService.CreateWeChatMiniProgramSession:output_type -> graviton.client.v1.SignInResponse
-	30, // [30:48] is the sub-list for method output_type
-	12, // [12:30] is the sub-list for method input_type
+	28, // 30: graviton.client.v1.AccountService.CreateAnonymousSession:input_type -> graviton.client.v1.CreateAnonymousSessionRequest
+	29, // 31: graviton.client.v1.AccountService.CreateOAuth2LinkSession:input_type -> graviton.client.v1.CreateOAuth2LinkSessionRequest
+	30, // 32: graviton.client.v1.AccountService.CreateOAuth2LinkTokenSession:input_type -> graviton.client.v1.CreateOAuth2LinkTokenSessionRequest
+	6,  // 33: graviton.client.v1.AccountService.SignUp:output_type -> graviton.client.v1.SignUpResponse
+	7,  // 34: graviton.client.v1.AccountService.SignIn:output_type -> graviton.client.v1.SignInResponse
+	33, // 35: graviton.client.v1.AccountService.SignOut:output_type -> graviton.shared.v1.Empty
+	9,  // 36: graviton.client.v1.AccountService.RefreshToken:output_type -> graviton.client.v1.RefreshTokenResponse
+	4,  // 37: graviton.client.v1.AccountService.Me:output_type -> graviton.client.v1.Account
+	4,  // 38: graviton.client.v1.AccountService.UpdateAccount:output_type -> graviton.client.v1.Account
+	13, // 39: graviton.client.v1.AccountService.ListSessions:output_type -> graviton.client.v1.ListSessionsResponse
+	33, // 40: graviton.client.v1.AccountService.DeleteSession:output_type -> graviton.shared.v1.Empty
+	33, // 41: graviton.client.v1.AccountService.DeleteSessions:output_type -> graviton.shared.v1.Empty
+	17, // 42: graviton.client.v1.AccountService.GetPrefs:output_type -> graviton.client.v1.GetPrefsResponse
+	17, // 43: graviton.client.v1.AccountService.UpdatePrefs:output_type -> graviton.client.v1.GetPrefsResponse
+	21, // 44: graviton.client.v1.AccountService.CreateEmailOTP:output_type -> graviton.client.v1.ChallengeResponse
+	7,  // 45: graviton.client.v1.AccountService.CreateEmailOTPSession:output_type -> graviton.client.v1.SignInResponse
+	23, // 46: graviton.client.v1.AccountService.CreateOAuth2Session:output_type -> graviton.client.v1.CreateOAuth2SessionResponse
+	7,  // 47: graviton.client.v1.AccountService.CreateOAuth2TokenSession:output_type -> graviton.client.v1.SignInResponse
+	21, // 48: graviton.client.v1.AccountService.CreatePhoneOTP:output_type -> graviton.client.v1.ChallengeResponse
+	7,  // 49: graviton.client.v1.AccountService.CreatePhoneOTPSession:output_type -> graviton.client.v1.SignInResponse
+	7,  // 50: graviton.client.v1.AccountService.CreateWeChatMiniProgramSession:output_type -> graviton.client.v1.SignInResponse
+	7,  // 51: graviton.client.v1.AccountService.CreateAnonymousSession:output_type -> graviton.client.v1.SignInResponse
+	23, // 52: graviton.client.v1.AccountService.CreateOAuth2LinkSession:output_type -> graviton.client.v1.CreateOAuth2SessionResponse
+	4,  // 53: graviton.client.v1.AccountService.CreateOAuth2LinkTokenSession:output_type -> graviton.client.v1.Account
+	33, // [33:54] is the sub-list for method output_type
+	12, // [12:33] is the sub-list for method input_type
 	12, // [12:12] is the sub-list for extension type_name
 	12, // [12:12] is the sub-list for extension extendee
 	0,  // [0:12] is the sub-list for field type_name
@@ -1847,7 +2054,7 @@ func file_client_v1_account_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_client_v1_account_proto_rawDesc), len(file_client_v1_account_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   28,
+			NumMessages:   31,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

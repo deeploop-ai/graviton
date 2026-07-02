@@ -16,6 +16,38 @@
     "application/json"
   ],
   "paths": {
+    "/v1/console/auth/refresh": {
+      "post": {
+        "operationId": "ConsoleAuthService_RefreshToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/gravitonconsolev1SignInResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gravitonconsolev1RefreshTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsoleAuthService"
+        ]
+      }
+    },
     "/v1/console/auth/sign-in": {
       "post": {
         "operationId": "ConsoleAuthService_SignIn",
@@ -47,9 +79,49 @@
           "ConsoleAuthService"
         ]
       }
+    },
+    "/v1/console/auth/sign-out": {
+      "post": {
+        "operationId": "ConsoleAuthService_SignOut",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Empty"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/gravitonconsolev1SignOutRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ConsoleAuthService"
+        ]
+      }
     }
   },
   "definitions": {
+    "gravitonconsolev1RefreshTokenRequest": {
+      "type": "object",
+      "properties": {
+        "refreshToken": {
+          "type": "string"
+        }
+      }
+    },
     "gravitonconsolev1SignInRequest": {
       "type": "object",
       "properties": {
@@ -70,8 +142,14 @@
         "expiresAt": {
           "type": "string",
           "format": "int64"
+        },
+        "refreshToken": {
+          "type": "string"
         }
       }
+    },
+    "gravitonconsolev1SignOutRequest": {
+      "type": "object"
     },
     "protobufAny": {
       "type": "object",
@@ -100,6 +178,9 @@
           }
         }
       }
+    },
+    "v1Empty": {
+      "type": "object"
     }
   }
 }

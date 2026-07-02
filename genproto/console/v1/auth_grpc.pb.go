@@ -8,6 +8,7 @@ package consolev1
 
 import (
 	context "context"
+	v1 "github.com/deeploop-ai/graviton/genproto/shared/v1"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -19,7 +20,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ConsoleAuthService_SignIn_FullMethodName = "/graviton.console.v1.ConsoleAuthService/SignIn"
+	ConsoleAuthService_SignIn_FullMethodName       = "/graviton.console.v1.ConsoleAuthService/SignIn"
+	ConsoleAuthService_RefreshToken_FullMethodName = "/graviton.console.v1.ConsoleAuthService/RefreshToken"
+	ConsoleAuthService_SignOut_FullMethodName      = "/graviton.console.v1.ConsoleAuthService/SignOut"
 )
 
 // ConsoleAuthServiceClient is the client API for ConsoleAuthService service.
@@ -27,6 +30,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ConsoleAuthServiceClient interface {
 	SignIn(ctx context.Context, in *SignInRequest, opts ...grpc.CallOption) (*SignInResponse, error)
+	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*SignInResponse, error)
+	SignOut(ctx context.Context, in *SignOutRequest, opts ...grpc.CallOption) (*v1.Empty, error)
 }
 
 type consoleAuthServiceClient struct {
@@ -47,11 +52,33 @@ func (c *consoleAuthServiceClient) SignIn(ctx context.Context, in *SignInRequest
 	return out, nil
 }
 
+func (c *consoleAuthServiceClient) RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*SignInResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SignInResponse)
+	err := c.cc.Invoke(ctx, ConsoleAuthService_RefreshToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *consoleAuthServiceClient) SignOut(ctx context.Context, in *SignOutRequest, opts ...grpc.CallOption) (*v1.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(v1.Empty)
+	err := c.cc.Invoke(ctx, ConsoleAuthService_SignOut_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ConsoleAuthServiceServer is the server API for ConsoleAuthService service.
 // All implementations must embed UnimplementedConsoleAuthServiceServer
 // for forward compatibility.
 type ConsoleAuthServiceServer interface {
 	SignIn(context.Context, *SignInRequest) (*SignInResponse, error)
+	RefreshToken(context.Context, *RefreshTokenRequest) (*SignInResponse, error)
+	SignOut(context.Context, *SignOutRequest) (*v1.Empty, error)
 	mustEmbedUnimplementedConsoleAuthServiceServer()
 }
 
@@ -64,6 +91,12 @@ type UnimplementedConsoleAuthServiceServer struct{}
 
 func (UnimplementedConsoleAuthServiceServer) SignIn(context.Context, *SignInRequest) (*SignInResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SignIn not implemented")
+}
+func (UnimplementedConsoleAuthServiceServer) RefreshToken(context.Context, *RefreshTokenRequest) (*SignInResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method RefreshToken not implemented")
+}
+func (UnimplementedConsoleAuthServiceServer) SignOut(context.Context, *SignOutRequest) (*v1.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method SignOut not implemented")
 }
 func (UnimplementedConsoleAuthServiceServer) mustEmbedUnimplementedConsoleAuthServiceServer() {}
 func (UnimplementedConsoleAuthServiceServer) testEmbeddedByValue()                            {}
@@ -104,6 +137,42 @@ func _ConsoleAuthService_SignIn_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ConsoleAuthService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefreshTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConsoleAuthServiceServer).RefreshToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ConsoleAuthService_RefreshToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConsoleAuthServiceServer).RefreshToken(ctx, req.(*RefreshTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ConsoleAuthService_SignOut_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SignOutRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConsoleAuthServiceServer).SignOut(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ConsoleAuthService_SignOut_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConsoleAuthServiceServer).SignOut(ctx, req.(*SignOutRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ConsoleAuthService_ServiceDesc is the grpc.ServiceDesc for ConsoleAuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +183,14 @@ var ConsoleAuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SignIn",
 			Handler:    _ConsoleAuthService_SignIn_Handler,
+		},
+		{
+			MethodName: "RefreshToken",
+			Handler:    _ConsoleAuthService_RefreshToken_Handler,
+		},
+		{
+			MethodName: "SignOut",
+			Handler:    _ConsoleAuthService_SignOut_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

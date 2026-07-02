@@ -47,7 +47,7 @@ func wireBootstrap(app lynx.Lynx) (*boot.Bootstrap, func(), error) {
 	validator := auth.NewValidator(appConfig, apiKeyRepository, consoleAdminRepository, consoleAdminProjectRepository, documentDB)
 	repository := bunrepo.NewAuditRepository(database)
 	projectsRepository := bunrepo.NewProjectRepository(database)
-	oAuthProviderRepository := bunrepo.NewOAuthProviderRepository(database)
+	oAuthProviderRepository := bunrepo.NewOAuthProviderRepository(database, appConfig)
 	userRoles := client.NewUserRoles(documentDB)
 	sessionService := auth.NewSessionService(appConfig, documentDB, userRoles)
 	redisClient := clients.NewRedis(dataClients)

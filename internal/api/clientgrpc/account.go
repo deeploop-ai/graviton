@@ -253,6 +253,45 @@ func (s *AccountService) CreateWeChatMiniProgramSession(ctx context.Context, req
 	}, nil
 }
 
+func (s *AccountService) CreateAnonymousSession(ctx context.Context, req *clientv1.CreateAnonymousSessionRequest) (*clientv1.SignInResponse, error) {
+	user, tokens, _, err := s.account.CreateAnonymousSession(ctx, client.CreateAnonymousSessionCommand{
+		ProjectID: req.GetProjectId(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &clientv1.SignInResponse{
+		Account: mapUser(user),
+		Tokens:  mapTokens(tokens),
+	}, nil
+}
+
+func (s *AccountService) CreateOAuth2LinkSession(ctx context.Context, req *clientv1.CreateOAuth2LinkSessionRequest) (*clientv1.CreateOAuth2SessionResponse, error) {
+	redirectURL, err := s.account.CreateOAuth2LinkSession(ctx, client.CreateOAuth2LinkSessionCommand{
+		ProjectID: req.GetProjectId(),
+		Provider:  req.GetProvider(),
+		Success:   req.GetSuccess(),
+		Failure:   req.GetFailure(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &clientv1.CreateOAuth2SessionResponse{RedirectUrl: redirectURL}, nil
+}
+
+func (s *AccountService) CreateOAuth2LinkTokenSession(ctx context.Context, req *clientv1.CreateOAuth2LinkTokenSessionRequest) (*clientv1.Account, error) {
+	user, err := s.account.CreateOAuth2LinkTokenSession(ctx, client.CreateOAuth2LinkTokenSessionCommand{
+		ProjectID: req.GetProjectId(),
+		Provider:  req.GetProvider(),
+		Code:      req.GetCode(),
+		State:     req.GetState(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return mapUser(user), nil
+}
+
 func mapUser(u *client.User) *clientv1.Account {
 	if u == nil {
 		return nil

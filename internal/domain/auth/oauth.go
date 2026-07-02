@@ -13,6 +13,8 @@ type OAuthState struct {
 	SuccessURL   string
 	FailureURL   string
 	PKCEVerifier string
+	// LinkUserID, when set, binds the OAuth identity to an existing authenticated user.
+	LinkUserID string
 }
 
 // OAuthStateStore persists OAuth2 state and PKCE verifiers until callback.

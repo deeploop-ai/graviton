@@ -38,6 +38,9 @@ const (
 	AccountService_CreatePhoneOTP_FullMethodName                 = "/graviton.client.v1.AccountService/CreatePhoneOTP"
 	AccountService_CreatePhoneOTPSession_FullMethodName          = "/graviton.client.v1.AccountService/CreatePhoneOTPSession"
 	AccountService_CreateWeChatMiniProgramSession_FullMethodName = "/graviton.client.v1.AccountService/CreateWeChatMiniProgramSession"
+	AccountService_CreateAnonymousSession_FullMethodName         = "/graviton.client.v1.AccountService/CreateAnonymousSession"
+	AccountService_CreateOAuth2LinkSession_FullMethodName        = "/graviton.client.v1.AccountService/CreateOAuth2LinkSession"
+	AccountService_CreateOAuth2LinkTokenSession_FullMethodName   = "/graviton.client.v1.AccountService/CreateOAuth2LinkTokenSession"
 )
 
 // AccountServiceClient is the client API for AccountService service.
@@ -62,6 +65,9 @@ type AccountServiceClient interface {
 	CreatePhoneOTP(ctx context.Context, in *CreatePhoneOTPRequest, opts ...grpc.CallOption) (*ChallengeResponse, error)
 	CreatePhoneOTPSession(ctx context.Context, in *CreatePhoneOTPSessionRequest, opts ...grpc.CallOption) (*SignInResponse, error)
 	CreateWeChatMiniProgramSession(ctx context.Context, in *CreateWeChatMiniProgramSessionRequest, opts ...grpc.CallOption) (*SignInResponse, error)
+	CreateAnonymousSession(ctx context.Context, in *CreateAnonymousSessionRequest, opts ...grpc.CallOption) (*SignInResponse, error)
+	CreateOAuth2LinkSession(ctx context.Context, in *CreateOAuth2LinkSessionRequest, opts ...grpc.CallOption) (*CreateOAuth2SessionResponse, error)
+	CreateOAuth2LinkTokenSession(ctx context.Context, in *CreateOAuth2LinkTokenSessionRequest, opts ...grpc.CallOption) (*Account, error)
 }
 
 type accountServiceClient struct {
@@ -252,6 +258,36 @@ func (c *accountServiceClient) CreateWeChatMiniProgramSession(ctx context.Contex
 	return out, nil
 }
 
+func (c *accountServiceClient) CreateAnonymousSession(ctx context.Context, in *CreateAnonymousSessionRequest, opts ...grpc.CallOption) (*SignInResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SignInResponse)
+	err := c.cc.Invoke(ctx, AccountService_CreateAnonymousSession_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) CreateOAuth2LinkSession(ctx context.Context, in *CreateOAuth2LinkSessionRequest, opts ...grpc.CallOption) (*CreateOAuth2SessionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateOAuth2SessionResponse)
+	err := c.cc.Invoke(ctx, AccountService_CreateOAuth2LinkSession_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *accountServiceClient) CreateOAuth2LinkTokenSession(ctx context.Context, in *CreateOAuth2LinkTokenSessionRequest, opts ...grpc.CallOption) (*Account, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Account)
+	err := c.cc.Invoke(ctx, AccountService_CreateOAuth2LinkTokenSession_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AccountServiceServer is the server API for AccountService service.
 // All implementations must embed UnimplementedAccountServiceServer
 // for forward compatibility.
@@ -274,6 +310,9 @@ type AccountServiceServer interface {
 	CreatePhoneOTP(context.Context, *CreatePhoneOTPRequest) (*ChallengeResponse, error)
 	CreatePhoneOTPSession(context.Context, *CreatePhoneOTPSessionRequest) (*SignInResponse, error)
 	CreateWeChatMiniProgramSession(context.Context, *CreateWeChatMiniProgramSessionRequest) (*SignInResponse, error)
+	CreateAnonymousSession(context.Context, *CreateAnonymousSessionRequest) (*SignInResponse, error)
+	CreateOAuth2LinkSession(context.Context, *CreateOAuth2LinkSessionRequest) (*CreateOAuth2SessionResponse, error)
+	CreateOAuth2LinkTokenSession(context.Context, *CreateOAuth2LinkTokenSessionRequest) (*Account, error)
 	mustEmbedUnimplementedAccountServiceServer()
 }
 
@@ -337,6 +376,15 @@ func (UnimplementedAccountServiceServer) CreatePhoneOTPSession(context.Context, 
 }
 func (UnimplementedAccountServiceServer) CreateWeChatMiniProgramSession(context.Context, *CreateWeChatMiniProgramSessionRequest) (*SignInResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateWeChatMiniProgramSession not implemented")
+}
+func (UnimplementedAccountServiceServer) CreateAnonymousSession(context.Context, *CreateAnonymousSessionRequest) (*SignInResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateAnonymousSession not implemented")
+}
+func (UnimplementedAccountServiceServer) CreateOAuth2LinkSession(context.Context, *CreateOAuth2LinkSessionRequest) (*CreateOAuth2SessionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateOAuth2LinkSession not implemented")
+}
+func (UnimplementedAccountServiceServer) CreateOAuth2LinkTokenSession(context.Context, *CreateOAuth2LinkTokenSessionRequest) (*Account, error) {
+	return nil, status.Error(codes.Unimplemented, "method CreateOAuth2LinkTokenSession not implemented")
 }
 func (UnimplementedAccountServiceServer) mustEmbedUnimplementedAccountServiceServer() {}
 func (UnimplementedAccountServiceServer) testEmbeddedByValue()                        {}
@@ -683,6 +731,60 @@ func _AccountService_CreateWeChatMiniProgramSession_Handler(srv interface{}, ctx
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AccountService_CreateAnonymousSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAnonymousSessionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).CreateAnonymousSession(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_CreateAnonymousSession_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).CreateAnonymousSession(ctx, req.(*CreateAnonymousSessionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_CreateOAuth2LinkSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateOAuth2LinkSessionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).CreateOAuth2LinkSession(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_CreateOAuth2LinkSession_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).CreateOAuth2LinkSession(ctx, req.(*CreateOAuth2LinkSessionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AccountService_CreateOAuth2LinkTokenSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateOAuth2LinkTokenSessionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AccountServiceServer).CreateOAuth2LinkTokenSession(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AccountService_CreateOAuth2LinkTokenSession_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AccountServiceServer).CreateOAuth2LinkTokenSession(ctx, req.(*CreateOAuth2LinkTokenSessionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AccountService_ServiceDesc is the grpc.ServiceDesc for AccountService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -761,6 +863,18 @@ var AccountService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateWeChatMiniProgramSession",
 			Handler:    _AccountService_CreateWeChatMiniProgramSession_Handler,
+		},
+		{
+			MethodName: "CreateAnonymousSession",
+			Handler:    _AccountService_CreateAnonymousSession_Handler,
+		},
+		{
+			MethodName: "CreateOAuth2LinkSession",
+			Handler:    _AccountService_CreateOAuth2LinkSession_Handler,
+		},
+		{
+			MethodName: "CreateOAuth2LinkTokenSession",
+			Handler:    _AccountService_CreateOAuth2LinkTokenSession_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

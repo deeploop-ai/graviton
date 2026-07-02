@@ -9,14 +9,21 @@ import (
 	"github.com/deeploop-ai/graviton/internal/domain/projects"
 	"github.com/deeploop-ai/graviton/internal/infra/bun/model"
 	"github.com/deeploop-ai/graviton/internal/infra/clients"
+	"github.com/deeploop-ai/graviton/internal/pkg/config"
+	"github.com/deeploop-ai/graviton/pkg/secretbox"
 )
 
 type oauthProviderRepo struct {
-	db *clients.Database
+	db            *clients.Database
+	encryptionKey string
 }
 
-func NewOAuthProviderRepository(db *clients.Database) projects.OAuthProviderRepository {
-	return &oauthProviderRepo{db: db}
+func NewOAuthProviderRepository(db *clients.Database, cfg *config.AppConfig) projects.OAuthProviderRepository {
+	key := ""
+	if cfg != nil && cfg.GetSecurity() != nil && cfg.GetSecurity().GetJwt() != nil {
+		key = cfg.GetSecurity().GetJwt().GetSecret()
+	}
+	return &oauthProviderRepo{db: db, encryptionKey: key}
 }
 
 func (r *oauthProviderRepo) GetOAuthProvider(ctx context.Context, projectID, provider string) (*projects.OAuthProvider, error) {
@@ -30,7 +37,7 @@ func (r *oauthProviderRepo) GetOAuthProvider(ctx context.Context, projectID, pro
 		}
 		return nil, err
 	}
-	return mapOAuthProvider(m), nil
+	return mapOAuthProvider(m, r.encryptionKey)
 }
 
 func (r *oauthProviderRepo) ListOAuthProviders(ctx context.Context, projectID string) ([]projects.OAuthProvider, error) {
@@ -44,7 +51,11 @@ func (r *oauthProviderRepo) ListOAuthProviders(ctx context.Context, projectID st
 	}
 	out := make([]projects.OAuthProvider, len(rows))
 	for i := range rows {
-		out[i] = *mapOAuthProvider(&rows[i])
+		mapped, err := mapOAuthProvider(&rows[i], r.encryptionKey)
+		if err != nil {
+			return nil, err
+		}
+		out[i] = *mapped
 	}
 	return out, nil
 }
@@ -53,13 +64,21 @@ func (r *oauthProviderRepo) UpsertOAuthProvider(ctx context.Context, cfg *projec
 	if cfg == nil {
 		return errors.New("oauth provider is nil")
 	}
+	secret := cfg.ClientSecret
+	if secret != "" {
+		enc, err := secretbox.Encrypt(secret, r.encryptionKey)
+		if err != nil {
+			return err
+		}
+		secret = enc
+	}
 	now := time.Now()
 	m := &model.ProjectOAuthProvider{
 		ProjectID:    cfg.ProjectID,
 		Provider:     cfg.Provider,
 		Enabled:      cfg.Enabled,
 		ClientID:     cfg.ClientID,
-		ClientSecret: cfg.ClientSecret,
+		ClientSecret: secret,
 		Scopes:       append([]string(nil), cfg.Scopes...),
 		UpdatedAt:    now,
 	}
@@ -81,18 +100,22 @@ func (r *oauthProviderRepo) DeleteOAuthProvider(ctx context.Context, projectID, 
 	return err
 }
 
-func mapOAuthProvider(m *model.ProjectOAuthProvider) *projects.OAuthProvider {
+func mapOAuthProvider(m *model.ProjectOAuthProvider, encryptionKey string) (*projects.OAuthProvider, error) {
 	if m == nil {
-		return nil
+		return nil, nil
+	}
+	secret, err := secretbox.Decrypt(m.ClientSecret, encryptionKey)
+	if err != nil {
+		return nil, err
 	}
 	return &projects.OAuthProvider{
 		ProjectID:    m.ProjectID,
 		Provider:     m.Provider,
 		Enabled:      m.Enabled,
 		ClientID:     m.ClientID,
-		ClientSecret: m.ClientSecret,
+		ClientSecret: secret,
 		Scopes:       append([]string(nil), m.Scopes...),
 		CreatedAt:    m.CreatedAt,
 		UpdatedAt:    m.UpdatedAt,
-	}
+	}, nil
 }

@@ -153,7 +153,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1RefreshTokenRequest"
+              "$ref": "#/definitions/gravitonclientv1RefreshTokenRequest"
             }
           }
         ],
@@ -205,6 +205,38 @@
             "in": "query",
             "required": false,
             "type": "boolean"
+          }
+        ],
+        "tags": [
+          "AccountService"
+        ]
+      }
+    },
+    "/v1/account/sessions/anonymous": {
+      "post": {
+        "operationId": "AccountService_CreateAnonymousSession",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/gravitonclientv1SignInResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateAnonymousSessionRequest"
+            }
           }
         ],
         "tags": [
@@ -317,6 +349,92 @@
             "in": "query",
             "required": false,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "AccountService"
+        ]
+      }
+    },
+    "/v1/account/sessions/oauth2/{provider}/link": {
+      "get": {
+        "operationId": "AccountService_CreateOAuth2LinkSession",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateOAuth2SessionResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "projectId",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "success",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "failure",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "AccountService"
+        ]
+      }
+    },
+    "/v1/account/sessions/oauth2/{provider}/link/token": {
+      "post": {
+        "operationId": "AccountService_CreateOAuth2LinkTokenSession",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1Account"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AccountServiceCreateOAuth2LinkTokenSessionBody"
+            }
           }
         ],
         "tags": [
@@ -543,7 +661,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1SignOutRequest"
+              "$ref": "#/definitions/gravitonclientv1SignOutRequest"
             }
           }
         ],
@@ -586,6 +704,20 @@
     }
   },
   "definitions": {
+    "AccountServiceCreateOAuth2LinkTokenSessionBody": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        }
+      }
+    },
     "AccountServiceCreateOAuth2TokenSessionBody": {
       "type": "object",
       "properties": {
@@ -602,6 +734,17 @@
           "type": "string"
         },
         "state": {
+          "type": "string"
+        }
+      }
+    },
+    "gravitonclientv1RefreshTokenRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "refreshToken": {
           "type": "string"
         }
       }
@@ -628,6 +771,14 @@
         },
         "tokens": {
           "$ref": "#/definitions/v1TokenBundle"
+        }
+      }
+    },
+    "gravitonclientv1SignOutRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
         }
       }
     },
@@ -704,6 +855,14 @@
         "expireAt": {
           "type": "string",
           "format": "int64"
+        }
+      }
+    },
+    "v1CreateAnonymousSessionRequest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
         }
       }
     },
@@ -805,17 +964,6 @@
         }
       }
     },
-    "v1RefreshTokenRequest": {
-      "type": "object",
-      "properties": {
-        "projectId": {
-          "type": "string"
-        },
-        "refreshToken": {
-          "type": "string"
-        }
-      }
-    },
     "v1RefreshTokenResponse": {
       "type": "object",
       "properties": {
@@ -852,14 +1000,6 @@
         },
         "current": {
           "type": "boolean"
-        }
-      }
-    },
-    "v1SignOutRequest": {
-      "type": "object",
-      "properties": {
-        "projectId": {
-          "type": "string"
         }
       }
     },

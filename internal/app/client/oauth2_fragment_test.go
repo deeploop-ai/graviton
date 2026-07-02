@@ -14,6 +14,6 @@ func TestAppendOAuthSPAFragment(t *testing.T) {
 	})
 	require.Contains(t, url, "#")
 	require.Contains(t, url, "access_token=at-1")
-	require.Contains(t, url, "refresh_token=rt-1")
+	require.NotContains(t, url, "refresh_token=")
 	require.Contains(t, url, "userId=user-1")
 }
