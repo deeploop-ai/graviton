@@ -25,10 +25,12 @@ var ProviderSet = wire.NewSet(
 	auth.NewRedisOTPChallengeStore,
 	auth.NewRedisOAuthStateStore,
 	auth.NewRedisAccountTokenStore,
+	auth.NewRedisAdminTokenRevokeStore,
 	wire.Bind(new(domainauth.SessionService), new(*auth.SessionService)),
 	wire.Bind(new(domainauth.OTPChallengeStore), new(*auth.RedisOTPChallengeStore)),
 	wire.Bind(new(domainauth.OAuthStateStore), new(*auth.RedisOAuthStateStore)),
 	wire.Bind(new(domainauth.AccountTokenStore), new(*auth.RedisAccountTokenStore)),
+	wire.Bind(new(domainauth.AdminTokenRevokeStore), new(*auth.RedisAdminTokenRevokeStore)),
 
 	infraidgen.ProviderSet,
 	wire.Bind(new(domainidgen.Generator), new(*infraidgen.Service)),

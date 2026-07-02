@@ -2,7 +2,11 @@ package interceptor
 
 import "strings"
 
-func apiKeyScopeAllowed(fullMethod string, scopes []string) bool {
+// StorageServiceCreateFile is the gRPC method used for HTTP storage scope checks.
+const StorageServiceCreateFile = "/graviton.server.v1.StorageService/CreateFile"
+
+// APIKeyScopeAllowed reports whether scopes grant access to the given gRPC method.
+func APIKeyScopeAllowed(fullMethod string, scopes []string) bool {
 	resource := apiKeyScopeResource(fullMethod)
 	// Methods without a mapped resource (e.g. health) are always allowed.
 	if resource == "" {

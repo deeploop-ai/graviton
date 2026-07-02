@@ -14,6 +14,7 @@ import (
 	"github.com/deeploop-ai/graviton/internal/domain/shared"
 	"github.com/deeploop-ai/graviton/internal/infra/auth"
 	"github.com/deeploop-ai/graviton/internal/pkg/config"
+	"github.com/deeploop-ai/graviton/pkg/grpc/interceptor"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -47,7 +48,7 @@ const maxUploadBytes = 100 << 20 // 100 MiB
 
 func (h *FileHandler) upload(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 	ctx := r.Context()
-	principal, err := h.authenticate(r)
+	principal, err := h.authorize(r)
 	if err != nil {
 		httpError(w, err)
 		return
@@ -118,7 +119,7 @@ func (h *FileHandler) createFile(ctx context.Context, w http.ResponseWriter, pro
 
 func (h *FileHandler) download(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 	ctx := r.Context()
-	principal, err := h.authenticate(r)
+	principal, err := h.authorize(r)
 	if err != nil {
 		httpError(w, err)
 		return
@@ -150,6 +151,27 @@ func (h *FileHandler) download(w http.ResponseWriter, r *http.Request, pathParam
 	w.Header().Set("Content-Disposition", contentDispositionHeader(disposition, file.Name))
 	w.WriteHeader(http.StatusOK)
 	_, _ = io.Copy(w, reader)
+}
+
+func (h *FileHandler) authorize(r *http.Request) (*shared.Principal, error) {
+	ctx := r.Context()
+	principal, err := h.authenticate(r)
+	if err != nil {
+		return nil, err
+	}
+	if principal.CredentialType == shared.CredentialTypeAPIKey &&
+		!interceptor.APIKeyScopeAllowed(interceptor.StorageServiceCreateFile, principal.Permissions) {
+		return nil, status.Error(codes.PermissionDenied, "api key missing required scope")
+	}
+	if principal.ActorKind == shared.ActorKindAdmin {
+		if projectID := strings.TrimSpace(r.Header.Get("X-Graviton-Project")); projectID != "" {
+			principal.ProjectID = projectID
+		}
+		if err := h.validator.ValidateAdminProjectAccess(ctx, principal); err != nil {
+			return nil, err
+		}
+	}
+	return principal, nil
 }
 
 func (h *FileHandler) authenticate(r *http.Request) (*shared.Principal, error) {

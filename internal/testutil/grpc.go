@@ -35,6 +35,7 @@ func NewInterceptorEnv(db *clients.Database, cfg *config.AppConfig, docDB databa
 		bunrepo.NewAPIKeyRepository(db),
 		bunrepo.NewConsoleAdminRepository(db),
 		bunrepo.NewConsoleAdminProjectRepository(db),
+		nil,
 		docDB,
 	)
 	authIC, err := interceptor.NewAuthInterceptor(

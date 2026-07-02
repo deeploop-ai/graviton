@@ -50,6 +50,7 @@ func setupStorageHTTPFixture(t *testing.T) *storageHTTPFixture {
 		bunrepo.NewAPIKeyRepository(db),
 		bunrepo.NewConsoleAdminRepository(db),
 		bunrepo.NewConsoleAdminProjectRepository(db),
+		nil,
 		docDB,
 	)
 	handler := NewFileHandler(cfg, validator, storageUC)
@@ -204,6 +205,7 @@ func TestFileHandler_UserJWTProjectScope(t *testing.T) {
 		bunrepo.NewAPIKeyRepository(db),
 		bunrepo.NewConsoleAdminRepository(db),
 		bunrepo.NewConsoleAdminProjectRepository(db),
+		nil,
 		docDB,
 	)
 	handler := NewFileHandler(cfg, validator, storageUC)
@@ -280,4 +282,128 @@ func TestFileHandler_UserJWTProjectScope(t *testing.T) {
 	got, err := io.ReadAll(downloadResp.Body)
 	require.NoError(t, err)
 	require.Equal(t, want, got)
+}
+
+func TestFileHandler_APIKeyRequiresStorageScope(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	ctx := context.Background()
+	db := testutil.SetupTestDB(t)
+
+	projectID, internalID, projectCleanup := testutil.CreateTestProject(ctx, db)
+	apiSecret, keyCleanup := testutil.CreateTestAPIKey(ctx, db, projectID, []string{"users"})
+
+	docDB := documentdb.NewPostgresDocumentDB(db)
+	require.NoError(t, docDB.EnsureSystemCollections(ctx, projectID, internalID))
+
+	cfg := &config.AppConfig{}
+	store := testutil.NewMemObjectStore()
+	storageUC := appstorage.NewStorage(cfg, bunrepo.NewProjectRepository(db), docDB, store)
+	validator := auth.NewValidator(
+		cfg,
+		bunrepo.NewAPIKeyRepository(db),
+		bunrepo.NewConsoleAdminRepository(db),
+		bunrepo.NewConsoleAdminProjectRepository(db),
+		nil,
+		docDB,
+	)
+	handler := NewFileHandler(cfg, validator, storageUC)
+	mux := runtime.NewServeMux()
+	handler.Register(mux)
+	server := httptest.NewServer(mux)
+
+	bucket, err := storageUC.CreateBucket(ctx, appstorage.CreateBucketCommand{
+		ProjectID: projectID,
+		Name:      "scope-test-bucket",
+	})
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		server.Close()
+		keyCleanup()
+		projectCleanup()
+		db.Close()
+	})
+
+	_, status := (&storageHTTPFixture{
+		t:         t,
+		projectID: projectID,
+		apiSecret: apiSecret,
+		handler:   handler,
+		server:    server,
+		bucketID:  bucket.ID,
+	}).upload([]byte("blocked"), map[string]string{"X-Api-Key": apiSecret})
+	require.Equal(t, http.StatusForbidden, status)
+}
+
+func TestFileHandler_AdminRequiresProjectAccess(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+
+	ctx := context.Background()
+	db := testutil.SetupTestDB(t)
+
+	projectID, internalID, projectCleanup := testutil.CreateTestProject(ctx, db)
+	otherProjectID, otherInternalID, otherCleanup := testutil.CreateTestProject(ctx, db)
+
+	docDB := documentdb.NewPostgresDocumentDB(db)
+	require.NoError(t, docDB.EnsureSystemCollections(ctx, projectID, internalID))
+	require.NoError(t, docDB.EnsureSystemCollections(ctx, otherProjectID, otherInternalID))
+
+	cfg := &config.AppConfig{}
+	store := testutil.NewMemObjectStore()
+	storageUC := appstorage.NewStorage(cfg, bunrepo.NewProjectRepository(db), docDB, store)
+	admin, adminCleanup := testutil.CreateTestConsoleAdmin(ctx, db, "member")
+	token, err := testutil.SignConsoleAdminToken(cfg, admin)
+	require.NoError(t, err)
+	require.NoError(t, testutil.GrantConsoleAdminProject(ctx, db, admin.ID, projectID))
+
+	validator := auth.NewValidator(
+		cfg,
+		bunrepo.NewAPIKeyRepository(db),
+		bunrepo.NewConsoleAdminRepository(db),
+		bunrepo.NewConsoleAdminProjectRepository(db),
+		nil,
+		docDB,
+	)
+	handler := NewFileHandler(cfg, validator, storageUC)
+	mux := runtime.NewServeMux()
+	handler.Register(mux)
+	server := httptest.NewServer(mux)
+
+	bucket, err := storageUC.CreateBucket(ctx, appstorage.CreateBucketCommand{
+		ProjectID: otherProjectID,
+		Name:      "foreign-bucket",
+	})
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		server.Close()
+		adminCleanup()
+		otherCleanup()
+		projectCleanup()
+		db.Close()
+	})
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", "blocked.txt")
+	require.NoError(t, err)
+	_, err = part.Write([]byte("should-not-upload"))
+	require.NoError(t, err)
+	require.NoError(t, writer.Close())
+
+	req, err := http.NewRequest(http.MethodPost, server.URL+"/v1/storage/buckets/"+bucket.ID+"/files", body)
+	require.NoError(t, err)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("X-Graviton-Project", otherProjectID)
+
+	resp, err := http.DefaultClient.Do(req)
+	require.NoError(t, err)
+	resp.Body.Close()
+	require.Equal(t, http.StatusForbidden, resp.StatusCode)
 }

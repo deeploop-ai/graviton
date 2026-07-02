@@ -6,19 +6,19 @@ func TestAPIKeyScopeAllowed(t *testing.T) {
 	t.Parallel()
 	method := "/graviton.server.v1.UsersService/ListUsers"
 
-	if apiKeyScopeAllowed(method, nil) {
+	if APIKeyScopeAllowed(method, nil) {
 		t.Fatal("empty scopes should deny resource-scoped methods")
 	}
-	if !apiKeyScopeAllowed(method, []string{"*"}) {
+	if !APIKeyScopeAllowed(method, []string{"*"}) {
 		t.Fatal("wildcard scope should allow")
 	}
-	if !apiKeyScopeAllowed(method, []string{"users"}) {
+	if !APIKeyScopeAllowed(method, []string{"users"}) {
 		t.Fatal("matching resource scope should allow")
 	}
-	if !apiKeyScopeAllowed(method, []string{"users.read"}) {
+	if !APIKeyScopeAllowed(method, []string{"users.read"}) {
 		t.Fatal("prefixed resource scope should allow")
 	}
-	if apiKeyScopeAllowed(method, []string{"storage"}) {
+	if APIKeyScopeAllowed(method, []string{"storage"}) {
 		t.Fatal("unrelated scope should deny")
 	}
 }

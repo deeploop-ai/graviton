@@ -4,8 +4,11 @@ import (
 	"context"
 	"time"
 
+	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
 	"github.com/deeploop-ai/graviton/internal/domain/projects"
+	"github.com/deeploop-ai/graviton/internal/domain/shared"
 	"github.com/deeploop-ai/graviton/internal/pkg/config"
+	"github.com/deeploop-ai/graviton/internal/pkg/contexts"
 	"github.com/deeploop-ai/graviton/pkg/idgen"
 	"github.com/deeploop-ai/graviton/pkg/jwtparser"
 	"github.com/deeploop-ai/graviton/pkg/password"
@@ -14,12 +17,13 @@ import (
 )
 
 type Auth struct {
-	cfg       *config.AppConfig
-	adminRepo projects.ConsoleAdminRepository
+	cfg              *config.AppConfig
+	adminRepo        projects.ConsoleAdminRepository
+	adminRevokeStore domainauth.AdminTokenRevokeStore
 }
 
-func NewAuth(cfg *config.AppConfig, adminRepo projects.ConsoleAdminRepository) *Auth {
-	return &Auth{cfg: cfg, adminRepo: adminRepo}
+func NewAuth(cfg *config.AppConfig, adminRepo projects.ConsoleAdminRepository, adminRevokeStore domainauth.AdminTokenRevokeStore) *Auth {
+	return &Auth{cfg: cfg, adminRepo: adminRepo, adminRevokeStore: adminRevokeStore}
 }
 
 type SignInCommand struct {
@@ -51,7 +55,7 @@ func (a *Auth) SignIn(ctx context.Context, cmd SignInCommand) (*TokenPair, error
 	return a.issueAdminTokens(admin.ID, admin.Email, admin.Role)
 }
 
-func (a *Auth) RefreshToken(_ context.Context, cmd RefreshTokenCommand) (*TokenPair, error) {
+func (a *Auth) RefreshToken(ctx context.Context, cmd RefreshTokenCommand) (*TokenPair, error) {
 	if cmd.RefreshToken == "" {
 		return nil, status.Error(codes.InvalidArgument, "refresh_token is required")
 	}
@@ -62,10 +66,35 @@ func (a *Auth) RefreshToken(_ context.Context, cmd RefreshTokenCommand) (*TokenP
 	if claims.TokenType != jwtparser.TokenTypeRefresh || claims.ActorKind != "admin" {
 		return nil, status.Error(codes.Unauthenticated, "invalid refresh token")
 	}
+	if err := a.checkAdminTokenRevoked(ctx, claims); err != nil {
+		return nil, err
+	}
 	return a.issueAdminTokens(claims.UserID, claims.Username, firstRole(claims.Roles))
 }
 
-func (a *Auth) SignOut(context.Context) error {
+func (a *Auth) SignOut(ctx context.Context) error {
+	p, ok := contexts.Principal(ctx)
+	if !ok || p.ActorKind != shared.ActorKindAdmin || p.UserID == "" || a.adminRevokeStore == nil {
+		return nil
+	}
+	refreshTTL := 7 * 24 * time.Hour
+	if d, err := time.ParseDuration(a.cfg.GetSecurity().GetJwt().GetRefreshTtl()); err == nil {
+		refreshTTL = d
+	}
+	return a.adminRevokeStore.RevokeBefore(ctx, p.UserID, time.Now(), refreshTTL)
+}
+
+func (a *Auth) checkAdminTokenRevoked(ctx context.Context, claims *jwtparser.Claims) error {
+	if a.adminRevokeStore == nil || claims == nil || claims.UserID == "" {
+		return nil
+	}
+	revokedBefore, err := a.adminRevokeStore.RevokedBefore(ctx, claims.UserID)
+	if err != nil {
+		return err
+	}
+	if !revokedBefore.IsZero() && claims.IssuedAt < revokedBefore.Unix() {
+		return status.Error(codes.Unauthenticated, "token revoked")
+	}
 	return nil
 }
 

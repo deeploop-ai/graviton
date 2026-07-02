@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/deeploop-ai/graviton/internal/domain/databases"
+	domainauth "github.com/deeploop-ai/graviton/internal/domain/auth"
 	"github.com/deeploop-ai/graviton/internal/domain/projects"
 	"github.com/deeploop-ai/graviton/internal/domain/shared"
 	"github.com/deeploop-ai/graviton/internal/domain/users"
@@ -23,6 +24,7 @@ type Validator struct {
 	apiKeyRepo        projects.APIKeyRepository
 	adminRepo         projects.ConsoleAdminRepository
 	adminProjectRepo  projects.ConsoleAdminProjectRepository
+	adminRevokeStore  domainauth.AdminTokenRevokeStore
 	docDB             databases.DocumentDB
 	sessionCodec      *SessionCookieCodec
 }
@@ -32,6 +34,7 @@ func NewValidator(
 	apiKeyRepo projects.APIKeyRepository,
 	adminRepo projects.ConsoleAdminRepository,
 	adminProjectRepo projects.ConsoleAdminProjectRepository,
+	adminRevokeStore domainauth.AdminTokenRevokeStore,
 	docDB databases.DocumentDB,
 ) *Validator {
 	return &Validator{
@@ -39,6 +42,7 @@ func NewValidator(
 		apiKeyRepo:       apiKeyRepo,
 		adminRepo:        adminRepo,
 		adminProjectRepo: adminProjectRepo,
+		adminRevokeStore: adminRevokeStore,
 		docDB:            docDB,
 		sessionCodec:     NewSessionCookieCodec(cfg.GetSecurity().GetJwt().GetSecret()),
 	}
@@ -99,6 +103,9 @@ func (v *Validator) validateAPIKey(ctx context.Context, raw string) (*shared.Pri
 func (v *Validator) principalFromJWT(ctx context.Context, claims *jwtparser.Claims) (*shared.Principal, error) {
 	switch claims.ActorKind {
 	case "admin":
+		if err := v.checkAdminTokenRevoked(ctx, claims); err != nil {
+			return nil, err
+		}
 		admin, err := v.adminRepo.GetConsoleAdmin(ctx, claims.UserID)
 		if err != nil {
 			return nil, status.Error(codes.Internal, "admin lookup failed")
@@ -224,6 +231,20 @@ func (v *Validator) ValidateAdminProjectAccess(ctx context.Context, principal *s
 	}
 	if !has {
 		return status.Error(codes.PermissionDenied, "admin has no access to project")
+	}
+	return nil
+}
+
+func (v *Validator) checkAdminTokenRevoked(ctx context.Context, claims *jwtparser.Claims) error {
+	if v.adminRevokeStore == nil || claims == nil || claims.UserID == "" {
+		return nil
+	}
+	revokedBefore, err := v.adminRevokeStore.RevokedBefore(ctx, claims.UserID)
+	if err != nil {
+		return err
+	}
+	if !revokedBefore.IsZero() && claims.IssuedAt < revokedBefore.Unix() {
+		return status.Error(codes.Unauthenticated, "token revoked")
 	}
 	return nil
 }
